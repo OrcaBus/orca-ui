@@ -147,14 +147,14 @@ export const LibraryAnalysisReportTable: FC<LibraryAnalysisReportTableProps> = (
    * Ideally this could be viewable in a case-view to show relevant reports
    *
    * Notes:
-   * WGS library type => "UMCCRISE" && "tumor-normal" workflow type html reports
-   * WTS library type => "wts" && "rnasum" workflow type pdf/html reports
+   * WGS library type => "UMCCRISE" && ("tumor-normal" or "dragen-wgts-dna" workflow type html reports
+   * WTS library type => ("wts" or "dragen-wgts-rna") && "rnasum" workflow type pdf/html reports
    * ctDNA library type && "ctTSO" assay => "dragen-tso500-ctDNA" or "cttsov2" workflow pdf/html reports
    */
 
   const libraryDisplayNotes = {
-    '"WGS" type': ['sash', 'tumor-normal'],
-    '"WTS" type': ['wts', 'rnasum'],
+    '"WGS" type': ['sash', 'tumor-normal or dragen-wgts-dna'],
+    '"WTS" type': ['wts or dragen-wgts-rna', 'rnasum'],
     '"ctDNA" type, "ctTSO" assay': ['dragen-tso500-ctDNA or cttsov2'],
   };
 
@@ -191,11 +191,13 @@ export const LibraryAnalysisReportTable: FC<LibraryAnalysisReportTableProps> = (
               </Suspense>
             </DetailedErrorBoundary>
             <div className='py-4'></div>
-            <DetailedErrorBoundary errorTitle={`Unable to load 'tumor-normal' report files`}>
+            <DetailedErrorBoundary
+              errorTitle={`Unable to load 'tumor-normal' or 'dragen-wgts-dna' report files`}
+            >
               <Suspense fallback={<SpinnerWithText text='loading data ...' />}>
                 <AnalysisTable
                   libraryOrcabusId={libraryDetail.orcabusId}
-                  workflowType='tumor-normal'
+                  workflowType={['tumor-normal', 'dragen-wgts-dna']}
                   keyPatterns={WORKFLOW_ANALYSIS_TABLE['tumor-normal']['keyPatterns']}
                   getTableDataFormat={WORKFLOW_ANALYSIS_TABLE['tumor-normal']['getTableData']}
                 />
@@ -204,11 +206,13 @@ export const LibraryAnalysisReportTable: FC<LibraryAnalysisReportTableProps> = (
           </>
         ) : libraryDetail.type === 'WTS' ? (
           <>
-            <DetailedErrorBoundary errorTitle={`Unable to load 'wts' report files`}>
+            <DetailedErrorBoundary
+              errorTitle={`Unable to load 'wts' or 'dragen-wgts-rna' report files`}
+            >
               <Suspense fallback={<SpinnerWithText text='loading data ...' />}>
                 <AnalysisTable
                   libraryOrcabusId={libraryDetail.orcabusId}
-                  workflowType='wts'
+                  workflowType={['wts', 'dragen-wgts-rna']}
                   keyPatterns={WORKFLOW_ANALYSIS_TABLE['wts']['keyPatterns']}
                   getTableDataFormat={WORKFLOW_ANALYSIS_TABLE['wts']['getTableData']}
                 />
