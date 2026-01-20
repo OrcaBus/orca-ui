@@ -5,6 +5,7 @@ import { useQueryParams } from '@/hooks/useQueryParams';
 import CaseLibraryTable from '../component/CaseLibrary';
 import WorkflowRunTable from '../component/CaseWorkflowRun';
 import { SpinnerWithText } from '@/components/common/spinner';
+import { Button } from '@/components/common/buttons';
 
 const selectedClassName =
   'inline-flex items-center gap-2 p-4 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 rounded-t-lg font-medium transition-colors duration-200';
@@ -12,6 +13,7 @@ const regularClassName =
   'inline-flex items-center gap-2 p-4 text-gray-600 dark:text-gray-300 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-900 dark:hover:text-gray-100 rounded-t-lg cursor-pointer transition-all duration-200';
 
 export const CaseDetailAPITable = () => {
+  const navigate = useNavigate();
   const { getQueryParams, setQueryParams } = useQueryParams();
   const currentTabSelection = getQueryParams().tab ?? 'Libraries';
   const { caseOrcabusId } = useParams();
@@ -43,6 +45,14 @@ export const CaseDetailAPITable = () => {
         <div className='space-y-2'>
           <h1 className='text-2xl font-semibold text-slate-900'>{caseData.title}</h1>
         </div>
+        <Button
+          onClick={() => navigate('./edit')}
+          type='primary'
+          size='md'
+          className='px-6 shadow-sm transition-shadow duration-200 hover:shadow-md'
+        >
+          Edit
+        </Button>
       </div>
       {/* Divider */}
       <div className='my-6 border-t border-slate-200' />
@@ -56,6 +66,14 @@ export const CaseDetailAPITable = () => {
         <div>
           <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase'>Last Modified</p>
           <p className='font-medium text-slate-800'>{caseData.lastModified}</p>
+        </div>
+        <div>
+          <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase'>Creation Status</p>
+          <p className='font-medium text-slate-800'>{caseData.creationStatus}</p>
+        </div>
+        <div>
+          <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase'>Trello URL</p>
+          <p className='font-medium text-slate-800'>{caseData.trelloUrl ?? '-'}</p>
         </div>
         <div>
           <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase'>Type</p>
