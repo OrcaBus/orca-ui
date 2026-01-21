@@ -30,11 +30,21 @@ export const CaseDetailAPITable = () => {
   const tabs = [
     {
       label: 'Libraries',
-      content: <CaseLibraryTable externalEntitySet={caseData.externalEntitySet} />,
+      content: (
+        <CaseLibraryTable
+          externalEntitySet={caseData.externalEntitySet}
+          caseOrcabusId={caseOrcabusId}
+        />
+      ),
     },
     {
       label: 'WorkflowRun',
-      content: <WorkflowRunTable externalEntitySet={caseData.externalEntitySet} />,
+      content: (
+        <WorkflowRunTable
+          externalEntitySet={caseData.externalEntitySet}
+          caseOrcabusId={caseOrcabusId}
+        />
+      ),
     },
   ];
 

@@ -73,12 +73,48 @@ export function useMutationCaseUpdate({
   };
 }) {
   return useMutation({
-    ...reactQuery, // Spread the reactQuery options here
+    ...reactQuery,
     mutationFn: async () => {
       const { data, error, response } = await client.PATCH('/api/v1/case/{orcabusId}/', {
         params: { path: { orcabusId } },
         body,
       });
+
+      if (error) {
+        if (typeof error === 'object') {
+          throw new Error(JSON.stringify(error));
+        }
+        throw new Error((response as Response).statusText);
+      }
+
+      return data;
+    },
+  });
+}
+
+export function useMutationCaseUnlinkEntity({
+  caseOrcabusId,
+  externalEntityOrcabusId,
+  reactQuery,
+}: {
+  caseOrcabusId: string;
+  externalEntityOrcabusId: string;
+  reactQuery?: {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+  };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async () => {
+      const { data, error, response } = await client.DELETE(
+        '/api/v1/case/{orcabusId}/external-entity/{externalEntityOrcabusId}/',
+        {
+          params: {
+            path: { orcabusId: caseOrcabusId, externalEntityOrcabusId: externalEntityOrcabusId },
+          },
+        }
+      );
 
       if (error) {
         if (typeof error === 'object') {
