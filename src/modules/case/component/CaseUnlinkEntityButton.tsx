@@ -9,10 +9,14 @@ function CaseUnlinkEntityButton({
   entityId,
   entityOrcabusId,
   caseOrcabusId,
+  disabled = false,
+  setIsUnlinking,
 }: {
   entityId: string;
   entityOrcabusId: string;
   caseOrcabusId: string;
+  disabled?: boolean;
+  setIsUnlinking: (value: boolean) => void;
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -27,6 +31,10 @@ function CaseUnlinkEntityButton({
         });
         toaster.success({ title: `'${entityId}' unlinked` });
         setIsDialogOpen(false);
+        setIsUnlinking(false);
+      },
+      onError: () => {
+        setIsUnlinking(false);
       },
     },
   });
@@ -42,8 +50,12 @@ function CaseUnlinkEntityButton({
   return (
     <>
       <div
-        className='ml-2 cursor-pointer text-sm font-medium text-red-500 transition-colors duration-200 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
-        onClick={() => setIsDialogOpen(true)}
+        className={`ml-2 text-sm font-medium transition-colors duration-200 ${
+          disabled
+            ? 'cursor-not-allowed text-gray-400 dark:text-gray-600'
+            : 'cursor-pointer text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'
+        }`}
+        onClick={() => !disabled && setIsDialogOpen(true)}
       >
         unlink
       </div>
@@ -67,6 +79,7 @@ function CaseUnlinkEntityButton({
           className:
             'text-white bg-red-600 hover:bg-red-700 focus:ring-red-500 dark:bg-red-500 dark:hover:bg-red-600 shadow-md hover:shadow-lg border-none',
           onClick: () => {
+            setIsUnlinking(true);
             mutate();
           },
         }}

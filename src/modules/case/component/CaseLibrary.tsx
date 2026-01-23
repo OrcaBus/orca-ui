@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState } from 'react';
 import { Table } from '@/components/tables';
 import { DEFAULT_NON_PAGINATE_PAGE_SIZE } from '@/utils/constant';
 import { useQueryMetadataLibraryModel } from '@/api/metadata';
@@ -14,6 +15,8 @@ const CaseLibraryTable = ({
   externalEntitySet: Record<string, any>[];
   caseOrcabusId: string;
 }) => {
+  const [isUnlinking, setIsUnlinking] = useState(false);
+
   // we want just the case for the library metadata for this component,
   // we will split this orcabusId map to its full case detail
   const libraryMapCase: Record<string, any> = {};
@@ -108,6 +111,8 @@ const CaseLibraryTable = ({
                 entityId={(val as LibraryIdType).libraryId}
                 entityOrcabusId={(val as LibraryIdType).libraryOrcabusId}
                 caseOrcabusId={caseOrcabusId}
+                disabled={isUnlinking}
+                setIsUnlinking={setIsUnlinking}
               />
             );
           },

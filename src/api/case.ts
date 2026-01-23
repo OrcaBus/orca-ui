@@ -127,3 +127,30 @@ export function useMutationCaseUnlinkEntity({
     },
   });
 }
+
+export function useMutationCaseLinkEntity({
+  reactQuery,
+}: {
+  reactQuery?: {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+  };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async (body: components['schemas']['CaseExternalEntityLinkCreateRequest']) => {
+      const { data, error, response } = await client.POST('/api/v1/case/link/external-entity/', {
+        body,
+      });
+
+      if (error) {
+        if (typeof error === 'object') {
+          throw new Error(JSON.stringify(error));
+        }
+        throw new Error((response as Response).statusText);
+      }
+
+      return data;
+    },
+  });
+}

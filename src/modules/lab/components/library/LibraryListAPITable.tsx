@@ -89,7 +89,7 @@ export const LibraryListAPITable = ({ queryParams }: { queryParams: LibraryListQ
  * @param data the results returned from the API
  * @returns
  */
-const processLibraryResults = (data: components['schemas']['LibraryDetail'][]) => {
+export const processLibraryResults = (data: components['schemas']['LibraryDetail'][]) => {
   return data.map((library) => {
     const rec: Record<string, unknown> = {
       // Library Model

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Table, Column, TableData } from '@/components/tables';
 import { dayjs, TIMESTAMP_FORMAT } from '@/utils/dayjs';
 import { Badge } from '@/components/common/badges';
@@ -16,6 +16,8 @@ const CaseWorkflowRunTable = ({
   externalEntitySet: Record<string, any>[];
   caseOrcabusId: string;
 }) => {
+  const [isUnlinking, setIsUnlinking] = useState(false);
+
   // we want just the case for the library metadata for this component,
   // we will split this orcabusId map to its full case detail
   const wfrMapCase: Record<string, any> = {};
@@ -139,6 +141,8 @@ const CaseWorkflowRunTable = ({
               entityId={wfrMapCase[workflowOrcabusId].externalEntity.alias}
               entityOrcabusId={workflowOrcabusId}
               caseOrcabusId={caseOrcabusId}
+              disabled={isUnlinking}
+              setIsUnlinking={setIsUnlinking}
             />
           );
         },
