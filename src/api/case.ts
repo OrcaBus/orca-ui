@@ -154,3 +154,28 @@ export function useMutationCaseLinkEntity({
     },
   });
 }
+
+export function useMutationCaseGenerate({
+  reactQuery,
+}: {
+  reactQuery?: {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+  };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async () => {
+      const { data, error, response } = await client.POST('/api/v1/case/generate/', {});
+
+      if (error) {
+        if (typeof error === 'object') {
+          throw new Error(JSON.stringify(error));
+        }
+        throw new Error((response as Response).statusText);
+      }
+
+      return data;
+    },
+  });
+}

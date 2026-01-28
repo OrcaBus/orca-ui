@@ -16,7 +16,7 @@ export interface DialogProps {
   description?: string;
   content?: string | ReactNode;
   open: boolean;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   onClose: () => void;
   closeBtn?: DialogButtonProps;
   confirmBtn?: DialogButtonProps;
@@ -53,6 +53,7 @@ const SimpleDialog: FC<DialogProps> = ({
               size === 'sm' && 'sm:max-w-lg sm:data-closed:translate-y-0 sm:data-closed:scale-95',
               size === 'md' && 'md:max-w-2xl md:data-closed:translate-y-0 md:data-closed:scale-95',
               size === 'lg' && 'lg:max-w-6xl lg:data-closed:translate-y-0 lg:data-closed:scale-95',
+              size === 'xl' && 'xl:max-w-7xl xl:data-closed:translate-y-0 xl:data-closed:scale-95',
               'dark:bg-gray-800 dark:ring-white/5',
               className || ''
             )}

@@ -113,9 +113,6 @@ export function groupBySubjectAndCount(): SubjectWorkflowCount {
   const result: SubjectWorkflowCount = {};
 
   Object.keys(mockWorkflowData).forEach((workflowType) => {
-    console.log(`Processing workflow type: ${workflowType}`);
-    console.log(`Data for workflow:`, mockWorkflowData[workflowType]);
-
     mockWorkflowData[workflowType].forEach((item) => {
       const subjectID = extractAnchorText(item.SubjectID);
 

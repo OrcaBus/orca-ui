@@ -5,6 +5,7 @@ import { classNames } from '@/utils/commonUtils';
 import { RedirectLink } from '@/components/common/link';
 import { dayjs, TIMESTAMP_FORMAT } from '@/utils/dayjs';
 import { Search } from '@/components/common/search';
+import CaseGenerateButton from '../component/CaseGenerationButton';
 
 const standardClassName = classNames(
   'text-gray-900 dark:text-gray-100',
@@ -29,8 +30,9 @@ export const CaseListAPITable = () => {
       tableHeader={
         <div className='flex flex-col md:flex-row'>
           <div className='flex items-center justify-center'>{'Case Table'}</div>
-          <div className='flex flex-1 items-center justify-end pt-2'>
-            <div className='w-1/5'>
+          <div className='flex flex-1 flex-col items-stretch gap-3 pt-2 md:flex-row md:items-center md:justify-end'>
+            <CaseGenerateButton />
+            <div className='w-full md:w-1/5'>
               <Search
                 onSearch={(s) => setQueryParams({ search: s })}
                 searchBoxContent={queryParams.search}

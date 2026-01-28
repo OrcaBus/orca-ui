@@ -12,7 +12,14 @@ const CasePage = lazy(() => import('@/modules/case/pages/Case'));
 export const Router: RouteObject = {
   path: 'case',
   children: [
-    { path: '', element: <CasePage /> },
+    {
+      path: '',
+      element: (
+        <DetailedErrorBoundary>
+          <CasePage />
+        </DetailedErrorBoundary>
+      ),
+    },
     {
       path: ':caseOrcabusId',
       children: [

@@ -98,7 +98,7 @@ function CaseLinkEntityButton<TData>({
 
       <Dialog
         open={isDialogOpen}
-        size='lg'
+        size='xl'
         title={`Link ${entityName}`}
         content={
           <div className='w-full space-y-4 bg-white p-6 dark:bg-gray-800'>
