@@ -34,7 +34,7 @@ export const getAppStackConfig = (appStage: AppStage): ApplicationStackProps => 
       return {
         cloudFrontBucketName: cloudFrontBucketNameConfig[appStage],
         configLambdaName: configLambdaNameConfig[appStage],
-        aliasDomainName: ['orcaui.dev.umccr.org'],
+        aliasDomainName: ['orcaui.dev.umccr.org', 'portal.dev.umccr.org'],
         reactBuildEnvVariables: {
           VITE_METADATA_URL: `https://metadata.dev.umccr.org`,
           VITE_WORKFLOW_URL: `https://workflow.dev.umccr.org`,
@@ -50,7 +50,7 @@ export const getAppStackConfig = (appStage: AppStage): ApplicationStackProps => 
       return {
         cloudFrontBucketName: cloudFrontBucketNameConfig[appStage],
         configLambdaName: configLambdaNameConfig[appStage],
-        aliasDomainName: ['orcaui.stg.umccr.org'],
+        aliasDomainName: ['orcaui.stg.umccr.org', 'portal.stg.umccr.org'],
         reactBuildEnvVariables: {
           VITE_METADATA_URL: `https://metadata.stg.umccr.org`,
           VITE_WORKFLOW_URL: `https://workflow.stg.umccr.org`,
