@@ -30,6 +30,7 @@ export function CaseEditForm({ caseOrcabusId }: { caseOrcabusId: string }) {
     type: caseData.type,
     creationStatus: caseData.creationStatus,
     trelloUrl: caseData.trelloUrl,
+    alias: caseData.alias ?? [],
   });
 
   const caseDataOnChange = (field: keyof typeof draftDataUpdate, value: string | number) => {
@@ -131,6 +132,52 @@ export function CaseEditForm({ caseOrcabusId }: { caseOrcabusId: string }) {
               />
             </div>
 
+            {/* Alias */}
+            <div className='sm:col-span-2 lg:col-span-3'>
+              <label className={labelClassName}>Alias</label>
+              <div className='space-y-2'>
+                {(draftDataUpdate.alias ?? []).map((item, index) => (
+                  <div key={index} className='flex items-center gap-2'>
+                    <input
+                      type='text'
+                      value={item}
+                      onChange={(e) => {
+                        const newAlias = [...(draftDataUpdate.alias ?? [])];
+                        newAlias[index] = e.target.value;
+                        setDraftDataUpdate((prev) => ({ ...prev, alias: newAlias }));
+                      }}
+                      placeholder='Enter alias'
+                      className={classNames(inputClassName, 'flex-1')}
+                    />
+                    <button
+                      type='button'
+                      onClick={() => {
+                        const newAlias = (draftDataUpdate.alias ?? []).filter(
+                          (_, i) => i !== index
+                        );
+                        setDraftDataUpdate((prev) => ({ ...prev, alias: newAlias }));
+                      }}
+                      className='rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30'
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type='button'
+                  onClick={() => {
+                    setDraftDataUpdate((prev) => ({
+                      ...prev,
+                      alias: [...(prev.alias ?? []), ''],
+                    }));
+                  }}
+                  className='rounded-md bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30'
+                >
+                  + Add Alias
+                </button>
+              </div>
+            </div>
+
             {/* Description */}
             <div className='sm:col-span-2 lg:col-span-3'>
               <label htmlFor='description' className={labelClassName}>
@@ -148,7 +195,7 @@ export function CaseEditForm({ caseOrcabusId }: { caseOrcabusId: string }) {
           </div>
 
           {/* Action Buttons */}
-          <div className='mt-8 flex items-center justify-end gap-3 border-t border-gray-200 pt-6 dark:border-gray-700'>
+          <div className='mt-8 flex items-center justify-end gap-3 pt-6'>
             <Button
               onClick={() => navigate(`/case/${caseOrcabusId}`)}
               type='red'

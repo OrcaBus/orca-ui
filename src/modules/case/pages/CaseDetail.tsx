@@ -96,11 +96,19 @@ export const CaseDetailAPITable = () => {
         </div>
         <div>
           <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
-            Trello URL
+            Alias
           </p>
-          <p className='font-medium text-slate-800 dark:text-gray-200'>
-            {caseData.trelloUrl ?? '-'}
-          </p>
+          {caseData.alias && caseData.alias.length > 0 ? (
+            <ul className='list-disc space-y-1 pl-5'>
+              {caseData.alias.map((item, index) => (
+                <li key={index} className='font-medium text-slate-800 dark:text-gray-200'>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className='font-medium text-slate-800 dark:text-gray-200'>-</p>
+          )}
         </div>
         <div>
           <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
@@ -114,6 +122,14 @@ export const CaseDetailAPITable = () => {
             Description
           </p>
           <p className='font-medium text-slate-800 dark:text-gray-200'>{caseData.description}</p>
+        </div>
+        <div>
+          <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
+            Trello URL
+          </p>
+          <p className='font-medium text-slate-800 dark:text-gray-200'>
+            {caseData.trelloUrl ?? '-'}
+          </p>
         </div>
       </div>
 

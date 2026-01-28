@@ -56,6 +56,26 @@ export const CaseListAPITable = () => {
           },
         },
         {
+          header: 'Alias',
+          headerClassName: standardClassName,
+          accessor: 'alias',
+          cell: (cellData: unknown) => {
+            const aliasArr = cellData as string[];
+            if (!aliasArr || aliasArr.length === 0) {
+              return <>-</>;
+            }
+            return (
+              <ul className='list-disc space-y-1 pl-5'>
+                {aliasArr.map((item, index) => (
+                  <li key={index} className='text-gray-900 dark:text-gray-100'>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            );
+          },
+        },
+        {
           header: 'Description',
           headerClassName: standardClassName,
           accessor: 'description',
@@ -78,6 +98,7 @@ export const CaseListAPITable = () => {
         description: a.description,
         type: a.type ?? '-',
         lastModified: dayjs(a.lastModified).format(TIMESTAMP_FORMAT),
+        alias: a.alias,
       }))}
       paginationProps={{
         totalCount: pagination?.count ?? 0,
