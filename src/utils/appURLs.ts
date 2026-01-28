@@ -2,6 +2,9 @@ export enum AppURLs {
   // auth
   SignIn = '/signIn',
 
+  // Case
+  Case = '/case',
+
   // Lab
   Lab = '/lab',
   LabLibraryOverview = '/lab/library/:id/overview',

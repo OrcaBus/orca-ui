@@ -95,7 +95,7 @@ export const CaseListAPITable = () => {
       tableData={data.results.map((a) => ({
         orcabusId: a.orcabusId,
         title: { text: a.title, orcabusId: a.orcabusId },
-        description: a.description,
+        description: a.description ?? '-',
         type: a.type ?? '-',
         lastModified: dayjs(a.lastModified).format(TIMESTAMP_FORMAT),
         alias: a.alias,

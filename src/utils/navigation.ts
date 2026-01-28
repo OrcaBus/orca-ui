@@ -4,6 +4,7 @@ import {
   FolderIcon,
   ShieldCheckIcon,
   InboxStackIcon,
+  DocumentDuplicateIcon,
 } from '@heroicons/react/24/outline';
 import {
   CircleStackIcon as SolidCircleStackIcon,
@@ -11,6 +12,7 @@ import {
   FolderIcon as SolidFolderIcon,
   ShieldCheckIcon as SolidShieldCheckIcon,
   InboxStackIcon as SolidInboxStackIcon,
+  DocumentDuplicateIcon as SolidDocumentDuplicateIcon,
 } from '@heroicons/react/24/solid';
 import { AppURLs } from './appURLs';
 import { SequenceIcon } from '@/components/icons/SequenceIcon';
@@ -19,6 +21,12 @@ import { WorkflowIcon } from '@/components/icons/WorkflowIcon';
 // import { ReportIcon } from '@/components/icons/ReportIcon';
 
 const sideNavigation = [
+  {
+    name: 'Case',
+    icon: DocumentDuplicateIcon,
+    solidIcon: SolidDocumentDuplicateIcon,
+    href: AppURLs.Case,
+  },
   { name: 'Lab', icon: CircleStackIcon, solidIcon: SolidCircleStackIcon, href: AppURLs.Lab },
   { name: 'Runs', icon: ChartBarIcon, solidIcon: SolidChartBarIcon, href: AppURLs.Runs },
   { name: 'Files', icon: FolderIcon, solidIcon: SolidFolderIcon, href: AppURLs.Files },

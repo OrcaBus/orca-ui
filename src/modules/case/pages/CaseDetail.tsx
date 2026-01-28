@@ -121,7 +121,9 @@ export const CaseDetailAPITable = () => {
           <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
             Description
           </p>
-          <p className='font-medium text-slate-800 dark:text-gray-200'>{caseData.description}</p>
+          <p className='font-medium text-slate-800 dark:text-gray-200'>
+            {caseData.description ?? '-'}
+          </p>
         </div>
         <div>
           <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
