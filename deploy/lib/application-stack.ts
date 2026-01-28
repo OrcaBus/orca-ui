@@ -18,7 +18,7 @@ import { Construct } from 'constructs';
 import { Architecture, Code, Runtime } from 'aws-cdk-lib/aws-lambda';
 // import { BuildEnvironmentVariableType } from 'aws-cdk-lib/aws-codebuild';
 import { AccountPrincipal, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Function } from 'aws-cdk-lib/aws-lambda';
 import { TOOLCHAIN_ACCOUNT_ID } from '../config';
 import { Key } from 'aws-cdk-lib/aws-kms';
@@ -53,12 +53,16 @@ export class ApplicationStack extends Stack {
       3. invalidate the CloudFront cache
     */
 
+    const logGroup = new LogGroup(this, 'EnvConfigLambdaLogGroup', {
+      retention: RetentionDays.ONE_WEEK,
+    });
+
     const configLambda = new Function(this, 'EnvConfigLambda', {
       functionName: props.configLambdaName,
       code: Code.fromAsset(path.join(__dirname, '..', 'lambda')),
       timeout: Duration.minutes(10),
       handler: 'env_config_and_cdn_refresh.handler',
-      logRetention: RetentionDays.ONE_WEEK,
+      logGroup: logGroup,
       runtime: Runtime.PYTHON_3_12,
       architecture: Architecture.ARM_64,
       memorySize: 1024,
@@ -71,7 +75,6 @@ export class ApplicationStack extends Stack {
         VITE_OAUTH_REDIRECT_IN: '/orcaui/oauth_redirect_in_stage',
         VITE_OAUTH_REDIRECT_OUT: '/orcaui/oauth_redirect_out_stage',
         VITE_COG_USER_POOL_ID: '/data_portal/client/cog_user_pool_id',
-        VITE_COG_IDENTITY_POOL_ID: '/data_portal/client/cog_identity_pool_id',
         VITE_OAUTH_DOMAIN: '/data_portal/client/oauth_domain',
         VITE_UNSPLASH_CLIENT_ID: '/data_portal/unsplash/client_id',
       },
@@ -143,6 +146,16 @@ export class ApplicationStack extends Stack {
       sslSupportMethod: SSLMethod.SNI,
     });
 
+    // Support dual access via both 'portal' and 'orcaui' subdomains.
+    // Both A records alias to the same CloudFront distribution at no additional cost.
+    // This enables a gradual domain migration from 'orcaui' to 'portal' while maintaining backward compatibility.
+
+    new ARecord(this, 'PortalDomainAlias', {
+      target: RecordTarget.fromAlias(new CloudFrontTarget(cloudFrontDistribution)),
+      zone: hostedZone,
+      recordName: 'portal',
+    });
+
     new ARecord(this, 'CustomDomainAlias', {
       target: RecordTarget.fromAlias(new CloudFrontTarget(cloudFrontDistribution)),
       zone: hostedZone,
@@ -151,50 +164,4 @@ export class ApplicationStack extends Stack {
 
     return cloudFrontDistribution;
   }
-
-  // private getSSMEnvironmentVariables() {
-  //   return {
-  //     VITE_COG_APP_CLIENT_ID: StringParameter.fromStringParameterName(
-  //       this,
-  //       'VITE_COG_APP_CLIENT_ID',
-  //       '/orcaui/cog_app_client_id_stage'
-  //     ).stringValue,
-  //     VITE_OAUTH_REDIRECT_IN: StringParameter.fromStringParameterName(
-  //       this,
-  //       'VITE_OAUTH_REDIRECT_IN',
-  //       '/orcaui/oauth_redirect_in_stage'
-  //     ).stringValue,
-  //     VITE_OAUTH_REDIRECT_OUT: StringParameter.fromStringParameterName(
-  //       this,
-  //       'VITE_OAUTH_REDIRECT_OUT',
-  //       '/orcaui/oauth_redirect_out_stage'
-  //     ).stringValue,
-  //     VITE_COG_USER_POOL_ID: StringParameter.fromStringParameterName(
-  //       this,
-  //       'VITE_COG_USER_POOL_ID',
-  //       '/data_portal/client/cog_user_pool_id'
-  //     ).stringValue,
-  //     VITE_COG_IDENTITY_POOL_ID: StringParameter.fromStringParameterName(
-  //       this,
-  //       'VITE_COG_IDENTITY_POOL_ID',
-  //       '/data_portal/client/cog_identity_pool_id'
-  //     ).stringValue,
-  //     VITE_OAUTH_DOMAIN: StringParameter.fromStringParameterName(
-  //       this,
-  //       'VITE_OAUTH_DOMAIN',
-  //       '/data_portal/client/oauth_domain'
-  //     ).stringValue,
-  //     // secure string for unsplash client id
-  //     VITE_UNSPLASH_CLIENT_ID: StringParameter.fromSecureStringParameterAttributes(
-  //       this,
-  //       'VITE_UNSPLASH_CLIENT_ID',
-  //       {
-  //         parameterName: '/data_portal/unsplash/client_id',
-  //         encryptionKey: Key.fromLookup(this, 'UnsplashClientIdKey', {
-  //           aliasName: 'alias/aws/ssm',
-  //         }),
-  //       }
-  //     ).stringValue,
-  //   };
-  // }
 }

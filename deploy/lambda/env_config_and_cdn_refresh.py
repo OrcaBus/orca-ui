@@ -60,7 +60,6 @@ def handler(event, context):
         'VITE_OAUTH_REDIRECT_IN': get_ssm_parameter('/orcaui/oauth_redirect_in_stage'),
         'VITE_OAUTH_REDIRECT_OUT': get_ssm_parameter('/orcaui/oauth_redirect_out_stage'),
         'VITE_COG_USER_POOL_ID': get_ssm_parameter('/data_portal/client/cog_user_pool_id'),
-        'VITE_COG_IDENTITY_POOL_ID': get_ssm_parameter('/data_portal/client/cog_identity_pool_id'),
         'VITE_OAUTH_DOMAIN': get_ssm_parameter('/data_portal/client/oauth_domain'),
         'VITE_UNSPLASH_CLIENT_ID': get_ssm_parameter('/data_portal/unsplash/client_id'),
 

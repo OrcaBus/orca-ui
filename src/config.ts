@@ -18,7 +18,6 @@ const config = {
     REGION: REGION,
     USER_POOL_ID: env.VITE_COG_USER_POOL_ID,
     APP_CLIENT_ID: env.VITE_COG_APP_CLIENT_ID,
-    IDENTITY_POOL_ID: env.VITE_COG_IDENTITY_POOL_ID,
     OAUTH: {
       domain: OAUTH_DOMAIN,
       scopes: ['email', 'openid', 'aws.cognito.signin.user.admin', 'profile'],

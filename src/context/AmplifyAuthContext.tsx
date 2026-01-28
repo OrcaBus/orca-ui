@@ -137,23 +137,24 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }): ReactElement 
     setIsAuthenticating(false);
   }, []);
 
-  // redirect to main domain in production environment
-  // as callback is only working for main domain, refer: https://github.com/umccr/orca-ui/issues/68
-  const PROD_DOMAIN = 'orcaui.prod.umccr.org';
-  const PROD_PORTAL_DOMAIN = 'portal.prod.umccr.org';
-  const MAIN_PORTAL_DOMAIN = 'portal.umccr.org';
-  const MAIN_DOMAIN = 'orcaui.umccr.org'; // main domain
+  const currentHostname = window.location.hostname;
+  // Redirect legacy domains to the canonical 'portal' domain.
+  // This ensures OAuth works correctly by using a consistent callback URL:
+  // - orcaui.dev.umccr.org → portal.dev.umccr.org
+  // - portal.prod.umccr.org → portal.umccr.org (removes .prod)
+  const shouldHostnameRedirect =
+    currentHostname.includes('orcaui.') || currentHostname.includes('.prod.');
 
   useEffect(() => {
-    const aliasDomain = [PROD_DOMAIN, PROD_PORTAL_DOMAIN, MAIN_PORTAL_DOMAIN];
-    // Only redirect in production environment
-    if (
-      aliasDomain.includes(window.location.hostname) &&
-      !window.location.hostname.includes('localhost')
-    ) {
-      window.location.href = window.location.href.replace(window.location.hostname, MAIN_DOMAIN);
+    if (shouldHostnameRedirect) {
+      let newHostname = currentHostname;
+
+      newHostname = newHostname.replace('orcaui.', 'portal.');
+      newHostname = newHostname.replace('.prod.', '.');
+
+      window.location.href = window.location.href.replace(window.location.hostname, newHostname);
     }
-  }, []);
+  }, [currentHostname, shouldHostnameRedirect]);
 
   useEffect(() => {
     // Listen for auth events
@@ -170,7 +171,6 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }): ReactElement 
           dispatch({ type: AuthActionTypes.LOGOUT });
           break;
         default:
-          console.log('default auth event: ', payload.event);
           break;
       }
     });
@@ -225,7 +225,7 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }): ReactElement 
 
   return (
     <>
-      {isAuthenticating ? (
+      {isAuthenticating || shouldHostnameRedirect ? (
         <div className='h-screen'>
           <SpinnerWithText text='Authenticating...' />
         </div>
