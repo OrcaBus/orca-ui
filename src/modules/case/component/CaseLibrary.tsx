@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Table } from '@/components/tables';
 import { DEFAULT_NON_PAGINATE_PAGE_SIZE } from '@/utils/constant';
 import { useQueryMetadataLibraryModel } from '@/api/metadata';

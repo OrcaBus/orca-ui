@@ -4,8 +4,8 @@
 import { lazy } from 'react';
 import { RouteObject } from 'react-router-dom';
 import CaseDetailPage from './pages/CaseDetail';
-import { DetailedErrorBoundary } from '@/components/common/error';
 import CaseEditPage from './pages/CaseEdit';
+import CaseLayout from './layouts/CaseLayout';
 
 const CasePage = lazy(() => import('@/modules/case/pages/Case'));
 
@@ -15,9 +15,9 @@ export const Router: RouteObject = {
     {
       path: '',
       element: (
-        <DetailedErrorBoundary>
+        <CaseLayout>
           <CasePage />
-        </DetailedErrorBoundary>
+        </CaseLayout>
       ),
     },
     {
@@ -26,17 +26,17 @@ export const Router: RouteObject = {
         {
           path: '',
           element: (
-            <DetailedErrorBoundary>
+            <CaseLayout>
               <CaseDetailPage />
-            </DetailedErrorBoundary>
+            </CaseLayout>
           ),
         },
         {
           path: 'edit',
           element: (
-            <DetailedErrorBoundary>
+            <CaseLayout>
               <CaseEditPage />
-            </DetailedErrorBoundary>
+            </CaseLayout>
           ),
         },
       ],

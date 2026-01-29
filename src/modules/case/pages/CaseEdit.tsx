@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { caseDetailPath, useMutationCaseUpdate, useQueryCaseDetailObject } from '@/api/case';
 import { classNames } from '@/utils/commonUtils';
 import { Button } from '@/components/common/buttons';
