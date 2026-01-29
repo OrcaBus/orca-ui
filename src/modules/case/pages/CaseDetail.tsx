@@ -189,13 +189,8 @@ export const CaseDetailAPITable = () => {
 };
 
 export default function CaseDetailPage() {
-  const navigate = useNavigate();
-
   return (
-    <div className='flex max-w-full flex-col p-6'>
-      <h1 className='mb-4 cursor-pointer font-bold text-blue-500' onClick={() => navigate('/case')}>
-        Case
-      </h1>
+    <div className='flex max-w-full flex-col'>
       <CaseDetailAPITable />
     </div>
   );

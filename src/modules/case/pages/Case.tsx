@@ -117,8 +117,7 @@ export const CaseListAPITable = () => {
 
 export default function CasePage() {
   return (
-    <div className='flex max-w-full flex-col p-6'>
-      <h1 className='mb-4 font-bold'>Cases</h1>
+    <div className='flex max-w-full flex-col'>
       <CaseListAPITable />
     </div>
   );

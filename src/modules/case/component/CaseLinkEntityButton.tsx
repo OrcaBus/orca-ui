@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Dialog } from '@/components/common/dialogs';
 import { caseDetailPath, useMutationCaseLinkEntity } from '@/api/case';
 import toaster from '@/components/common/toaster';
