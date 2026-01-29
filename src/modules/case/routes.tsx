@@ -4,16 +4,42 @@
 import { lazy } from 'react';
 import { RouteObject } from 'react-router-dom';
 import CaseDetailPage from './pages/CaseDetail';
+import { DetailedErrorBoundary } from '@/components/common/error';
+import CaseEditPage from './pages/CaseEdit';
 
 const CasePage = lazy(() => import('@/modules/case/pages/Case'));
 
 export const Router: RouteObject = {
   path: 'case',
   children: [
-    { path: '', element: <CasePage /> },
+    {
+      path: '',
+      element: (
+        <DetailedErrorBoundary>
+          <CasePage />
+        </DetailedErrorBoundary>
+      ),
+    },
     {
       path: ':caseOrcabusId',
-      children: [{ path: '', element: <CaseDetailPage /> }],
+      children: [
+        {
+          path: '',
+          element: (
+            <DetailedErrorBoundary>
+              <CaseDetailPage />
+            </DetailedErrorBoundary>
+          ),
+        },
+        {
+          path: 'edit',
+          element: (
+            <DetailedErrorBoundary>
+              <CaseEditPage />
+            </DetailedErrorBoundary>
+          ),
+        },
+      ],
     },
   ],
 };

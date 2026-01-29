@@ -34,6 +34,7 @@ export interface TableProps {
   paginationProps?: PaginationProps;
   isFetchingData?: boolean;
   headerActions?: ReactNode;
+  onRowClick?: (row: TableData) => void;
 }
 
 const Table: FC<TableProps> = ({
@@ -47,6 +48,7 @@ const Table: FC<TableProps> = ({
   stickyHeader = false,
   isFetchingData = false,
   headerActions,
+  onRowClick,
 }) => {
   return (
     <div className='w-full'>
@@ -191,12 +193,14 @@ const Table: FC<TableProps> = ({
                     ? tableData.map((data, index) => (
                         <tr
                           key={index}
+                          onClick={onRowClick ? () => onRowClick(data) : undefined}
                           className={classNames(
                             'border-t border-gray-100 dark:border-gray-800',
                             'bg-white dark:bg-gray-900',
                             'transition-all duration-200',
                             striped ? 'even:bg-gray-50 dark:even:bg-gray-800/50' : '',
-                            'hover:bg-gray-50 dark:hover:bg-gray-800/75'
+                            'hover:bg-gray-50 dark:hover:bg-gray-800/75',
+                            onRowClick ? 'cursor-pointer' : ''
                           )}
                         >
                           {columns &&

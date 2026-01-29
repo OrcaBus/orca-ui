@@ -1,7 +1,7 @@
 import config from '@/config';
 import createClient from 'openapi-fetch';
-import type { paths } from './types/case';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import type { components, paths } from './types/case';
+import { useMutation, useSuspenseQuery } from '@tanstack/react-query';
 import { authMiddleware, UseSuspenseQueryOptions } from './utils';
 
 const client = createClient<paths>({
@@ -34,7 +34,7 @@ export function useQueryCaseListObject({
   });
 }
 
-const caseDetailPath = '/api/v1/case/{orcabusId}/';
+export const caseDetailPath = '/api/v1/case/{orcabusId}/';
 export function useQueryCaseDetailObject({
   params,
   reactQuery,
@@ -48,6 +48,126 @@ export function useQueryCaseDetailObject({
         params,
         signal, // allows React Query to cancel request
       });
+      if (error) {
+        if (typeof error === 'object') {
+          throw new Error(JSON.stringify(error));
+        }
+        throw new Error((response as Response).statusText);
+      }
+
+      return data;
+    },
+  });
+}
+
+export function useMutationCaseUpdate({
+  orcabusId,
+  body,
+  reactQuery,
+}: {
+  orcabusId: string;
+  body: components['schemas']['PatchedCaseDetailRequest'];
+  reactQuery?: {
+    onSuccess?: (data: components['schemas']['CaseDetail']) => void;
+    onError?: (error: Error) => void;
+  };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async () => {
+      const { data, error, response } = await client.PATCH('/api/v1/case/{orcabusId}/', {
+        params: { path: { orcabusId } },
+        body,
+      });
+
+      if (error) {
+        if (typeof error === 'object') {
+          throw new Error(JSON.stringify(error));
+        }
+        throw new Error((response as Response).statusText);
+      }
+
+      return data;
+    },
+  });
+}
+
+export function useMutationCaseUnlinkEntity({
+  caseOrcabusId,
+  externalEntityOrcabusId,
+  reactQuery,
+}: {
+  caseOrcabusId: string;
+  externalEntityOrcabusId: string;
+  reactQuery?: {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+  };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async () => {
+      const { data, error, response } = await client.DELETE(
+        '/api/v1/case/{orcabusId}/external-entity/{externalEntityOrcabusId}/',
+        {
+          params: {
+            path: { orcabusId: caseOrcabusId, externalEntityOrcabusId: externalEntityOrcabusId },
+          },
+        }
+      );
+
+      if (error) {
+        if (typeof error === 'object') {
+          throw new Error(JSON.stringify(error));
+        }
+        throw new Error((response as Response).statusText);
+      }
+
+      return data;
+    },
+  });
+}
+
+export function useMutationCaseLinkEntity({
+  reactQuery,
+}: {
+  reactQuery?: {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+  };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async (body: components['schemas']['CaseExternalEntityLinkCreateRequest']) => {
+      const { data, error, response } = await client.POST('/api/v1/case/link/external-entity/', {
+        body,
+      });
+
+      if (error) {
+        if (typeof error === 'object') {
+          throw new Error(JSON.stringify(error));
+        }
+        throw new Error((response as Response).statusText);
+      }
+
+      return data;
+    },
+  });
+}
+
+export function useMutationCaseGenerate({
+  reactQuery,
+}: {
+  reactQuery?: {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+  };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async () => {
+      const { data, error, response } = await client.POST('/api/v1/case/generate/', {});
+
       if (error) {
         if (typeof error === 'object') {
           throw new Error(JSON.stringify(error));

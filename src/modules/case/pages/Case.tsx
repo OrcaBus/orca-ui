@@ -5,6 +5,7 @@ import { classNames } from '@/utils/commonUtils';
 import { RedirectLink } from '@/components/common/link';
 import { dayjs, TIMESTAMP_FORMAT } from '@/utils/dayjs';
 import { Search } from '@/components/common/search';
+import CaseGenerateButton from '../component/CaseGenerationButton';
 
 const standardClassName = classNames(
   'text-gray-900 dark:text-gray-100',
@@ -29,8 +30,9 @@ export const CaseListAPITable = () => {
       tableHeader={
         <div className='flex flex-col md:flex-row'>
           <div className='flex items-center justify-center'>{'Case Table'}</div>
-          <div className='flex flex-1 items-center justify-end pt-2'>
-            <div className='w-1/5'>
+          <div className='flex flex-1 flex-col items-stretch gap-3 pt-2 md:flex-row md:items-center md:justify-end'>
+            <CaseGenerateButton />
+            <div className='w-full md:w-1/5'>
               <Search
                 onSearch={(s) => setQueryParams({ search: s })}
                 searchBoxContent={queryParams.search}
@@ -54,6 +56,26 @@ export const CaseListAPITable = () => {
           },
         },
         {
+          header: 'Alias',
+          headerClassName: standardClassName,
+          accessor: 'alias',
+          cell: (cellData: unknown) => {
+            const aliasArr = cellData as string[];
+            if (!aliasArr || aliasArr.length === 0) {
+              return <>-</>;
+            }
+            return (
+              <ul className='list-disc space-y-1 pl-5'>
+                {aliasArr.map((item, index) => (
+                  <li key={index} className='text-gray-900 dark:text-gray-100'>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            );
+          },
+        },
+        {
           header: 'Description',
           headerClassName: standardClassName,
           accessor: 'description',
@@ -73,9 +95,10 @@ export const CaseListAPITable = () => {
       tableData={data.results.map((a) => ({
         orcabusId: a.orcabusId,
         title: { text: a.title, orcabusId: a.orcabusId },
-        description: a.description,
+        description: a.description ?? '-',
         type: a.type ?? '-',
         lastModified: dayjs(a.lastModified).format(TIMESTAMP_FORMAT),
+        alias: a.alias,
       }))}
       paginationProps={{
         totalCount: pagination?.count ?? 0,

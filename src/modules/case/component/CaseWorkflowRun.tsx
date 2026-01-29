@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Table, Column, TableData } from '@/components/tables';
 import { dayjs, TIMESTAMP_FORMAT } from '@/utils/dayjs';
 import { Badge } from '@/components/common/badges';
@@ -7,8 +7,17 @@ import { DEFAULT_NON_PAGINATE_PAGE_SIZE } from '@/utils/constant';
 import { useWorkflowRunListModel } from '@/api/workflow';
 import { RedirectLink } from '@/components/common/link';
 import { classNames } from '@/utils/commonUtils';
+import CaseUnlinkEntityButton from './CaseUnlinkEntityButton';
 
-const WorkflowRunTable = ({ externalEntitySet }: { externalEntitySet: Record<string, any>[] }) => {
+const CaseWorkflowRunTable = ({
+  externalEntitySet,
+  caseOrcabusId,
+}: {
+  externalEntitySet: Record<string, any>[];
+  caseOrcabusId: string;
+}) => {
+  const [isUnlinking, setIsUnlinking] = useState(false);
+
   // we want just the case for the library metadata for this component,
   // we will split this orcabusId map to its full case detail
   const wfrMapCase: Record<string, any> = {};
@@ -114,7 +123,7 @@ const WorkflowRunTable = ({ externalEntitySet }: { externalEntitySet: Record<str
         cell: (p: unknown) => {
           const rawOrcabusId = (p as string).split('.')[1];
 
-          return <>{wfrMapCase[rawOrcabusId].timestamp ?? '-'}</>;
+          return <>{dayjs(wfrMapCase[rawOrcabusId].timestamp).format(TIMESTAMP_FORMAT) ?? '-'}</>;
         },
       },
       {
@@ -125,21 +134,21 @@ const WorkflowRunTable = ({ externalEntitySet }: { externalEntitySet: Record<str
           'transition-all duration-200'
         ),
         accessor: 'orcabusId',
-        cell: () => {
+        cell: (p: unknown) => {
+          const workflowOrcabusId = (p as string).split('.')[1];
           return (
-            <div
-              className='ml-2 cursor-pointer text-sm font-medium text-red-500 transition-colors duration-200 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
-              onClick={() => {
-                console.log('TODO: deleting relationship');
-              }}
-            >
-              unlink
-            </div>
+            <CaseUnlinkEntityButton
+              entityId={wfrMapCase[workflowOrcabusId].externalEntity.alias}
+              entityOrcabusId={workflowOrcabusId}
+              caseOrcabusId={caseOrcabusId}
+              disabled={isUnlinking}
+              setIsUnlinking={setIsUnlinking}
+            />
           );
         },
       },
     ],
-    []
+    [caseOrcabusId, wfrMapCase]
   );
 
   return (
@@ -154,4 +163,4 @@ const WorkflowRunTable = ({ externalEntitySet }: { externalEntitySet: Record<str
   );
 };
 
-export default WorkflowRunTable;
+export default CaseWorkflowRunTable;
