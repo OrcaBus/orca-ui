@@ -6,9 +6,10 @@ import CaseLibraryTable from '../component/CaseLibrary';
 import WorkflowRunTable from '../component/CaseWorkflowRun';
 import { SpinnerWithText } from '@/components/common/spinner';
 import { Button } from '@/components/common/buttons';
-import { dayjs, TIMESTAMP_FORMAT } from '@/utils/dayjs';
 import CaseLinkLibraryButton from '../component/CaseLinkLibraryButton';
 import CaseLinkWorkflowRunButton from '../component/CaseLinkWorkflowRunButton';
+import CaseDetailDisplay from '../component/CaseDetailDisplay';
+import CaseFileViewer from '../component/CaseFileViewer';
 
 const selectedClassName =
   'inline-flex items-center gap-2 p-4 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 rounded-t-lg font-medium transition-colors duration-200';
@@ -34,19 +35,37 @@ export const CaseDetailAPITable = () => {
     {
       label: 'Libraries',
       content: (
-        <CaseLibraryTable
-          externalEntitySet={caseData.externalEntitySet}
-          caseOrcabusId={caseOrcabusId}
-        />
+        <>
+          <div className='flex justify-end'>
+            <CaseLinkLibraryButton caseOrcabusId={caseOrcabusId} />
+          </div>
+          <CaseLibraryTable
+            externalEntitySet={caseData.externalEntitySet}
+            caseOrcabusId={caseOrcabusId}
+          />
+        </>
       ),
     },
     {
       label: 'WorkflowRun',
       content: (
-        <WorkflowRunTable
-          externalEntitySet={caseData.externalEntitySet}
-          caseOrcabusId={caseOrcabusId}
-        />
+        <>
+          <div className='flex justify-end'>
+            <CaseLinkWorkflowRunButton caseOrcabusId={caseOrcabusId} />
+          </div>
+          <WorkflowRunTable
+            externalEntitySet={caseData.externalEntitySet}
+            caseOrcabusId={caseOrcabusId}
+          />
+        </>
+      ),
+    },
+    {
+      label: 'Files',
+      content: (
+        <>
+          <CaseFileViewer externalEntitySet={caseData.externalEntitySet} />
+        </>
       ),
     },
   ];
@@ -72,78 +91,14 @@ export const CaseDetailAPITable = () => {
       {/* Divider */}
       <div className='my-6 border-t border-slate-200' />
       {/* Meta info grid */}
-      <div className='grid grid-cols-1 gap-6 text-sm sm:grid-cols-2 lg:grid-cols-3'>
-        <div>
-          <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
-            Case ID
-          </p>
-          <p className='font-medium text-slate-800 dark:text-gray-200'>{caseData.orcabusId}</p>
-        </div>
-
-        <div>
-          <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
-            Last Modified
-          </p>
-          <p className='font-medium text-slate-800 dark:text-gray-200'>
-            {dayjs(caseData.lastModified).format(TIMESTAMP_FORMAT)}
-          </p>
-        </div>
-        <div>
-          <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
-            Creation Status
-          </p>
-          <p className='font-medium text-slate-800 dark:text-gray-200'>{caseData.creationStatus}</p>
-        </div>
-        <div>
-          <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
-            Alias
-          </p>
-          {caseData.alias && caseData.alias.length > 0 ? (
-            <ul className='list-disc space-y-1 pl-5'>
-              {caseData.alias.map((item, index) => (
-                <li key={index} className='font-medium text-slate-800 dark:text-gray-200'>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className='font-medium text-slate-800 dark:text-gray-200'>-</p>
-          )}
-        </div>
-        <div>
-          <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
-            Type
-          </p>
-          <p className='font-medium text-slate-800 dark:text-gray-200'>{caseData.type ?? '-'}</p>
-        </div>
-
-        <div>
-          <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
-            Description
-          </p>
-          <p className='font-medium text-slate-800 dark:text-gray-200'>
-            {caseData.description ?? '-'}
-          </p>
-        </div>
-        <div>
-          <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
-            Trello URL
-          </p>
-          <p className='font-medium text-slate-800 dark:text-gray-200'>
-            {caseData.trelloUrl ?? '-'}
-          </p>
-        </div>
-      </div>
-
+      <CaseDetailDisplay caseData={caseData} />
       <div className='my-6 border-t border-slate-200' />
-
       <div className='mb-4'>
         <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
-          External Entities
+          Case Data
         </p>
         <p className='text-sm font-normal text-slate-500 dark:text-gray-400'>
-          This case is linked to external entities of different types. Below, you can view
-          associated workflow runs and libraries.
+          View libraries, workflow runs, and files associated with this case.
         </p>
       </div>
       <div className='rounded-lg bg-white dark:bg-gray-900'>
@@ -169,14 +124,6 @@ export const CaseDetailAPITable = () => {
             if (currentTabSelection === tab.label) {
               return (
                 <Fragment key={index}>
-                  <div className='flex justify-end'>
-                    {tab.label == 'Libraries' && (
-                      <CaseLinkLibraryButton caseOrcabusId={caseOrcabusId} />
-                    )}
-                    {tab.label == 'WorkflowRun' && (
-                      <CaseLinkWorkflowRunButton caseOrcabusId={caseOrcabusId} />
-                    )}
-                  </div>
                   <Suspense fallback={<SpinnerWithText />}>{tab.content}</Suspense>
                 </Fragment>
               );

@@ -18,7 +18,7 @@ const CaseWorkflowRunTable = ({
 }) => {
   const [isUnlinking, setIsUnlinking] = useState(false);
 
-  // we want just the case for the library metadata for this component,
+  // we want just the wfr_run for this component,
   // we will split this orcabusId map to its full case detail
   const wfrMapCase: Record<string, any> = {};
   externalEntitySet.forEach((o) => {
