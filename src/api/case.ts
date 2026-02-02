@@ -9,7 +9,7 @@ const client = createClient<paths>({
 });
 client.use(authMiddleware);
 
-const casePath = '/api/v1/case/';
+export const casePath = '/api/v1/case/';
 export function useQueryCaseListObject({
   params,
   reactQuery,
@@ -62,11 +62,9 @@ export function useQueryCaseDetailObject({
 
 export function useMutationCaseUpdate({
   orcabusId,
-  body,
   reactQuery,
 }: {
   orcabusId: string;
-  body: components['schemas']['PatchedCaseDetailRequest'];
   reactQuery?: {
     onSuccess?: (data: components['schemas']['CaseDetail']) => void;
     onError?: (error: Error) => void;
@@ -74,9 +72,36 @@ export function useMutationCaseUpdate({
 }) {
   return useMutation({
     ...reactQuery,
-    mutationFn: async () => {
+    mutationFn: async (body: components['schemas']['PatchedCaseDetailRequest']) => {
       const { data, error, response } = await client.PATCH('/api/v1/case/{orcabusId}/', {
         params: { path: { orcabusId } },
+        body,
+      });
+
+      if (error) {
+        if (typeof error === 'object') {
+          throw new Error(JSON.stringify(error));
+        }
+        throw new Error((response as Response).statusText);
+      }
+
+      return data;
+    },
+  });
+}
+
+export function useMutationCaseCreate({
+  reactQuery,
+}: {
+  reactQuery?: {
+    onSuccess?: (data: components['schemas']['CaseDetail']) => void;
+    onError?: (error: Error) => void;
+  };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async (body: components['schemas']['CaseRequest']) => {
+      const { data, error, response } = await client.POST('/api/v1/case/', {
         body,
       });
 
@@ -167,6 +192,35 @@ export function useMutationCaseGenerate({
     ...reactQuery,
     mutationFn: async () => {
       const { data, error, response } = await client.POST('/api/v1/case/generate/', {});
+
+      if (error) {
+        if (typeof error === 'object') {
+          throw new Error(JSON.stringify(error));
+        }
+        throw new Error((response as Response).statusText);
+      }
+
+      return data;
+    },
+  });
+}
+
+export function useMutationCaseDelete({
+  reactQuery,
+  orcabusId,
+}: {
+  orcabusId: string;
+  reactQuery?: {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+  };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async () => {
+      const { data, error, response } = await client.DELETE('/api/v1/case/{orcabusId}/', {
+        params: { path: { orcabusId } },
+      });
 
       if (error) {
         if (typeof error === 'object') {

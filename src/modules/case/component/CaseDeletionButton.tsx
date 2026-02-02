@@ -2,7 +2,7 @@ import { Button } from '@/components/common/buttons';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { Dialog } from '@/components/common/dialogs';
 import { useState } from 'react';
-import { useMutationCaseDelete } from '@/api/case';
+import { caseDetailPath, casePath, useMutationCaseDelete } from '@/api/case';
 import toaster from '@/components/common/toaster';
 import { SpinnerWithText } from '@/components/common/spinner';
 import { useQueryClient } from '@tanstack/react-query';
@@ -21,7 +21,12 @@ function CaseDeletionButton({ caseOrcabusId }: { caseOrcabusId: string }) {
           title: 'Case Deleted!',
           message: `Case ${caseOrcabusId} has been successfully deleted.`,
         });
-        await queryClient.invalidateQueries();
+        await queryClient.invalidateQueries({
+          queryKey: ['GET', casePath],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['GET', caseDetailPath],
+        });
         navigate(`../`);
       },
     },

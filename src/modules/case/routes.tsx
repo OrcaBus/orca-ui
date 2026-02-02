@@ -6,6 +6,7 @@ import { RouteObject } from 'react-router-dom';
 import CaseDetailPage from './pages/CaseDetail';
 import CaseEditPage from './pages/CaseEdit';
 import CaseLayout from './layouts/CaseLayout';
+import CaseCreatePage from './pages/CaseCreatePage';
 
 const CasePage = lazy(() => import('@/modules/case/pages/Case'));
 
@@ -17,6 +18,14 @@ export const Router: RouteObject = {
       element: (
         <CaseLayout>
           <CasePage />
+        </CaseLayout>
+      ),
+    },
+    {
+      path: 'new',
+      element: (
+        <CaseLayout>
+          <CaseCreatePage />
         </CaseLayout>
       ),
     },
