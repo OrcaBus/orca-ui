@@ -92,22 +92,27 @@ function CaseFileViewer({ externalEntitySet }: { externalEntitySet: Record<strin
         : [newO];
     }
   }
-
   return (
     <div>
-      {Object.keys(groupedWorkflowName).map((workflowName) => {
-        const props = getFileViewerWorkflowProps(workflowName);
-        return (
-          <FileWorkflowViewer
-            key={workflowName}
-            workflowRuns={groupedWorkflowName[workflowName]}
-            // eslint-disable-next-line react/prop-types
-            keyPatterns={props.keyPatterns}
-            // eslint-disable-next-line react/prop-types
-            getTableDataFormat={props.getTableData}
-          />
-        );
-      })}
+      {Object.keys(groupedWorkflowName).length === 0 ? (
+        <div className='py-8 text-center text-gray-500 dark:text-gray-400'>
+          No file highlight preview available.
+        </div>
+      ) : (
+        Object.keys(groupedWorkflowName).map((workflowName) => {
+          const props = getFileViewerWorkflowProps(workflowName);
+          return (
+            <FileWorkflowViewer
+              key={workflowName}
+              workflowRuns={groupedWorkflowName[workflowName]}
+              // eslint-disable-next-line react/prop-types
+              keyPatterns={props.keyPatterns}
+              // eslint-disable-next-line react/prop-types
+              getTableDataFormat={props.getTableData}
+            />
+          );
+        })
+      )}
     </div>
   );
 }

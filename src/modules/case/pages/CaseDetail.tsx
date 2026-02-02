@@ -10,6 +10,7 @@ import CaseLinkLibraryButton from '../component/CaseLinkLibraryButton';
 import CaseLinkWorkflowRunButton from '../component/CaseLinkWorkflowRunButton';
 import CaseDetailDisplay from '../component/CaseDetailDisplay';
 import CaseFileViewer from '../component/CaseFileViewer';
+import CaseDeletionButton from '../component/CaseDeletionButton';
 
 const selectedClassName =
   'inline-flex items-center gap-2 p-4 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 rounded-t-lg font-medium transition-colors duration-200';
@@ -79,14 +80,17 @@ export const CaseDetailAPITable = () => {
             {caseData.title}
           </h1>
         </div>
-        <Button
-          onClick={() => navigate('./edit')}
-          type='primary'
-          size='md'
-          className='px-6 shadow-sm transition-shadow duration-200 hover:shadow-md'
-        >
-          Edit
-        </Button>
+        <div className='flex gap-2'>
+          <CaseDeletionButton caseOrcabusId={caseOrcabusId} />
+          <Button
+            onClick={() => navigate('./edit')}
+            type='primary'
+            size='md'
+            className='px-6 shadow-sm transition-shadow duration-200 hover:shadow-md'
+          >
+            Edit
+          </Button>
+        </div>
       </div>
       {/* Divider */}
       <div className='my-6 border-t border-slate-200' />
