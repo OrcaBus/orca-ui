@@ -5,7 +5,7 @@ import FileWorkflowViewer from '@/modules/files/components/FileWorkflowViewer';
 import { WORKFLOW_ANALYSIS_TABLE } from '@/modules/lab/components/library/LibraryAnalysisReportTable';
 import { DEFAULT_NON_PAGINATE_PAGE_SIZE } from '@/utils/constant';
 
-const WGS_WORKFLOW = ['sash', 'tumor-normal', 'dragen-wgs-dna'];
+const WGS_WORKFLOW = ['sash', 'tumor-normal', 'dragen-wgts-dna'];
 const WTS_WORKFLOW = ['rnasum', 'wts', 'dragen-wgts-rna'];
 const CTTSO_WORKFLOW = ['dragen-tso500-ctDNA', 'cttsov2'];
 
@@ -13,7 +13,7 @@ const getFileViewerWorkflowProps = (wfrName: string) => {
   if (wfrName == 'sash') {
     return WORKFLOW_ANALYSIS_TABLE['sash'];
   }
-  if (['tumor-normal', 'dragen-wgs-dna'].includes(wfrName)) {
+  if (['tumor-normal', 'dragen-wgts-dna'].includes(wfrName)) {
     return WORKFLOW_ANALYSIS_TABLE['tumor-normal'];
   }
   if (wfrName == 'rnasum') {
@@ -37,7 +37,7 @@ const getFileViewerWorkflowProps = (wfrName: string) => {
 const groupWfrName = (wfrName: string) => {
   if (['wts', 'dragen-wgts-rna'].includes(wfrName)) return 'dragen-wgts-rna';
   if (['dragen-tso500-ctDNA', 'cttsov2'].includes(wfrName)) return 'dragen-tso500-ctDNA';
-  if (['tumor-normal', 'dragen-wgs-dna'].includes(wfrName)) return 'dragen-wgs-dna';
+  if (['tumor-normal', 'dragen-wgts-dna'].includes(wfrName)) return 'dragen-wgts-dna';
   return wfrName;
 };
 
