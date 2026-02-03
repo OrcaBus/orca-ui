@@ -4,7 +4,6 @@ import { SpinnerWithText } from '@/components/common/spinner';
 import FileWorkflowViewer from '@/modules/files/components/FileWorkflowViewer';
 import { WORKFLOW_ANALYSIS_TABLE } from '@/modules/lab/components/library/LibraryAnalysisReportTable';
 import { DEFAULT_NON_PAGINATE_PAGE_SIZE } from '@/utils/constant';
-import React from 'react';
 
 const WGS_WORKFLOW = ['sash', 'tumor-normal', 'dragen-wgs-dna'];
 const WTS_WORKFLOW = ['rnasum', 'wts', 'dragen-wgts-rna'];
