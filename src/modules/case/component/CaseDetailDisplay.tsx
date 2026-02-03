@@ -1,4 +1,3 @@
-import React from 'react';
 import { dayjs, TIMESTAMP_FORMAT } from '@/utils/dayjs';
 import { components } from '@/api/types/case';
 
