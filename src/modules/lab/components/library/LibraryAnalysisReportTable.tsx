@@ -16,7 +16,7 @@ import { Tooltip } from '@/components/common/tooltips';
 import { JsonToTable } from '@/components/common/json-to-table';
 import { WorkflowDialogDetail } from './WorkflowDialogDetail';
 
-const WORKFLOW_ANALYSIS_TABLE = {
+export const WORKFLOW_ANALYSIS_TABLE = {
   sash: {
     keyPatterns: [
       '*.html',

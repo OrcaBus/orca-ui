@@ -6,6 +6,9 @@ import { RedirectLink } from '@/components/common/link';
 import { dayjs, TIMESTAMP_FORMAT } from '@/utils/dayjs';
 import { Search } from '@/components/common/search';
 import CaseGenerateButton from '../component/CaseGenerationButton';
+import { Button } from '@/components/common/buttons';
+import { useNavigate } from 'react-router-dom';
+import { PlusIcon } from '@heroicons/react/24/outline';
 
 const standardClassName = classNames(
   'text-gray-900 dark:text-gray-100',
@@ -13,6 +16,7 @@ const standardClassName = classNames(
   'bg-transparent'
 );
 export const CaseListAPITable = () => {
+  const navigate = useNavigate();
   const { setQueryParams, getPaginationParams, getQueryParams } = useQueryParams();
   const queryParams = getQueryParams();
 
@@ -31,6 +35,10 @@ export const CaseListAPITable = () => {
         <div className='flex flex-col md:flex-row'>
           <div className='flex items-center justify-center'>{'Case Table'}</div>
           <div className='flex flex-1 flex-col items-stretch gap-3 pt-2 md:flex-row md:items-center md:justify-end'>
+            <Button type='green' onClick={() => navigate('./new')}>
+              <PlusIcon className='h-5 w-5' />
+              New Case
+            </Button>
             <CaseGenerateButton />
             <div className='w-full md:w-1/5'>
               <Search

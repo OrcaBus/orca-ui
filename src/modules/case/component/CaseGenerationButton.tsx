@@ -22,10 +22,6 @@ function CaseGenerateButton() {
     },
   });
 
-  if (isPending) {
-    return <SpinnerWithText text='Saving changes ...' />;
-  }
-
   if (isError) {
     throw error;
   }
@@ -37,9 +33,16 @@ function CaseGenerateButton() {
         type='primary'
         size='sm'
         className='shadow-sm transition-shadow duration-200 hover:shadow-md'
+        disabled={isPending}
       >
-        <SparklesIcon className='h-5 w-5' />
-        Generate Cases
+        {isPending ? (
+          <SpinnerWithText text='Generating...' className='flex-row' />
+        ) : (
+          <>
+            <SparklesIcon className='h-5 w-5' />
+            {'Generate Cases'}
+          </>
+        )}
       </Button>
 
       <Dialog
