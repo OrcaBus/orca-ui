@@ -154,15 +154,17 @@ export function createWorkflowDeleteMutationHook<K extends keyof paths>(path: K)
 }
 
 export type WorkflowModel = components['schemas']['Workflow'];
+export type WorkflowListModel = components['schemas']['WorkflowList'];
 export type WorkflowRunModel = components['schemas']['WorkflowRunDetail'];
 export type AnalysisRunModel = components['schemas']['AnalysisRunDetail'];
-export type AnalysisModel = components['schemas']['AnalysisMin'];
+export type AnalysisModel = components['schemas']['Analysis'];
 export type ComputeContextModel = components['schemas']['AnalysisContext'];
 export type StorageContextModel = components['schemas']['AnalysisContext'];
 export type WorkflowRunPaginatedModel = components['schemas']['PaginatedWorkflowRunList'];
 export type WorkflowRunRerunValidMapDataModel = components['schemas']['AllowedRerunWorkflow'];
 
 export const useWorkflowModel = createWorkflowQueryHook('/api/v1/workflow/');
+export const useWorkflowDetailModel = createWorkflowQueryHook('/api/v1/workflow/{orcabusId}/');
 
 // workflow run
 export const useWorkflowRunListModel = createWorkflowQueryHook('/api/v1/workflowrun/');
@@ -172,11 +174,9 @@ export const useWorkflowRunDetailModel = createWorkflowQueryHook(
 export const useWorkflowStateModel = createWorkflowQueryHook(
   '/api/v1/workflowrun/{orcabusId}/state/'
 );
-export const useWorkflowPayloadModel = createWorkflowQueryHook('/api/v1/payload/{id}/');
 
-export const useWorkflowRunStatusCountModel = createWorkflowQueryHook(
-  '/api/v1/workflowrun/stats/count_by_status/'
-);
+// payload
+export const useWorkflowPayloadModel = createWorkflowQueryHook('/api/v1/payload/{orcabusId}/');
 
 // workflow run comment
 export const useWorkflowRunCommentModel = createWorkflowQueryHook(
@@ -186,11 +186,11 @@ export const useWorkflowRunCommentCreateModel = createWorkflowPostMutationHook(
   '/api/v1/workflowrun/{orcabusId}/comment/'
 );
 export const useWorkflowRunCommentUpdateModel = createWorkflowPatchMutationHook(
-  '/api/v1/workflowrun/{orcabusId}/comment/{id}/'
+  '/api/v1/workflowrun/{orcabusId}/comment/{commentOrcabusId}/'
 );
 
-export const useWorkflowRunCommentDeleteModel = createWorkflowDeleteMutationHook(
-  '/api/v1/workflowrun/{orcabusId}/comment/{id}/soft_delete/'
+export const useWorkflowRunCommentDeleteModel = createWorkflowPostMutationHook(
+  '/api/v1/workflowrun/{orcabusId}/comment/{commentOrcabusId}/soft_delete/'
 );
 
 // workflow run state creation
@@ -211,8 +211,44 @@ export const useSuspensePayloadListModel = createWorkflowFetchingHook('/api/v1/p
 
 // analysis run
 export const useAnalysisRunListModel = createWorkflowQueryHook('/api/v1/analysisrun/');
+export const useAnalysisRunCreateModel = createWorkflowPostMutationHook('/api/v1/analysisrun/');
 export const useAnalysisRunDetailModel = createWorkflowQueryHook(
   '/api/v1/analysisrun/{orcabusId}/'
+);
+export const useAnalysisRunDetailUpdateModel = createWorkflowPatchMutationHook(
+  '/api/v1/analysisrun/{orcabusId}/'
+);
+
+// analysis
+export const useAnalysisListModel = createWorkflowQueryHook('/api/v1/analysis/');
+export const useAnalysisCreateModel = createWorkflowPostMutationHook('/api/v1/analysis/');
+export const useAnalysisDetailModel = createWorkflowQueryHook('/api/v1/analysis/{orcabusId}/');
+export const useAnalysisDetailUpdateModel = createWorkflowPatchMutationHook(
+  '/api/v1/analysis/{orcabusId}/'
+);
+
+// analysis context
+export const useAnalysisContextListModel = createWorkflowQueryHook('/api/v1/analysiscontext/');
+export const useAnalysisContextCreateModel = createWorkflowPostMutationHook(
+  '/api/v1/analysiscontext/'
+);
+export const useAnalysisContextDetailModel = createWorkflowQueryHook(
+  '/api/v1/analysiscontext/{orcabusId}/'
+);
+export const useAnalysisContextDetailUpdateModel = createWorkflowPatchMutationHook(
+  '/api/v1/analysiscontext/{orcabusId}/'
+);
+
+// library
+export const useLibraryListModel = createWorkflowQueryHook('/api/v1/library/');
+export const useLibraryDetailModel = createWorkflowQueryHook('/api/v1/library/{orcabusId}/');
+
+// run context
+export const useRunContextListModel = createWorkflowQueryHook('/api/v1/runcontext/');
+export const useRunContextCreateModel = createWorkflowPostMutationHook('/api/v1/runcontext/');
+export const useRunContextDetailModel = createWorkflowQueryHook('/api/v1/runcontext/{orcabusId}/');
+export const useRunContextDetailUpdateModel = createWorkflowPatchMutationHook(
+  '/api/v1/runcontext/{orcabusId}/'
 );
 
 // rerun
@@ -221,4 +257,9 @@ export const useWorkflowRunRerunModel = createWorkflowPostMutationHook(
 );
 export const useWorkflowRunRerunValidateModel = createWorkflowQueryHook(
   '/api/v1/workflowrun/{orcabusId}/validate_rerun_workflows/'
+);
+
+// statistics
+export const useWorkflowRunStatusCountModel = createWorkflowQueryHook(
+  '/api/v1/workflowrun/stats/count_by_status/'
 );

@@ -1,6 +1,5 @@
 import {
   CircleStackIcon,
-  ChartBarIcon,
   FolderIcon,
   ShieldCheckIcon,
   InboxStackIcon,
@@ -8,7 +7,6 @@ import {
 } from '@heroicons/react/24/outline';
 import {
   CircleStackIcon as SolidCircleStackIcon,
-  ChartBarIcon as SolidChartBarIcon,
   FolderIcon as SolidFolderIcon,
   ShieldCheckIcon as SolidShieldCheckIcon,
   InboxStackIcon as SolidInboxStackIcon,
@@ -16,8 +14,10 @@ import {
 } from '@heroicons/react/24/solid';
 import { AppURLs } from './appURLs';
 import { SequenceIcon } from '@/components/icons/SequenceIcon';
+import { SolidSequenceIcon } from '@/components/icons/SolidSequenceIcon';
 // import { AnalysisIcon } from '@/components/icons/AnalysisIcon';
 import { WorkflowIcon } from '@/components/icons/WorkflowIcon';
+import { SolidWorkflowIcon } from '@/components/icons/SolidWorkflowIcon';
 // import { ReportIcon } from '@/components/icons/ReportIcon';
 
 const sideNavigation = [
@@ -28,7 +28,10 @@ const sideNavigation = [
     href: AppURLs.Case,
   },
   { name: 'Lab', icon: CircleStackIcon, solidIcon: SolidCircleStackIcon, href: AppURLs.Lab },
-  { name: 'Runs', icon: ChartBarIcon, solidIcon: SolidChartBarIcon, href: AppURLs.Runs },
+  // { name: 'Runs', icon: ChartBarIcon, solidIcon: SolidChartBarIcon, href: AppURLs.Runs },
+  { name: 'Sequence', icon: SequenceIcon, solidIcon: SolidSequenceIcon, href: AppURLs.Sequence },
+  { name: 'Workflows', icon: WorkflowIcon, solidIcon: SolidWorkflowIcon, href: AppURLs.Workflows },
+
   { name: 'Files', icon: FolderIcon, solidIcon: SolidFolderIcon, href: AppURLs.Files },
   {
     name: 'SSCheck',
@@ -61,17 +64,17 @@ const libraryModuleNavigation = [
   },
 ];
 
-const runsModuleNavigation = [
-  {
-    title: 'Runs',
-    children: [
-      { name: 'Sequence', href: AppURLs.RunsSequence, icon: SequenceIcon },
-      // umcomment when analysis is ready
-      // { name: 'Analysis', href: AppURLs.RunsAnalysis, icon: AnalysisIcon },
-      { name: 'Workflow', href: AppURLs.RunsWorkflow, icon: WorkflowIcon },
-    ],
-  },
-];
+// const runsModuleNavigation = [
+//   {
+//     title: 'Runs',
+//     children: [
+//       { name: 'Sequence', href: AppURLs.RunsSequence, icon: SequenceIcon },
+//       // umcomment when analysis is ready
+//       // { name: 'Analysis', href: AppURLs.RunsAnalysis, icon: AnalysisIcon },
+//       { name: 'Workflow', href: AppURLs.RunsWorkflow, icon: WorkflowIcon },
+//     ],
+//   },
+// ];
 
 export default sideNavigation;
-export { libraryModuleNavigation, runsModuleNavigation };
+export { libraryModuleNavigation };

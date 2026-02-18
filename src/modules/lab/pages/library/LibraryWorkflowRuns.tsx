@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useQueryMetadataDetailLibraryModel } from '@/api/metadata';
-import WorkflowRunTable from '@/modules/runs/components/workflowRuns/WorkflowRunTable';
+import WorkflowRunsTable from '@/modules/workflows/components/workflowRuns/WorkflowRunsTable';
 import { classNames } from '@/utils/commonUtils';
 import { SpinnerWithText } from '@/components/common/spinner';
 
@@ -31,7 +31,7 @@ export default function LibraryWorkflowRunsPage() {
       <div className={classNames('my-4 ml-2 text-sm font-medium')}>
         <div className='text-lg font-bold'>Workflow Run</div>
       </div>
-      <WorkflowRunTable libraryOrcabusId={libraryOrcabusId} />
+      <WorkflowRunsTable libraryOrcabusId={libraryOrcabusId} />
     </div>
   );
 }

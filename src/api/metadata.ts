@@ -9,6 +9,17 @@ client.use(authMiddleware);
 
 type GetPaths = PathsWithGet<paths>;
 
+type PathsWithPost<Paths> = {
+  [K in keyof Paths]: Paths[K] extends { post: unknown } ? K : never;
+}[keyof Paths];
+
+/** Extract the success response data type for a POST operation at path P */
+type PostResponseData<P extends keyof paths> = paths[P] extends {
+  post: { responses: { 200: { content: { 'application/json': infer C } } } };
+}
+  ? C
+  : never;
+
 function createMetadataUseQueryHook<K extends GetPaths>(path: K) {
   return function ({ params, reactQuery }: UseQueryOptions<paths[K]['get']>) {
     return useQuery({
@@ -32,22 +43,21 @@ function createMetadataUseQueryHook<K extends GetPaths>(path: K) {
   };
 }
 
-export function createMetadataPostHook<K extends keyof paths>(path: K) {
-  return function ({ params, reactQuery, body }: UseMutationOptions<paths[typeof path]['post']>) {
+export function createMetadataPostHook<K extends PathsWithPost<paths>>(path: K) {
+  return function ({ params, reactQuery, body }: UseMutationOptions<paths[K]['post']>) {
     return useMutation({
       ...reactQuery,
-      mutationFn: async () => {
-        const { data, error, response }: { data?: string; error?: undefined; response: Response } =
+      mutationFn: async (): Promise<PostResponseData<K>> => {
+        const { data, error, response } =
           // @ts-expect-error: params is dynamic type type for openapi-fetch
           await client.POST(path, { params, body: body });
         if (error) {
           if (typeof error === 'object') {
             throw new Error(JSON.stringify(error));
           }
-          throw new Error(response.statusText);
+          throw new Error((response as Response).statusText);
         }
-
-        return data;
+        return data as PostResponseData<K>;
       },
     });
   };

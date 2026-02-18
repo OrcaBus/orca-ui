@@ -35,9 +35,6 @@
 |-- /hooks                  # Custom React hooks
 |   |-- useAuth.ts
 |   |-- useDialog.ts
-|-- /router                 # react routes
-|   |-- index.ts
-|   |-- modules.ts            # modules routers collections defined in system
 |-- /modules                  # Route-specific components
 |   |-- /runs
 |   |   |-- index.tsx       # router for thsi modules
@@ -45,15 +42,18 @@
 |   |       |-- WorkflowRuns.tsx  # Page section of the ModulesPage
 |   |   |-- /components
 |   |       |-- WorkflowTable.tsx  # components section of the HomePage
-|-- /utils                  # Utility functions
-|   |-- formatDate.ts
-|   |-- calculateTotal.ts
+|-- /router                 # react routes
+|   |-- index.ts
+|   |-- modules.ts            # modules routers collections defined in system
 |-- /types                  # TypeScript type definitions
 |   |-- commonTypes.d.ts
 |   |-- vite-env.d.ts
 |-- /stories                # storybook store
 |   |-- assets
 |   |-- Button.stories.tsx
+|-- /utils                  # Utility functions
+|   |-- formatDate.ts
+|   |-- calculateTotal.ts
 |-- App.tsx                 # Root component
 |-- main.tsx                # Entry point of the application
 |-- index.css               # Global styles
