@@ -71,7 +71,7 @@ const Button: FC<ButtonProps> = ({
         typeStyles[type],
         sizeStyles[size],
         rounded ? 'rounded-full' : 'rounded-sm',
-        disabled ? 'cursor-not-allowed opacity-50 hover:bg-transparent!' : ' ',
+        disabled ? 'cursor-not-allowed opacity-50' : ' ',
         loading ? 'cursor-wait' : ' ',
         className
       )}
