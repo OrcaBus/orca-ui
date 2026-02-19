@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import RunsModuleLayout from '@/components/layouts/runs/RunsModuleLayout';
 import { RouteObject } from 'react-router-dom';
 import { SpinnerWithText } from '@/components/common/spinner';
@@ -17,37 +17,23 @@ export const Router: RouteObject = {
   element: (
     <RunsModuleLayout>
       <Suspense fallback={<SpinnerWithText text='Loading Workflows data...' />}>
-        <WorkflowsPage />
+        <Outlet />
       </Suspense>
     </RunsModuleLayout>
   ),
   children: [
     {
-      path: '',
+      element: <WorkflowsPage />,
       children: [
-        { path: '', element: <Navigate to='workflowRuns' replace /> },
-        { path: 'workflowRuns', element: <WorkflowRunsPage /> },
-        { path: 'workflowRuns/:orcabusId', element: <WorkflowRunsDetailsPage /> },
+        { path: 'workflowRuns', children: [{ path: '', element: <WorkflowRunsPage /> }] },
+        { path: 'analysisRuns', children: [{ path: '', element: <AnalysisRunsPage /> }] },
+        { path: 'workflowTypes', children: [{ path: '', element: <WorkflowTypesPage /> }] },
+        { path: 'analysisTypes', children: [{ path: '', element: <AnalysisTypesPage /> }] },
       ],
     },
-    {
-      path: 'analysisRuns',
-      children: [
-        { path: '', element: <AnalysisRunsPage /> },
-        { path: ':orcabusId', element: <AnalysisRunsDetailsPage /> },
-      ],
-    },
-    {
-      path: 'workflowTypes',
-      children: [{ path: '', element: <WorkflowTypesPage /> }],
-    },
-    {
-      path: 'analysisTypes',
-      children: [{ path: '', element: <AnalysisTypesPage /> }],
-    },
-    {
-      path: '*',
-      element: <Navigate to='/workflows' replace />,
-    },
+    { path: 'workflowRuns/:orcabusId', element: <WorkflowRunsDetailsPage /> },
+    { path: 'analysisRuns/:orcabusId', element: <AnalysisRunsDetailsPage /> },
+    { path: '', element: <Navigate to='workflowRuns' replace /> },
+    { path: '*', element: <Navigate to='workflowRuns' replace /> },
   ],
 };

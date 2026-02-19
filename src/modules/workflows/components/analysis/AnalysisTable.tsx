@@ -64,7 +64,7 @@ const AnalysisTable = () => {
             <div>-</div>
           ) : (
             <RedirectLink
-              to={`/workflows?tab=Analysis+Runs&analysisTypeId=${id}`}
+              to={`/workflows/analysisRuns?analysisTypeId=${id}`}
               className='flex items-center p-1'
             >
               <div>{analysisName as string}</div>

@@ -171,6 +171,45 @@ export const useWorkflowRunListModel = createWorkflowQueryHook('/api/v1/workflow
 export const useWorkflowRunDetailModel = createWorkflowQueryHook(
   '/api/v1/workflowrun/{orcabusId}/'
 );
+export const useWorkflowRunDetailUpdateModel = createWorkflowPatchMutationHook(
+  '/api/v1/workflowrun/{orcabusId}/'
+);
+
+/** Link or unlink a workflow run to/from an analysis run. Pass analysisRunOrcabusId or null to unlink. */
+export function useWorkflowRunLinkAnalysisRunMutation({
+  reactQuery,
+}: {
+  reactQuery?: {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+  };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async ({
+      workflowRunOrcabusId,
+      analysisRunOrcabusId,
+    }: {
+      workflowRunOrcabusId: string;
+      analysisRunOrcabusId: string | null;
+    }) => {
+      const versionedPath = getVersionedPath(
+        '/api/v1/workflowrun/{orcabusId}/'
+      ) as '/api/v1/workflowrun/{orcabusId}/';
+      const { data, error, response } = await client.PATCH(versionedPath, {
+        params: { path: { orcabusId: workflowRunOrcabusId } },
+        body: { analysisRun: analysisRunOrcabusId },
+      });
+      if (error) {
+        if (typeof error === 'object') {
+          throw new Error(JSON.stringify(error));
+        }
+        throw new Error((response as Response).statusText);
+      }
+      return data;
+    },
+  });
+}
 export const useWorkflowStateModel = createWorkflowQueryHook(
   '/api/v1/workflowrun/{orcabusId}/state/'
 );

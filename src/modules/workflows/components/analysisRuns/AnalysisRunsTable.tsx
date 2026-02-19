@@ -23,6 +23,12 @@ const AnalysisRunsTable = () => {
         page: getQueryParams().page || 1,
         rowsPerPage: getPaginationParams().rowsPerPage || DEFAULT_PAGE_SIZE,
         search: getQueryParams().search || undefined,
+        analysis__orcabus_id: getQueryParams().analysisTypeId || undefined,
+        status: ['succeeded', 'failed', 'aborted', 'resolved', 'deprecated'].includes(
+          getQueryParams().workflowRunStatus
+        )
+          ? getQueryParams().workflowRunStatus
+          : undefined,
       },
     },
     reactQuery: {

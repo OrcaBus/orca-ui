@@ -82,7 +82,7 @@ const AnalysisRunsDetailsTabs = () => {
     () => [
       {
         label: `Workflow Runs (${workflowRunsCount})`,
-        content: <AnalysisRunsDetailsWorkflowRunsContent workflowRunsCount={workflowRunsCount} />,
+        content: <AnalysisRunsDetailsWorkflowRunsContent />,
       },
       {
         label: `Libraries (${librariesCount})`,
@@ -130,14 +130,9 @@ const AnalysisRunsDetailsTabs = () => {
   return <ContentTabs tabs={tabs} />;
 };
 
-const AnalysisRunsDetailsWorkflowRunsContent = ({
-  workflowRunsCount,
-}: {
-  workflowRunsCount: number;
-}) => {
+const AnalysisRunsDetailsWorkflowRunsContent = () => {
   return (
     <div>
-      <p className='mb-2 text-sm text-gray-500 dark:text-gray-400'>{workflowRunsCount} rows</p>
       <AnalysisRunsDetailsWorkflowRuns />
     </div>
   );

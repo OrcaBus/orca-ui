@@ -20,25 +20,26 @@ const WorkflowsPage = () => {
   //     setQueryParams({ tab: 'Workflow Runs' }, true);
   //   }
   // }, [queryParams.tab, setQueryParams]);
+  const basePath = '/workflows';
   const tabs = [
     {
       name: 'Workflow Runs',
-      href: 'workflowRuns',
-      current: pathname.endsWith('/workflows') || pathname.includes('/workflowRuns'), // default to workflow runs
+      href: `${basePath}/workflowRuns`,
+      current: pathname.endsWith('/workflows') || pathname.includes('/workflowRuns'),
     },
     {
       name: 'Analysis Runs',
-      href: 'analysisRuns',
+      href: `${basePath}/analysisRuns`,
       current: pathname.includes('/analysisRuns'),
     },
     {
       name: 'Workflows',
-      href: 'workflowTypes',
+      href: `${basePath}/workflowTypes`,
       current: pathname.includes('/workflowTypes'),
     },
     {
       name: 'Analysis',
-      href: 'analysisTypes',
+      href: `${basePath}/analysisTypes`,
       current: pathname.includes('/analysisTypes'),
     },
   ];
@@ -90,8 +91,8 @@ const WorkflowsPage = () => {
     <div className={classNames('flex w-full flex-col gap-3', 'bg-white dark:bg-gray-900')}>
       <div className='flex flex-col gap-2 py-2'>
         <LinkTabs tabs={tabs} />
-        <Outlet />
       </div>
+      <Outlet />
     </div>
   );
 };

@@ -1,10 +1,6 @@
-/* eslint-disable react-refresh/only-export-components */
-// https://github.com/ArnaudBarre/eslint-plugin-react-refresh/issues/25#issuecomment-1729071347
-
 import { lazy, Suspense } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, RouteObject } from 'react-router-dom';
 import RunsModuleLayout from '@/components/layouts/runs/RunsModuleLayout';
-import { RouteObject } from 'react-router-dom';
 import { SpinnerWithText } from '@/components/common/spinner';
 
 const SequenceRunsPage = lazy(() => import('@/modules/sequence/pages/SequenceRunsPage'));
