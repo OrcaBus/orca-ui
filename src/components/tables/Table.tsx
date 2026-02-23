@@ -35,7 +35,6 @@ export interface TableProps {
   isFetchingData?: boolean;
   headerActions?: ReactNode;
   onRowClick?: (row: TableData) => void;
-  emptyMessage?: ReactNode;
 }
 
 const Table: FC<TableProps> = ({
@@ -50,7 +49,6 @@ const Table: FC<TableProps> = ({
   isFetchingData = false,
   headerActions,
   onRowClick,
-  emptyMessage,
 }) => {
   return (
     <div className='w-full'>
@@ -296,7 +294,7 @@ const Table: FC<TableProps> = ({
             </svg>
           </div>
           <h3 className='mt-2 text-sm font-medium text-gray-900 dark:text-gray-100'>
-            {emptyMessage ?? 'No data found'}
+            No data found
           </h3>
         </div>
       )}

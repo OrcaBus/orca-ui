@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Table, Column, TableData } from '@/components/tables';
 import { keepPreviousData } from '@tanstack/react-query';
 import { dayjs, TIMESTAMP_FORMAT } from '@/utils/dayjs';
@@ -8,17 +8,13 @@ import { useQueryParams } from '@/hooks/useQueryParams';
 import { useWorkflowRunListModel } from '@/api/workflow';
 import { useAnalysisRunsContext } from './AnalysisRunsContext';
 import { RedirectLink } from '@/components/common/link';
-import { ClipboardDocumentIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { ClipboardDocumentIcon } from '@heroicons/react/24/outline';
 import toaster from '@/components/common/toaster';
 import { Tooltip } from '@/components/common/tooltips';
-import { Button } from '@/components/common/buttons';
-import UnlinkWorkflowRunButton from './UnlinkWorkflowRunButton';
-import AddWorkflowRunModal from './AddWorkflowRunModal';
 
 const AnalysisRunsDetailsWorkflowRuns = () => {
-  const { analysisRunDetail, workflowRunsCount } = useAnalysisRunsContext();
+  const { analysisRunDetail } = useAnalysisRunsContext();
   const { setQueryParams, getPaginationParams, getQueryParams } = useQueryParams();
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const { data: workflowRunsData, isFetching } = useWorkflowRunListModel({
     params: {
@@ -64,8 +60,7 @@ const AnalysisRunsDetailsWorkflowRuns = () => {
                 <Tooltip text='Copy to clipboard' size='small' background='light'>
                   <button
                     type='button'
-                    onClick={(e) => {
-                      e.stopPropagation();
+                    onClick={() => {
                       navigator.clipboard.writeText(value);
                       toaster.success({ title: 'Copied to clipboard' });
                     }}
@@ -95,37 +90,17 @@ const AnalysisRunsDetailsWorkflowRuns = () => {
           return timestamp ? dayjs(timestamp).format(TIMESTAMP_FORMAT) : '-';
         },
       },
-      {
-        header: 'Actions',
-        accessor: 'orcabusId',
-        cell: (_: unknown, rowData: TableData) => (
-          <UnlinkWorkflowRunButton workflowRunOrcabusId={rowData.orcabusId as string} />
-        ),
-      },
     ],
     []
   );
 
   return (
     <div className='mt-4'>
-      <div className='mb-4 flex items-center justify-between'>
-        <p className='text-sm text-gray-500 dark:text-gray-400'>{workflowRunsCount} rows</p>
-        <Button
-          onClick={() => setIsAddModalOpen(true)}
-          type='primary'
-          size='md'
-          className='shadow-sm'
-        >
-          <PlusIcon className='h-5 w-5' />
-          Add Workflow Run
-        </Button>
-      </div>
       <Table
         columns={columns}
         tableData={workflowRunsData?.results ?? []}
         inCard={true}
         isFetchingData={isFetching}
-        emptyMessage='No workflow runs linked yet. Add workflow runs to associate them with this analysis run.'
         paginationProps={{
           totalCount: workflowRunsData?.pagination?.count ?? 0,
           rowsPerPage: workflowRunsData?.pagination?.rowsPerPage ?? DEFAULT_PAGE_SIZE,
@@ -135,13 +110,6 @@ const AnalysisRunsDetailsWorkflowRuns = () => {
           countUnit: 'rows',
         }}
       />
-      {analysisRunDetail?.orcabusId && (
-        <AddWorkflowRunModal
-          open={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          analysisRunOrcabusId={analysisRunDetail.orcabusId}
-        />
-      )}
     </div>
   );
 };

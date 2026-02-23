@@ -24,11 +24,13 @@
 |   |   |-- NavBar.tsx
 |   |   |-- Header.tsx
 |   |-- /modals             # For modal-related components
-|   |   |-- SideModal.tsx
+|   |   |-- DetailsModal.tsx
 |   |   |-- ConfirmationModal.tsx
-|   |-- /tabs               # Components related to tab functionalities
-|   |   |-- PopupTabView.tsx
-|   |   |-- DetailedTabView.tsx
+|   |-- /tables               # Components related to tables
+|   |   |-- Table.tsx
+|   |   |-- ExpandableTable.tsx
+|   |-- /timeline             # Components related to timeline
+|   |   |-- Timeline.tsx
 |-- /context                # React contexts for state management
 |   |-- UserContext.tsx
 |   |-- ThemeContext.tsx
@@ -37,11 +39,14 @@
 |   |-- useDialog.ts
 |-- /modules                  # Route-specific components
 |   |-- /runs
-|   |   |-- index.tsx       # router for thsi modules
+|   |   |-- router.tsx       # router for this modules
 |   |   |-- /Pages
-|   |       |-- WorkflowRuns.tsx  # Page section of the ModulesPage
+|   |       |-- WorkflowRunsPage.tsx  # Page section of the ModulesPage
+|   |       |-- WorkflowRunDetailsPage.tsx  # Page section of the ModulesPage
 |   |   |-- /components
-|   |       |-- WorkflowTable.tsx  # components section of the HomePage
+|   |       |-- WorkflowRunsContext.tsx  # ccontext for workflow runs details page
+|   |       |-- WorkflowRunsTable.tsx  # list table of workflow runs
+|   |       |-- WorkflowRunsTimeline.tsx  # timeline section for workflow runs
 |-- /router                 # react routes
 |   |-- index.ts
 |   |-- modules.ts            # modules routers collections defined in system

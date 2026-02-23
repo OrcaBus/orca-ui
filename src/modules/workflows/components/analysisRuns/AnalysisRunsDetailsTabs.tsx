@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { ContentTabs } from '@/components/navigation/tabs';
-import { Table, Column } from '@/components/tables';
+import { Table, Column, TableData } from '@/components/tables';
 import { useAnalysisRunsContext } from './AnalysisRunsContext';
 import { Link } from 'react-router-dom';
 import { classNames } from '@/utils/commonUtils';
@@ -53,6 +53,14 @@ const AnalysisRunsDetailsTabs = () => {
         accessor: 'usecase',
       },
       {
+        header: 'Description',
+        accessor: 'description',
+      },
+      {
+        header: 'Status',
+        accessor: 'status',
+      },
+      {
         header: 'Orcabus ID',
         accessor: 'orcabusId',
       },
@@ -69,6 +77,21 @@ const AnalysisRunsDetailsTabs = () => {
       {
         header: 'Library ID',
         accessor: 'libraryId',
+        cell: (libraryId: unknown, rowData: TableData) => {
+          const libraryOrcabusId = (rowData as { libraryOrcabusId: string }).libraryOrcabusId;
+          return (
+            <Link
+              to={`/lab/library/${libraryOrcabusId}/overview`}
+              className={classNames(
+                'inline-flex items-center gap-1 text-sm font-medium',
+                'text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
+              )}
+            >
+              {libraryId as string}
+              <ArrowTopRightOnSquareIcon className='h-3.5 w-3.5' />
+            </Link>
+          );
+        },
       },
       {
         header: 'Orcabus ID',
@@ -82,7 +105,7 @@ const AnalysisRunsDetailsTabs = () => {
     () => [
       {
         label: `Workflow Runs (${workflowRunsCount})`,
-        content: <AnalysisRunsDetailsWorkflowRunsContent />,
+        content: <AnalysisRunsDetailsWorkflowRunsContent workflowRunsCount={workflowRunsCount} />,
       },
       {
         label: `Libraries (${librariesCount})`,
@@ -130,9 +153,14 @@ const AnalysisRunsDetailsTabs = () => {
   return <ContentTabs tabs={tabs} />;
 };
 
-const AnalysisRunsDetailsWorkflowRunsContent = () => {
+const AnalysisRunsDetailsWorkflowRunsContent = ({
+  workflowRunsCount,
+}: {
+  workflowRunsCount: number;
+}) => {
   return (
     <div>
+      <p className='mb-2 text-sm text-gray-500 dark:text-gray-400'>{workflowRunsCount} rows</p>
       <AnalysisRunsDetailsWorkflowRuns />
     </div>
   );
