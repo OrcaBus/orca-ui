@@ -40,6 +40,7 @@ const AnalysisTable = () => {
   const { data: analysisData, isFetching: isFetchingAnalysisData } = useAnalysisListModel({
     params: {
       query: {
+        search: getQueryParams().search || '',
         page: getQueryParams().page || 1,
         rowsPerPage: getPaginationParams().rowsPerPage || DEFAULT_PAGE_SIZE,
       },

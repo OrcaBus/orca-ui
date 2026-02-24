@@ -9,12 +9,11 @@ const config: StorybookConfig = {
     '@storybook/addon-links',
     '@chromatic-com/storybook',
     'storybook-addon-remix-react-router',
-    '@storybook/addon-onboarding',
     '@storybook/addon-docs',
   ],
 
   framework: {
-    name: '@storybook/react',
+    name: '@storybook/react-vite',
     options: {},
   },
 

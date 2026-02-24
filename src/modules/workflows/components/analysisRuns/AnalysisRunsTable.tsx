@@ -1,14 +1,12 @@
 import { useMemo } from 'react';
 import { Table, Column, TableData } from '@/components/tables';
 import { useQueryParams } from '@/hooks/useQueryParams';
-import { classNames } from '@/utils/commonUtils';
 import { keepPreviousData } from '@tanstack/react-query';
-// import { dayjs } from '@/utils/dayjs';
 import { DEFAULT_PAGE_SIZE } from '@/utils/constant';
 import { Badge } from '@/components/common/badges';
 import { useAnalysisRunListModel } from '@/api/workflow';
-import { Link } from 'react-router-dom';
 import { dayjs, TIMESTAMP_FORMAT } from '@/utils/dayjs';
+import { RedirectLink } from '@/components/common/link';
 
 const AnalysisRunsTable = () => {
   const { setQueryParams, getPaginationParams, getQueryParams } = useQueryParams();
@@ -25,9 +23,9 @@ const AnalysisRunsTable = () => {
         search: getQueryParams().search || undefined,
         analysis__orcabus_id: getQueryParams().analysisTypeId || undefined,
         status: ['succeeded', 'failed', 'aborted', 'resolved', 'deprecated'].includes(
-          getQueryParams().workflowRunStatus
+          getQueryParams().analysisRunStatus
         )
-          ? getQueryParams().workflowRunStatus
+          ? getQueryParams().analysisRunStatus
           : undefined,
       },
     },
@@ -52,26 +50,9 @@ const AnalysisRunsTable = () => {
             return <div>-</div>;
           } else {
             return (
-              <div>
-                <div
-                  className={classNames(
-                    'ml-2 flex cursor-pointer flex-row items-center text-sm font-medium text-blue-500 lowercase hover:text-blue-700'
-                  )}
-                  // onClick={() => {
-                  //   setSelectedWorkflowRun(workflowRunRowData as WorkflowRunModel);
-                  //   setQueryParams({ workflowRunId: workflowRunRowData.id });
-                  // }}
-                >
-                  <Link
-                    to={`/workflows/analysisRuns/${id}`}
-                    className={classNames(
-                      'ml-2 flex cursor-pointer flex-row items-center text-sm font-medium text-blue-500 capitalize hover:text-blue-700'
-                    )}
-                  >
-                    {(analysisRunName as string).toLocaleLowerCase()}
-                  </Link>
-                </div>
-              </div>
+              <RedirectLink to={`/workflows/analysisRuns/${id}`} className='flex items-center p-1'>
+                <div>{analysisRunName as string}</div>
+              </RedirectLink>
             );
           }
         },

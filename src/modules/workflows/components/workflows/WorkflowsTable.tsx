@@ -39,6 +39,7 @@ const WorkflowsTable = () => {
   const { data: workflowData, isFetching: isFetchingWorkflowsData } = useWorkflowModel({
     params: {
       query: {
+        search: getQueryParams().search || '',
         page: getQueryParams().page || 1,
         rowsPerPage: getPaginationParams().rowsPerPage || DEFAULT_PAGE_SIZE,
       },
@@ -55,16 +56,24 @@ const WorkflowsTable = () => {
         header: 'Name',
         accessor: 'name',
         cell: (name: unknown, workflowRowData: TableData) => {
-          const selectedWorkflowTypeHistoryIds = (workflowRowData as WorkflowListModel)?.history
-            ?.map((workflow: WorkflowModel) => workflow.orcabusId)
-            .join(',');
+          const historyIds =
+            (workflowRowData as WorkflowListModel)?.history?.map(
+              (workflow: WorkflowModel) => workflow.orcabusId
+            ) ?? [];
+          const ids = Array.isArray(historyIds) ? historyIds : [historyIds];
+          const params = new URLSearchParams();
+          ids
+            .filter((id): id is string => Boolean(id))
+            .forEach((id) => params.append('workflowTypeId', String(id)));
+          const queryString = params.toString();
+          const to = queryString
+            ? `/workflows/workflowRuns?${queryString}`
+            : '/workflows/workflowRuns';
+
           return !name ? (
             <div>-</div>
           ) : (
-            <RedirectLink
-              to={`/workflows/workflowRuns?workflowTypeId=${selectedWorkflowTypeHistoryIds}`}
-              className='flex items-center p-1'
-            >
+            <RedirectLink to={to} className='flex items-center p-1'>
               <div>{name as string}</div>
             </RedirectLink>
           );

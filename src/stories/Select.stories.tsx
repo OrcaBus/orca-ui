@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { IconMultipleSelect, SingleSelect } from '@/components/common/select';
+import { IconMultipleSelect, SingleSelect, SearchableSelect } from '@/components/common/select';
 import { ListBulletIcon } from '@heroicons/react/24/outline';
 
 const people = [
@@ -55,6 +55,18 @@ export const IconMultipleSelectStory: Story = {
         selectedItemValues={['1', '2']}
         options={people}
         onApply={(value) => console.log(value)}
+      />
+    );
+  },
+};
+
+export const SearchableSelectStory: Story = {
+  render: () => {
+    return (
+      <SearchableSelect
+        options={people.map((person) => person.label)}
+        value={null}
+        onChange={(value) => console.log(value)}
       />
     );
   },

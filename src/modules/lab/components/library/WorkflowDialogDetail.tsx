@@ -32,7 +32,7 @@ export const WorkflowDialogDetail = ({
               <div className='mb-6 flex items-center'>
                 <div className='mr-6'>Workflow Details</div>
                 <Link
-                  to={`/workflows/workflow?search=${portalRunId}`}
+                  to={`/workflows/workflowRuns?search=${portalRunId}`}
                   className={classNames('flex items-center')}
                 >
                   <ArrowTopRightOnSquareIcon className='h-5 w-5 text-blue-500 hover:text-blue-700' />
