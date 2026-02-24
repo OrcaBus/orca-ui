@@ -2,7 +2,11 @@
 
 import { createContext, FC, PropsWithChildren, ReactElement, useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import { useAnalysisRunDetailModel, useWorkflowRunListModel } from '@/api/workflow';
+import {
+  useAnalysisRunDetailModel,
+  useAnalysisRunCommentListModel,
+  useWorkflowRunListModel,
+} from '@/api/workflow';
 import { SpinnerWithText } from '@/components/common/spinner';
 import type { AnalysisRunModel } from '@/api/workflow';
 
@@ -10,12 +14,18 @@ interface AnalysisRunsContextValue {
   analysisRunDetail: AnalysisRunModel | undefined;
   isFetchingAnalysisRunDetail: boolean;
   workflowRunsCount: number;
+  analysisRunCommentData: ReturnType<typeof useAnalysisRunCommentListModel>['data'];
+  isFetchingAnalysisRunComment: boolean;
+  refetchAnalysisRunComment: () => void;
 }
 
 const AnalysisRunsContext = createContext<AnalysisRunsContextValue>({
   analysisRunDetail: undefined,
   isFetchingAnalysisRunDetail: true,
   workflowRunsCount: 0,
+  analysisRunCommentData: undefined,
+  isFetchingAnalysisRunComment: true,
+  refetchAnalysisRunComment: () => {},
 });
 
 export const AnalysisRunsProvider: FC<PropsWithChildren> = ({ children }): ReactElement => {
@@ -28,6 +38,17 @@ export const AnalysisRunsProvider: FC<PropsWithChildren> = ({ children }): React
         enabled: !!orcabusId,
       },
     });
+
+  const {
+    data: analysisRunCommentData,
+    isFetching: isFetchingAnalysisRunComment,
+    refetch: refetchAnalysisRunComment,
+  } = useAnalysisRunCommentListModel({
+    params: { path: { orcabusId: orcabusId as string } },
+    reactQuery: {
+      enabled: !!orcabusId,
+    },
+  });
 
   const { data: workflowRunsData } = useWorkflowRunListModel({
     params: {
@@ -44,9 +65,11 @@ export const AnalysisRunsProvider: FC<PropsWithChildren> = ({ children }): React
 
   const workflowRunsCount = workflowRunsData?.pagination?.count ?? 0;
 
+  const isFetching = isFetchingAnalysisRunDetail || isFetchingAnalysisRunComment;
+
   return (
     <>
-      {isFetchingAnalysisRunDetail ? (
+      {isFetching ? (
         <div className='flex h-screen items-center justify-center'>
           <SpinnerWithText text='Loading Analysis Run Details...' />
         </div>
@@ -56,6 +79,9 @@ export const AnalysisRunsProvider: FC<PropsWithChildren> = ({ children }): React
             analysisRunDetail,
             isFetchingAnalysisRunDetail,
             workflowRunsCount,
+            analysisRunCommentData,
+            isFetchingAnalysisRunComment,
+            refetchAnalysisRunComment,
           }}
         >
           {children}

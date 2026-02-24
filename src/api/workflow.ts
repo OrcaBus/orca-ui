@@ -214,12 +214,22 @@ export const useSuspensePayloadListModel = createWorkflowFetchingHook('/api/v1/p
 
 // analysis run
 export const useAnalysisRunListModel = createWorkflowQueryHook('/api/v1/analysisrun/');
-export const useAnalysisRunCreateModel = createWorkflowPostMutationHook('/api/v1/analysisrun/');
 export const useAnalysisRunDetailModel = createWorkflowQueryHook(
   '/api/v1/analysisrun/{orcabusId}/'
 );
-export const useAnalysisRunDetailUpdateModel = createWorkflowPatchMutationHook(
-  '/api/v1/analysisrun/{orcabusId}/'
+
+// analysis run comment
+export const useAnalysisRunCommentListModel = createWorkflowQueryHook(
+  '/api/v1/analysisrun/{orcabusId}/comment/'
+);
+export const useAnalysisRunCommentCreateModel = createWorkflowPostMutationHook(
+  '/api/v1/analysisrun/{orcabusId}/comment/'
+);
+export const useAnalysisRunCommentUpdateModel = createWorkflowPatchMutationHook(
+  '/api/v1/analysisrun/{orcabusId}/comment/{commentOrcabusId}/'
+);
+export const useAnalysisRunCommentDeleteModel = createWorkflowPostMutationHook(
+  '/api/v1/analysisrun/{orcabusId}/comment/{commentOrcabusId}/soft_delete/'
 );
 
 // analysis

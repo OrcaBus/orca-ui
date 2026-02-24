@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { classNames } from '@/utils/commonUtils';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import AnalysisRunsDetailsWorkflowRuns from './AnalysisRunsDetailsWorkflowRuns';
+import AnalysisRunsTimeline from './AnalysisRunsTimeline';
 
 const AnalysisRunsDetailsTabs = () => {
   const { analysisRunDetail, workflowRunsCount } = useAnalysisRunsContext();
@@ -104,8 +105,12 @@ const AnalysisRunsDetailsTabs = () => {
   const tabs = useMemo(
     () => [
       {
+        label: `Timeline`,
+        content: <AnalysisRunsTimeline />,
+      },
+      {
         label: `Workflow Runs (${workflowRunsCount})`,
-        content: <AnalysisRunsDetailsWorkflowRunsContent workflowRunsCount={workflowRunsCount} />,
+        content: <AnalysisRunsDetailsWorkflowRuns />,
       },
       {
         label: `Libraries (${librariesCount})`,
@@ -151,19 +156,6 @@ const AnalysisRunsDetailsTabs = () => {
   );
 
   return <ContentTabs tabs={tabs} />;
-};
-
-const AnalysisRunsDetailsWorkflowRunsContent = ({
-  workflowRunsCount,
-}: {
-  workflowRunsCount: number;
-}) => {
-  return (
-    <div>
-      <p className='mb-2 text-sm text-gray-500 dark:text-gray-400'>{workflowRunsCount} rows</p>
-      <AnalysisRunsDetailsWorkflowRuns />
-    </div>
-  );
 };
 
 interface TabTableProps {
