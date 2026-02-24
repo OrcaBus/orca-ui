@@ -9,17 +9,6 @@ client.use(authMiddleware);
 
 type GetPaths = PathsWithGet<paths>;
 
-type PathsWithPost<Paths> = {
-  [K in keyof Paths]: Paths[K] extends { post: unknown } ? K : never;
-}[keyof Paths];
-
-/** Extract the success response data type for a POST operation at path P */
-type PostResponseData<P extends keyof paths> = paths[P] extends {
-  post: { responses: { 200: { content: { 'application/json': infer C } } } };
-}
-  ? C
-  : never;
-
 function createMetadataUseQueryHook<K extends GetPaths>(path: K) {
   return function ({ params, reactQuery }: UseQueryOptions<paths[K]['get']>) {
     return useQuery({
@@ -43,8 +32,8 @@ function createMetadataUseQueryHook<K extends GetPaths>(path: K) {
   };
 }
 
-export function createMetadataPostHook<K extends PathsWithPost<paths>>(path: K) {
-  return function ({ params, reactQuery, body }: UseMutationOptions<paths[K]['post']>) {
+export function createMetadataPostHook<K extends keyof paths>(path: K) {
+  return function ({ params, reactQuery, body }: UseMutationOptions<paths[typeof path]['post']>) {
     return useMutation({
       ...reactQuery,
       mutationFn: async () => {
@@ -56,9 +45,10 @@ export function createMetadataPostHook<K extends PathsWithPost<paths>>(path: K) 
           if (typeof error === 'object') {
             throw new Error(JSON.stringify(error));
           }
-          throw new Error((response as Response).statusText);
+          throw new Error(response.statusText);
         }
-        return data as PostResponseData<K>;
+
+        return data;
       },
     });
   };

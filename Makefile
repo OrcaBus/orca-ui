@@ -5,7 +5,7 @@
 
 # Set default values if not already set (default to dev)
 VITE_METADATA_URL ?= https://metadata.dev.umccr.org
-VITE_WORKFLOW_URL ?= http://localhost:8000
+VITE_WORKFLOW_URL ?= https://workflow.dev.umccr.org
 VITE_SEQUENCE_RUN_URL ?= https://sequence.dev.umccr.org
 VITE_FILE_URL ?= https://file.dev.umccr.org
 VITE_SSCHECK_URL ?= https://sscheck-orcabus.dev.umccr.org
