@@ -1,4 +1,4 @@
-import { useWorkflowModel } from '@/api/workflow';
+import { useWorkflowGroupedModel } from '@/api/workflow';
 import { useMemo, useCallback } from 'react';
 import { Table, TableData } from '@/components/tables';
 import { Badge } from '@/components/common/badges';
@@ -36,7 +36,7 @@ const WorkflowsTable = () => {
   }, [getQueryParams, setQueryParams]);
   const selectedWorkflowTypeId = (getQueryParams()[DRAWER_QUERY_PARAM] as string) || null;
 
-  const { data: workflowData, isFetching: isFetchingWorkflowsData } = useWorkflowModel({
+  const { data: workflowData, isFetching: isFetchingWorkflowsData } = useWorkflowGroupedModel({
     params: {
       query: {
         search: getQueryParams().search || '',

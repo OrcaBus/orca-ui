@@ -165,6 +165,7 @@ export type WorkflowRunRerunValidMapDataModel = components['schemas']['AllowedRe
 
 export const useWorkflowModel = createWorkflowQueryHook('/api/v1/workflow/');
 export const useWorkflowDetailModel = createWorkflowQueryHook('/api/v1/workflow/{orcabusId}/');
+export const useWorkflowGroupedModel = createWorkflowQueryHook('/api/v1/workflow/grouped/');
 
 // workflow run
 export const useWorkflowRunListModel = createWorkflowQueryHook('/api/v1/workflowrun/');
