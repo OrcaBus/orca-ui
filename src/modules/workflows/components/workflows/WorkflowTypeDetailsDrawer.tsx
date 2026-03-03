@@ -44,6 +44,11 @@ const WorkflowTypeDetailsDrawer: FC<WorkflowTypeDetailsDrawerProps> = ({
   const historyColumns: Column[] = useMemo(
     () => [
       {
+        header: 'Name',
+        accessor: 'name',
+        cell: (name: unknown) => <span>{(name as string) || '-'}</span>,
+      },
+      {
         header: 'Version',
         accessor: 'version',
         cell: (version: unknown) => <span>{(version as string) || '-'}</span>,
