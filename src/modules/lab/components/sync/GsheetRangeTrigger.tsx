@@ -14,7 +14,7 @@ const YEARS_ARRAY = Array.from(
   { length: CURRENT_YEAR - START_YEAR + 1 },
   (_, i) => CURRENT_YEAR - i
 );
-const RANGE_REGEX = /^\d+:\d+$/;
+const RANGE_REGEX = /^(\d+:\d+)(,\s*\d+:\d+)*$/;
 
 export const GsheetRangeTrigger = () => {
   const { getQueryParams, setQueryParams } = useQueryParams();
@@ -62,19 +62,20 @@ export const GsheetRangeTrigger = () => {
       <div>
         <label className='block text-sm font-medium text-gray-900 dark:text-white'>Range</label>
         <p className='text-xs text-gray-500 dark:text-gray-400'>
-          Specify the row range using the format:{' '}
+          Specify row range(s) using the format:{' '}
           <span className='font-mono font-semibold text-blue-600 dark:text-blue-400'>
             START:END
-          </span>
+          </span>{' '}
+          or CSV for multiple ranges
         </p>
         <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
-          Example: Enter <span className='font-mono font-extrabold'>20:30</span> to sync rows 20
-          through 30
+          Examples: <span className='font-mono font-extrabold'>20:30</span> or{' '}
+          <span className='font-mono font-extrabold'>20:30,40:50,60:70</span>
         </p>
         <input
           value={range}
           onChange={(e) => setRange(e.target.value)}
-          placeholder='e.g., 20:30'
+          placeholder='e.g., 20:30 or 20:30,40:50'
           className={classNames(
             'mt-2 block w-full rounded-lg px-3 py-2 text-sm',
             'bg-white dark:bg-gray-800',
@@ -89,7 +90,8 @@ export const GsheetRangeTrigger = () => {
         />
         {range && !isValidRange && (
           <p className='mt-1 text-xs text-red-600 dark:text-red-400'>
-            Invalid format. Please use START:END format (e.g., 20:30)
+            Invalid format. Use START:END (e.g., 20:30) or CSV for multiple ranges (e.g.,
+            20:30,40:50)
           </p>
         )}
       </div>
@@ -126,7 +128,7 @@ const GsheetRecordPreview = () => {
     error: previewError,
     mutate: fetchPreview,
   } = useMutationPreviewGsheetRecords({
-    body: { year, range },
+    body: { year, ranges: range.split(',') },
   });
 
   const {
