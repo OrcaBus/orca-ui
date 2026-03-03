@@ -121,7 +121,7 @@ const Tooltip: FC<TooltipProps> = ({
       >
         <div
           className={classNames(
-            'absolute z-999',
+            'absolute z-[999]',
             'rounded-md whitespace-nowrap shadow-lg',
             getPositionClasses(),
             getVariantClasses(),

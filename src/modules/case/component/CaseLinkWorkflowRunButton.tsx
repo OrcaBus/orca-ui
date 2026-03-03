@@ -15,7 +15,7 @@ const WorkflowRunColumn: Column[] = [
         return <div>-</div>;
       } else {
         return (
-          <RedirectLink to={`/runs/workflow/${id}`} className='flex items-center p-1'>
+          <RedirectLink to={`/workflows/workflowRuns/${id}`} className='flex items-center p-1'>
             <div>{workflowRunName as string}</div>
           </RedirectLink>
         );

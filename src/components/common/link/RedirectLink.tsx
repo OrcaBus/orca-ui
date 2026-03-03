@@ -13,7 +13,7 @@ const RedirectLink: FC<RedirectLinkProps> = ({ children, to, className }) => {
     <RedirectRouterLink
       to={to}
       className={classNames(
-        'ml-2 text-sm font-medium text-blue-500 capitalize hover:text-blue-700',
+        'ml-2 text-sm font-medium text-blue-500 hover:text-blue-700',
         'dark:text-blue-400 dark:hover:text-blue-300',
         'transition-colors duration-200',
         className

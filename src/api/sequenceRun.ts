@@ -1,6 +1,6 @@
 import config from '@/config';
 import createClient, { ParamsOption } from 'openapi-fetch';
-import type { paths } from './types/sequence-run';
+import type { components, paths } from './types/sequence-run';
 import { useSuspenseQuery, useQuery, useMutation } from '@tanstack/react-query';
 import {
   authMiddleware,
@@ -142,6 +142,8 @@ export function createSequenceRunDeleteMutationHook<K extends keyof paths>(path:
     });
   };
 }
+
+export type SequenceRunModel = components['schemas']['SequenceRun'];
 
 export const useSequenceRunListModel = createSequenceRunQueryHook('/api/v1/sequence_run/');
 export const useSequenceRunListByInstrumentRunIdModel = createSequenceRunQueryHook(

@@ -24,36 +24,41 @@
 |   |   |-- NavBar.tsx
 |   |   |-- Header.tsx
 |   |-- /modals             # For modal-related components
-|   |   |-- SideModal.tsx
+|   |   |-- DetailsModal.tsx
 |   |   |-- ConfirmationModal.tsx
-|   |-- /tabs               # Components related to tab functionalities
-|   |   |-- PopupTabView.tsx
-|   |   |-- DetailedTabView.tsx
+|   |-- /tables               # Components related to tables
+|   |   |-- Table.tsx
+|   |   |-- ExpandableTable.tsx
+|   |-- /timeline             # Components related to timeline
+|   |   |-- Timeline.tsx
 |-- /context                # React contexts for state management
 |   |-- UserContext.tsx
 |   |-- ThemeContext.tsx
 |-- /hooks                  # Custom React hooks
 |   |-- useAuth.ts
 |   |-- useDialog.ts
+|-- /modules                  # Route-specific components
+|   |-- /runs
+|   |   |-- router.tsx       # router for this modules
+|   |   |-- /Pages
+|   |       |-- WorkflowRunsPage.tsx  # Page section of the ModulesPage
+|   |       |-- WorkflowRunDetailsPage.tsx  # Page section of the ModulesPage
+|   |   |-- /components
+|   |       |-- WorkflowRunsContext.tsx  # ccontext for workflow runs details page
+|   |       |-- WorkflowRunsTable.tsx  # list table of workflow runs
+|   |       |-- WorkflowRunsTimeline.tsx  # timeline section for workflow runs
 |-- /router                 # react routes
 |   |-- index.ts
 |   |-- modules.ts            # modules routers collections defined in system
-|-- /modules                  # Route-specific components
-|   |-- /runs
-|   |   |-- index.tsx       # router for thsi modules
-|   |   |-- /Pages
-|   |       |-- WorkflowRuns.tsx  # Page section of the ModulesPage
-|   |   |-- /components
-|   |       |-- WorkflowTable.tsx  # components section of the HomePage
-|-- /utils                  # Utility functions
-|   |-- formatDate.ts
-|   |-- calculateTotal.ts
 |-- /types                  # TypeScript type definitions
 |   |-- commonTypes.d.ts
 |   |-- vite-env.d.ts
 |-- /stories                # storybook store
 |   |-- assets
 |   |-- Button.stories.tsx
+|-- /utils                  # Utility functions
+|   |-- formatDate.ts
+|   |-- calculateTotal.ts
 |-- App.tsx                 # Root component
 |-- main.tsx                # Entry point of the application
 |-- index.css               # Global styles

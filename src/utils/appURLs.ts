@@ -18,23 +18,36 @@ export enum AppURLs {
   LabLibraryReportsWgssash = '/lab/library/:id/reports/wgssash',
 
   // Runs
-  Runs = '/runs',
-  // Runs Sequence
-  RunsSequence = '/runs/sequence',
-  RunsSequenceDeatils = '/runs/sequence/:id',
-  RunsSequenceDeatilsTable = '/runs/sequence/:id/table',
-  RunsSequenceDeatilsDiagram = '/runs/sequence/:id/diagram',
-  RunsSequenceDeatilsReport = '/runs/sequence/:id/report',
-  // Runs Analysis
-  RunsAnalysis = '/runs/analysis',
-  RunsAnalysisDeatils = '/runs/analysis/:id',
-  RunsAnalysisDeatilsTable = '/runs/analysis/:id/table',
-  RunsAnalysisDeatilsDiagram = '/runs/analysis/:id/diagram',
-  RunsAnalysisDeatilsReport = '/runs/analysis/:id/report',
-  // Runs Library
-  RunsLibrary = '/runs/library',
-  // Runs Workflow
-  RunsWorkflow = '/runs/workflow',
+  // Runs = '/runs',
+  // // Runs Sequence
+  // RunsSequence = '/runs/sequence',
+  // RunsSequenceDeatils = '/runs/sequence/:id',
+  // RunsSequenceDeatilsTable = '/runs/sequence/:id/table',
+  // RunsSequenceDeatilsDiagram = '/runs/sequence/:id/diagram',
+  // RunsSequenceDeatilsReport = '/runs/sequence/:id/report',
+  // // Runs Analysis
+  // RunsAnalysis = '/runs/analysis',
+  // RunsAnalysisDeatils = '/runs/analysis/:id',
+  // RunsAnalysisDeatilsTable = '/runs/analysis/:id/table',
+  // RunsAnalysisDeatilsDiagram = '/runs/analysis/:id/diagram',
+  // RunsAnalysisDeatilsReport = '/runs/analysis/:id/report',
+  // // Runs Library
+  // RunsLibrary = '/runs/library',
+  // // Runs Workflow
+  // RunsWorkflow = '/runs/workflow',
+
+  //sequence
+  Sequence = '/sequence',
+  SequenceDetails = '/sequence/:instrumentRunId',
+  SequenceDetailsDetails = '/sequence/:instrumentRunId/details',
+  SequenceDetailsSampleSheet = '/sequence/:instrumentRunId/sampleSheet',
+  SequenceDetailsWorkflowRuns = '/sequence/:instrumentRunId/workflowRuns',
+
+  //workflows
+  Workflows = '/workflows',
+  WorkflowsAnalysis = '/workflows/analysis',
+  WorkflowsAnalysisDetails = '/workflows/analysis/:orcabusId',
+  WorkflowsAnalysisWorkflowRuns = '/workflows/analysis/:analysis_orcabusId/:orcabusId',
 
   // Files
   Files = '/files',
