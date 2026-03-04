@@ -33,7 +33,11 @@ export default function SyncPage() {
 
           {syncType && (
             <div className='mt-6 border-t border-gray-200 pt-6 dark:border-gray-700'>
-              <DetailedErrorBoundary>
+              <DetailedErrorBoundary
+                onCloseError={() => {
+                  setQueryParams({}, true);
+                }}
+              >
                 {syncType === 'gsheet' ? (
                   <GsheetTrigger />
                 ) : syncType === 'presigned-csv' ? (
