@@ -151,7 +151,7 @@ const GsheetRecordPreview = () => {
     mutate: syncRecords,
     reset: resetSync,
   } = useMutationSyncGsheet({
-    body: { year, ranges },
+    body: { year, ranges: sanitizeRanges(ranges) },
   });
 
   useEffect(() => {
