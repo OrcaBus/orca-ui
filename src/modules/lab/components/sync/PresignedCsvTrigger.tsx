@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { Button } from '@/components/common/buttons';
 import { SpinnerWithText } from '@/components/common/spinner';
 import { ArrowPathIcon } from '@heroicons/react/20/solid';
@@ -31,7 +31,7 @@ export const PresignedCsvTrigger = () => {
           reset();
         }}
       >
-        {data}
+        {data as ReactNode}
       </SuccessTriggerWrapper>
     );
   }
