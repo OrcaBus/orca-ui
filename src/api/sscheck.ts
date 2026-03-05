@@ -1,29 +1,44 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import createClient from 'openapi-fetch';
-import { useMutation } from '@tanstack/react-query';
-import { authMiddleware } from './utils';
 import config from '@/config';
+import type { UseMutationResult } from '@tanstack/react-query';
+import { ApiClient, createPostMutationHook } from './utils';
 
-interface path {
-  '/': any;
+/** Minimal paths type for sscheck (no OpenAPI codegen for this service) */
+interface SsCheckPaths {
+  '/': {
+    post: {
+      parameters: { query?: never; header?: never; path?: never; cookie?: never };
+      requestBody?: { content: { 'application/json': unknown } };
+      responses: { 200: { content: { 'application/json': unknown } } };
+    };
+  };
 }
 
-const client = createClient<path>({ baseUrl: config.apiEndpoint.sscheck });
-client.use(authMiddleware);
+/** Response type for sscheck validation (matches backend) */
+export interface ValidationResponse {
+  check_status: string;
+  error_message?: string;
+  log_file: string;
+  v2_sample_sheet?: string;
+}
 
-export function usePostSSCheck({ params, body }: { params?: any; body: any }) {
-  return useMutation({
-    mutationFn: async () => {
-      const { data, error, response } = await client.POST('/', { params, body });
+const sscheckApi = new ApiClient<SsCheckPaths>({
+  baseUrl: config.apiEndpoint.sscheck,
+});
 
-      if (error) {
-        if (typeof error === 'object') {
-          throw new Error(JSON.stringify(error));
-        }
-        throw new Error(response.statusText);
-      }
-
-      return data;
-    },
+export function usePostSSCheck({
+  params,
+  body,
+  reactQuery,
+}: {
+  params?: Record<string, unknown>;
+  body: Record<string, unknown> | FormData;
+  reactQuery?: { onSuccess?: () => void; onError?: (error: Error) => void };
+}): UseMutationResult<ValidationResponse, Error, void> {
+  const hook = createPostMutationHook(sscheckApi, '/');
+  const result = hook({
+    params,
+    body: body as Record<string, unknown>,
+    reactQuery,
   });
+  return result as UseMutationResult<ValidationResponse, Error, void>;
 }
