@@ -7,6 +7,9 @@ import { SpinnerWithText } from '@/components/common/spinner';
 const WorkflowsPage = lazy(() => import('@/modules/workflows/pages/WorkflowsPage'));
 const WorkflowRunsPage = lazy(() => import('@/modules/workflows/pages/WorkflowRunsPage'));
 const WorkflowRunsDetailsPage = lazy(() => import('@/modules/workflows/pages/WorkflowRunsDetails'));
+const WorkflowRunPortalRedirect = lazy(
+  () => import('@/modules/workflows/pages/WorkflowRunPortalRedirect')
+);
 const AnalysisRunsPage = lazy(() => import('@/modules/workflows/pages/AnalysisRunsPage'));
 const AnalysisRunsDetailsPage = lazy(() => import('@/modules/workflows/pages/AnalysisRunsDetails'));
 const AnalysisTypesPage = lazy(() => import('@/modules/workflows/pages/AnalysisTypesPage'));
@@ -30,6 +33,10 @@ export const Router: RouteObject = {
         { path: 'workflowTypes', children: [{ path: '', element: <WorkflowTypesPage /> }] },
         { path: 'analysisTypes', children: [{ path: '', element: <AnalysisTypesPage /> }] },
       ],
+    },
+    {
+      path: 'workflowRuns/portal/:portalRunId',
+      element: <WorkflowRunPortalRedirect />,
     },
     { path: 'workflowRuns/:orcabusId', element: <WorkflowRunsDetailsPage /> },
     { path: 'analysisRuns/:orcabusId', element: <AnalysisRunsDetailsPage /> },
