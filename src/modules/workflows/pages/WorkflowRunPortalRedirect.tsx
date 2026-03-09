@@ -16,8 +16,9 @@ const WorkflowRunPortalRedirect = () => {
     params: {
       query: {
         page: 1,
-        rowsPerPage: 1,
+        rowsPerPage: 100,
         portal_run_id: portalRunId ?? undefined,
+        order_by: '-timestamp', // latest first; when multiple matches, we show the first (latest)
       },
     },
     reactQuery: {
@@ -51,7 +52,19 @@ const WorkflowRunPortalRedirect = () => {
     );
   }
 
-  const run = data.results[0];
+  const results = data.results;
+  const run = results[0];
+
+  if (results.length > 1) {
+    console.warn(
+      `[WorkflowRunPortalRedirect] Multiple workflow runs found for Portal Run ID: ${portalRunId}. Showing latest run (orcabusId: ${run?.orcabusId}).`
+    );
+    console.log(
+      '[WorkflowRunPortalRedirect] Multiple runs:',
+      results.map((r) => ({ orcabusId: r.orcabusId, timestamp: r.currentState?.timestamp }))
+    );
+  }
+
   const orcabusId = run?.orcabusId;
   if (!orcabusId) {
     return (
