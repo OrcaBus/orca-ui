@@ -1,5 +1,5 @@
 import config from '@/config';
-import type { paths } from './types/file';
+import type { paths, components } from './types/file';
 import {
   ApiClient,
   createQueryHook,
@@ -11,22 +11,17 @@ const fileApi = new ApiClient<paths>({
   baseUrl: config.apiEndpoint.file,
 });
 
-const s3Path = '/api/v1/s3';
-export type S3Record =
-  paths[typeof s3Path]['get']['responses']['200']['content']['application/json']['results'][number];
+export type S3Record = components['schemas']['ListResponse_S3']['results'][number];
 
-const s3PresignObjIdPath = '/api/v1/s3/presign/{id}';
-const s3PresignIdListPath = '/api/v1/s3/presign';
-
-export const useQueryFileObject = createQueryHook(fileApi, s3Path);
+export const useQueryFileObject = createQueryHook(fileApi, '/api/v1/s3');
 
 export const usePresignedFileObjectId = createConditionalSuspenseQueryHook(
   fileApi,
-  s3PresignObjIdPath
+  '/api/v1/s3/presign/{id}'
 );
 
-export const useQueryPresignedFileObjectId = createQueryHook(fileApi, s3PresignObjIdPath);
+export const useQueryPresignedFileObjectId = createQueryHook(fileApi, '/api/v1/s3/presign/{id}');
 
-export const usePresignedFileList = createSuspenseQueryHook(fileApi, s3PresignIdListPath);
+export const usePresignedFileList = createSuspenseQueryHook(fileApi, '/api/v1/s3/presign');
 
-export const useQueryPresignedFileList = createQueryHook(fileApi, s3PresignIdListPath);
+export const useQueryPresignedFileList = createQueryHook(fileApi, '/api/v1/s3/presign');

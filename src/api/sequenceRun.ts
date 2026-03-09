@@ -17,13 +17,17 @@ const sequenceRunApi = new ApiClient<paths>({
   getPath: (path) => getVersionedPath(path, apiVersion),
 });
 
+// export component types for consumers
 export type SequenceRunModel = components['schemas']['SequenceRun'];
 
+// sequence run list
 export const useSequenceRunListModel = createQueryHook(sequenceRunApi, '/api/v1/sequence_run/');
 export const useSequenceRunListByInstrumentRunIdModel = createQueryHook(
   sequenceRunApi,
   '/api/v1/sequence_run/list_by_instrument_run_id/'
 );
+
+// sequence run detail
 export const useSequenceRunDetailModel = createQueryHook(
   sequenceRunApi,
   '/api/v1/sequence_run/{orcabusId}/'

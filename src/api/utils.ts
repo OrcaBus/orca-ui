@@ -135,7 +135,7 @@ export type UseMutationOptions<T> = {
     query?: Record<string, unknown>;
   };
   headers?: Record<string, string>;
-  body?: Record<string, unknown>;
+  body?: Record<string, unknown> | FormData;
 };
 
 // --- Hook factories: use ApiClient + path; call client GET/POST/etc. and assertOk with signal ---
@@ -256,7 +256,11 @@ export function createPostMutationHook<
       mutationFn: async () => {
         const { data, error, response } = await (
           client.POST as (url: keyof Paths, init?: object) => ReturnType<typeof client.POST>
-        )(resolvedPath as keyof Paths, { params, body: body as Record<string, unknown>, headers });
+        )(resolvedPath as keyof Paths, {
+          params,
+          body,
+          headers,
+        });
         return assertOk(data, error, response);
       },
     });
@@ -277,7 +281,11 @@ export function createPatchMutationHook<
       mutationFn: async () => {
         const { data, error, response } = await (
           client.PATCH as (url: keyof Paths, init?: object) => ReturnType<typeof client.PATCH>
-        )(resolvedPath as keyof Paths, { params, body: body as Record<string, unknown>, headers });
+        )(resolvedPath as keyof Paths, {
+          params,
+          body,
+          headers,
+        });
         return assertOk(data, error, response);
       },
     });
@@ -298,7 +306,11 @@ export function createDeleteMutationHook<
       mutationFn: async () => {
         const { data, error, response } = await (
           client.DELETE as (url: keyof Paths, init?: object) => ReturnType<typeof client.DELETE>
-        )(resolvedPath as keyof Paths, { params, body: body as Record<string, unknown>, headers });
+        )(resolvedPath as keyof Paths, {
+          params,
+          body,
+          headers,
+        });
         return assertOk(data, error, response);
       },
     });
