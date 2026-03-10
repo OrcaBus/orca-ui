@@ -6,7 +6,7 @@ import { SpinnerWithText } from '@/components/common/spinner';
  * Resolves a portal run ID (used by external users) to the internal orcabusId
  * and redirects to the workflow run details page.
  *
- * External users should link to: /workflows/workflowRuns/portal/:portalRunId
+ * External users should link to: /workflows/workflowRuns/prid/:portalRunId
  * This page fetches the run by portalRunId and redirects to /workflows/workflowRuns/:orcabusId
  */
 const WorkflowRunPortalRedirect = () => {

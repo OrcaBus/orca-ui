@@ -35,7 +35,7 @@ export const Router: RouteObject = {
       ],
     },
     {
-      path: 'workflowRuns/portal/:portalRunId',
+      path: 'workflowRuns/prid/:portalRunId',
       element: <WorkflowRunPortalRedirect />,
     },
     { path: 'workflowRuns/:orcabusId', element: <WorkflowRunsDetailsPage /> },
