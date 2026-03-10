@@ -127,7 +127,7 @@ const WorkflowRunsDetailsHeader = () => {
   } = useWorkflowRunCommentCreateModel({
     params: { path: { orcabusId: orcabusId as string } },
     body: {
-      comment: comment,
+      text: comment,
       createdBy: user?.email,
     },
   });

@@ -317,7 +317,7 @@ const WorkflowRunsTimeline = () => {
       },
     },
     body: {
-      comment: comment,
+      text: comment,
       createdBy: user?.email,
     },
     reactQuery: {
