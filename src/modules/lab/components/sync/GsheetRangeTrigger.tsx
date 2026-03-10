@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, ReactNode } from 'react';
 import { Button } from '@/components/common/buttons';
 import { SpinnerWithText } from '@/components/common/spinner';
 import { useMutationPreviewGsheetRecords, useMutationSyncGsheet } from '@/api/metadata';
@@ -216,7 +216,7 @@ const GsheetRecordPreview = () => {
         content={
           <SuccessTriggerWrapper onClose={cancel}>
             <div className='text-center'>
-              <p className='text-sm text-gray-700 dark:text-gray-300'>{syncData}</p>
+              <p className='text-sm text-gray-700 dark:text-gray-300'>{syncData as ReactNode}</p>
             </div>
           </SuccessTriggerWrapper>
         }
@@ -233,8 +233,9 @@ const GsheetRecordPreview = () => {
     syncRecords();
   };
 
-  const hasData = previewData.columns?.length && previewData.values?.length;
-  const recordCount = previewData.values?.length || 0;
+  const preview = previewData as { columns: string[]; values: string[][] } | undefined;
+  const hasData = preview?.columns?.length && preview?.values?.length;
+  const recordCount = preview?.values?.length || 0;
 
   return (
     <Dialog
@@ -247,8 +248,8 @@ const GsheetRecordPreview = () => {
           : 'No data available to sync.'
       }
       content={
-        hasData ? (
-          <GsheetPreviewTable columns={previewData.columns} values={previewData.values} />
+        hasData && preview ? (
+          <GsheetPreviewTable columns={preview.columns} values={preview.values} />
         ) : (
           <div className='rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-center dark:border-yellow-800 dark:bg-yellow-900/20'>
             <p className='text-sm text-yellow-800 dark:text-yellow-200'>
