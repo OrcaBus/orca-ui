@@ -213,7 +213,7 @@ const SequenceRunDetailsTimeline: FC<SequenceRunDetailsTimelineProps> = ({
   }, [selectedSequenceRunComment]);
 
   const timelineData = [...SequenceRunStateTimelineData, ...SequenceRunCommentTimelineData].sort(
-    (a, b) => (dayjs(a.datetime).isBefore(dayjs(b.datetime)) ? -1 : 1)
+    (a, b) => (dayjs(a.datetime).isAfter(dayjs(b.datetime)) ? -1 : 1)
   );
 
   const {
