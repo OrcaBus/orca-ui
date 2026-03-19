@@ -363,9 +363,6 @@ const WorkflowRunsTimeline = () => {
         commentOrcabusId: commentId as string,
       },
     },
-    body: {
-      createdBy: user?.email,
-    },
   });
 
   const handleDeleteComment = () => {

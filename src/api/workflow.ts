@@ -7,6 +7,7 @@ import {
   createSuspenseQueryHook,
   createPostMutationHook,
   createPatchMutationHook,
+  createDeleteMutationHook,
   type PathsWithPatch,
 } from './utils';
 import { env } from '@/utils/commonUtils';
@@ -33,6 +34,7 @@ export type ListWorkflowModel = operations['workflowList']['parameters']['query'
 export type ListWorkflowRunModel = operations['workflowrunList']['parameters']['query'];
 export type ListAnalysisRunModel = operations['analysisrunList']['parameters']['query'];
 export type ListAnalysisModel = operations['analysisList']['parameters']['query'];
+export type DatasetEnum = components['schemas']['DatasetEnum'];
 
 // workflow model
 export const useWorkflowModel = createQueryHook(workflowApi, '/api/v1/workflow/');
@@ -71,9 +73,9 @@ export const useWorkflowRunCommentUpdateModel = createPatchMutationHook(
   workflowApi,
   '/api/v1/workflowrun/{orcabusId}/comment/{commentOrcabusId}/'
 );
-export const useWorkflowRunCommentDeleteModel = createPostMutationHook(
+export const useWorkflowRunCommentDeleteModel = createDeleteMutationHook(
   workflowApi,
-  '/api/v1/workflowrun/{orcabusId}/comment/{commentOrcabusId}/soft_delete/'
+  '/api/v1/workflowrun/{orcabusId}/comment/{commentOrcabusId}/'
 );
 
 // workflow run state creation model
@@ -118,9 +120,9 @@ export const useAnalysisRunCommentUpdateModel = createPatchMutationHook(
   workflowApi,
   '/api/v1/analysisrun/{orcabusId}/comment/{commentOrcabusId}/'
 );
-export const useAnalysisRunCommentDeleteModel = createPostMutationHook(
+export const useAnalysisRunCommentDeleteModel = createDeleteMutationHook(
   workflowApi,
-  '/api/v1/analysisrun/{orcabusId}/comment/{commentOrcabusId}/soft_delete/'
+  '/api/v1/analysisrun/{orcabusId}/comment/{commentOrcabusId}/'
 );
 
 // analysis model

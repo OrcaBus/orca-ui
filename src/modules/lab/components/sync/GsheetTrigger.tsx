@@ -13,7 +13,7 @@ export const GsheetTrigger = () => {
   const [yearSelected, setYearSelected] = useState(currentYear);
 
   const { data, isPending, isError, isSuccess, error, mutate, reset } = useMutationSyncGsheet({
-    body: { year: yearSelected },
+    body: { year: yearSelected.toString() },
   });
 
   if (isPending) {

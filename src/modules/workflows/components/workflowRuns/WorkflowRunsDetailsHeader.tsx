@@ -4,6 +4,7 @@ import {
   useWorkflowRunRerunModel,
   useWorkflowRunStateCreateModel,
   useWorkflowRunCommentCreateModel,
+  DatasetEnum,
 } from '@/api/workflow';
 import Skeleton from 'react-loading-skeleton';
 import toaster from '@/components/common/toaster';
@@ -54,7 +55,7 @@ const WorkflowRunsDetailsHeader = () => {
   } = useWorkflowRunRerunModel({
     params: { path: { orcabusId: orcabusId as string } },
     body: {
-      dataset: selectedDataset,
+      dataset: selectedDataset as DatasetEnum,
     },
     reactQuery: {
       enabled: !!orcabusId,
@@ -128,7 +129,7 @@ const WorkflowRunsDetailsHeader = () => {
     params: { path: { orcabusId: orcabusId as string } },
     body: {
       text: comment,
-      createdBy: user?.email,
+      createdBy: user?.email as string,
     },
   });
 
@@ -166,9 +167,8 @@ const WorkflowRunsDetailsHeader = () => {
   } = useWorkflowRunStateCreateModel({
     params: { path: { orcabusId: orcabusId as string } },
     body: {
-      status: stateStatus,
+      status: stateStatus as string,
       comment: stateComment,
-      createdBy: user?.email,
     },
   });
 
@@ -218,7 +218,7 @@ const WorkflowRunsDetailsHeader = () => {
       setRefreshWorkflowRuns(true);
     }
     if (isErrorRerunWorkflow) {
-      toaster.error({ title: 'Error rerunning workflow', message: rerunWorkflowError?.message });
+      toaster.error({ title: 'Error rerunning workflow' });
       startTransition(() => {
         setIsOpenRerunWorkflowDialog(false);
         setSelectedDataset(null);

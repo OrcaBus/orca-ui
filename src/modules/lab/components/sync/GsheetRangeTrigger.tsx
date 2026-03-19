@@ -139,7 +139,7 @@ const GsheetRecordPreview = () => {
     error: previewError,
     mutate: fetchPreview,
   } = useMutationPreviewGsheetRecords({
-    body: { year, ranges: sanitizeRanges(ranges) },
+    body: { year: year.toString(), ranges: sanitizeRanges(ranges) },
   });
 
   const {
@@ -151,7 +151,7 @@ const GsheetRecordPreview = () => {
     mutate: syncRecords,
     reset: resetSync,
   } = useMutationSyncGsheet({
-    body: { year, ranges: sanitizeRanges(ranges) },
+    body: { year: year.toString(), ranges: sanitizeRanges(ranges) },
   });
 
   useEffect(() => {

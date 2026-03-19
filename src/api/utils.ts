@@ -1,318 +1,298 @@
 import { fetchAuthSession } from 'aws-amplify/auth';
-import createClient from 'openapi-fetch';
-import type { ParamsOption, RequestBodyOption, Middleware } from 'openapi-fetch';
-import { useSuspenseQuery, useQuery, useMutation } from '@tanstack/react-query';
+import createFetchClient, {
+  type Middleware,
+  type FetchResponse,
+  type MaybeOptionalInit,
+} from 'openapi-fetch';
+import createClient from 'openapi-react-query';
+import type {
+  QueryClient,
+  UseQueryOptions,
+  UseQueryResult,
+  UseSuspenseQueryOptions,
+  UseSuspenseQueryResult,
+  UseMutationOptions,
+  UseMutationResult,
+} from '@tanstack/react-query';
 
-/** OpenAPI paths type from codegen (e.g. paths from ./types/workflow). Use object so interface types are accepted. */
-export type PathsRecord = object;
+/* ---------------------------------- */
+/* Base types                         */
+/* ---------------------------------- */
 
-/** Path type helpers (paths that have get/post/patch/delete) */
-export type PathsWithGet<Paths> = {
-  [K in keyof Paths]: Paths[K] extends { get: unknown } ? K : never;
-}[keyof Paths];
+// Matches the `Paths extends {}` constraint used by openapi-fetch / openapi-react-query.
+// `Record<string, …>` would require an index signature that codegen'd `interface paths` lacks.
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export type PathsRecord = {};
 
-export type PathsWithPost<Paths> = {
-  [K in keyof Paths]: Paths[K] extends { post: unknown } ? K : never;
-}[keyof Paths];
+type PathsWithMethod<
+  Paths extends PathsRecord,
+  Method extends 'get' | 'post' | 'patch' | 'delete',
+> = {
+  [K in keyof Paths]: Paths[K] extends Record<Method, unknown> ? K : never;
+}[keyof Paths] &
+  string;
 
-export type PathsWithPatch<Paths> = {
-  [K in keyof Paths]: Paths[K] extends { patch: unknown } ? K : never;
-}[keyof Paths];
+export type PathsWithGet<Paths extends PathsRecord> = PathsWithMethod<Paths, 'get'>;
+export type PathsWithPost<Paths extends PathsRecord> = PathsWithMethod<Paths, 'post'>;
+export type PathsWithPatch<Paths extends PathsRecord> = PathsWithMethod<Paths, 'patch'>;
+export type PathsWithDelete<Paths extends PathsRecord> = PathsWithMethod<Paths, 'delete'>;
 
-export type PathsWithDelete<Paths> = {
-  [K in keyof Paths]: Paths[K] extends { delete: unknown } ? K : never;
-}[keyof Paths];
+/* ---------------------------------- */
+/* Internal type helpers              */
+/* ---------------------------------- */
 
-/** Operation type for a path key (safe when Paths extends object) */
-type PathGetOp<Paths, K> = K extends keyof Paths
-  ? Paths[K] extends { get: infer G }
-    ? G
-    : never
-  : never;
-type PathPostOp<Paths, K> = K extends keyof Paths
-  ? Paths[K] extends { post: infer G }
-    ? G
-    : never
-  : never;
-type PathPatchOp<Paths, K> = K extends keyof Paths
-  ? Paths[K] extends { patch: infer G }
-    ? G
-    : never
-  : never;
-type PathDeleteOp<Paths, K> = K extends keyof Paths
-  ? Paths[K] extends { delete: infer G }
-    ? G
-    : never
-  : never;
+type MediaType = `${string}/${string}`;
 
-/** Unified error handling: throw on error, return data on success */
-export function assertOk<T>(data: T | undefined, error: unknown, response: Response): T {
-  if (error) {
-    if (typeof error === 'object') {
-      throw new Error(JSON.stringify(error));
+// Intersection ensures TS can prove the method key exists on the path item,
+// even through the indirection of PathsWithMethod mapped types.
+type Ensure<P, M extends string> = P & Record<M, Record<string | number, unknown>>;
+type OpOf<P, M extends string> = Ensure<P, M>[M];
+type InitOf<P, M extends string> = MaybeOptionalInit<Ensure<P, M>, M>;
+type RespOf<P, M extends string> = Required<FetchResponse<OpOf<P, M>, InitOf<P, M>, MediaType>>;
+
+// Allows extra query params (DRF filter lookups like `workflow__orcabus_id`)
+// and extra top-level keys on the init object.
+type LooseInit = Record<string, unknown> & { params?: { query?: Record<string, unknown> } };
+
+// Common React Query options accepted by `reactQuery` on all hooks.
+// TanStack's full option types are difficult to infer through the generic
+// plumbing, so we surface the most-used options explicitly here and
+// forward everything else via `Opts` (the inferred query/mutation options).
+type ReactQueryExtras = {
+  enabled?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  placeholderData?: any;
+};
+
+// Build the single-argument type for hooks:
+//   { ...fetchInit, reactQuery?: TanStackOptions }
+// Init is optional when the endpoint has no required params/body.
+type HookArg<I, Opts> = undefined extends I
+  ? (Exclude<I, undefined> & LooseInit & { reactQuery?: Opts & ReactQueryExtras }) | undefined
+  : I & LooseInit & { reactQuery?: Opts & ReactQueryExtras };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyFn = (...args: any[]) => any;
+
+// Mutation result where variables are optional (pre-bound via baseInit at hook-call time).
+type BoundMutationResult<D, E, V, C = unknown> = Omit<
+  UseMutationResult<D, E, V, C>,
+  'mutate' | 'mutateAsync'
+> & {
+  mutate: (variables?: V, options?: Parameters<UseMutationResult<D, E, V, C>['mutate']>[1]) => void;
+  mutateAsync: (
+    variables?: V,
+    options?: Parameters<UseMutationResult<D, E, V, C>['mutateAsync']>[1]
+  ) => Promise<D>;
+};
+
+/* ---------------------------------- */
+/* Shared Cognito middleware          */
+/* ---------------------------------- */
+
+export const authMiddleware: Middleware = {
+  async onRequest({ request }) {
+    const idToken = (await fetchAuthSession()).tokens?.idToken?.toString();
+    if (idToken) {
+      request.headers.set('Authorization', `Bearer ${idToken}`);
     }
-    throw new Error(response.statusText);
-  }
-  return data as T;
-}
+    return request;
+  },
+};
 
-/**
- * Build a versioned path (e.g. /api/v1/... -> /api/v2/...) for common usage across workflow, sequenceRun, etc.
- * @param path - OpenAPI path string (e.g. '/api/v1/workflow/')
- * @param apiVersion - Optional version segment (e.g. 'v2'). If falsy, returns path unchanged.
- */
+/* ---------------------------------- */
+/* Utilities                          */
+/* ---------------------------------- */
+
 export function getVersionedPath<K extends string>(path: K, apiVersion?: string): K {
   if (!apiVersion) return path;
   return path.replace('/api/v1/', `/api/${apiVersion}/`) as K;
 }
 
-export const authMiddleware: Middleware = {
-  async onRequest({ request }) {
-    const accessToken = (await fetchAuthSession()).tokens?.idToken?.toString();
-    request.headers.set('Authorization', `Bearer ${accessToken}`);
-    return request;
-  },
-};
+export function assertOk<T>(data: T | undefined, error: unknown, response: Response): T {
+  if (error || !response.ok) {
+    throw error ?? new Error(`Request failed: ${response.status}`);
+  }
+  return data as T;
+}
 
-/**
- * Unified API client over OpenAPI paths. Holds the openapi-fetch client and optional path transform.
- * Hook factories use getClient() + resolvePath() and assertOk for requests (no get/post/patch/delete on the class).
- */
+/* ---------------------------------- */
+/* Service client                     */
+/* ---------------------------------- */
+
 export class ApiClient<Paths extends PathsRecord> {
-  private client: ReturnType<typeof createClient<Paths>>;
-  private pathTransform: <K extends keyof Paths>(path: K) => K;
+  readonly fetch: ReturnType<typeof createFetchClient<Paths>>;
+  readonly rq: ReturnType<typeof createClient<Paths>>;
+  private pathTransform: <K extends keyof Paths & string>(path: K) => K;
 
   constructor(config: {
     baseUrl: string;
-    /** Optional path transformer (e.g. for API versioning). Defaults to identity. */
-    getPath?: <K extends keyof Paths>(path: K) => K;
+    getPath?: <K extends keyof Paths & string>(path: K) => K;
   }) {
-    this.client = createClient<Paths>({ baseUrl: config.baseUrl });
-    this.client.use(authMiddleware);
-    this.pathTransform = (config.getPath ?? ((p) => p)) as <K extends keyof Paths>(path: K) => K;
+    this.fetch = createFetchClient<Paths>({ baseUrl: config.baseUrl });
+    this.fetch.use(authMiddleware);
+    this.rq = createClient(this.fetch);
+    this.pathTransform = config.getPath ?? ((p) => p);
   }
 
-  /** Resolved path used for requests (use in queryKey for cache consistency). */
-  resolvePath<K extends keyof Paths>(path: K): K {
+  resolvePath<K extends keyof Paths & string>(path: K): K {
     return this.pathTransform(path);
   }
 
-  /** Raw client for hook factories to call GET/POST/PATCH/DELETE and apply assertOk + signal. */
-  getClient(): ReturnType<typeof createClient<Paths>> {
-    return this.client;
+  getClient() {
+    return this.fetch;
   }
 }
 
-// --- Option types for hooks ---
+/* ---------------------------------- */
+/* Query hook factories               */
+/* ---------------------------------- */
 
-export type UseQueryOptions<T> = RequestBodyOption<T> & {
-  reactQuery?: {
-    enabled?: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    placeholderData?: any;
-  };
-  params: Omit<ParamsOption<T>['params'], 'query'> & {
-    query?: Record<string, unknown>;
-  };
-  headers?: Record<string, string>;
-};
+/**
+ * Creates a typed `useQuery` hook pre-bound to a GET endpoint.
+ *
+ * Accepts a single argument `{ params, reactQuery? }` matching the
+ * convention used across the codebase.  Extra query-param keys are
+ * allowed for DRF filter lookups (`workflow__orcabus_id`, etc.).
+ */
+export function createQueryHook<
+  Paths extends PathsRecord,
+  Path extends PathsWithMethod<Paths, 'get'>,
+>(api: ApiClient<Paths>, path: Path) {
+  const resolved = api.resolvePath(path);
 
-export type UseSuspenseQueryOptions<T> = RequestBodyOption<T> & {
-  reactQuery?: Record<string, unknown>;
-  params: Omit<ParamsOption<T>['params'], 'query'> & {
-    query?: Record<string, unknown>;
-  };
-  headers?: Record<string, string>;
-};
+  type I = InitOf<Paths[Path], 'get'>;
+  type R = RespOf<Paths[Path], 'get'>;
+  type Opts = Omit<UseQueryOptions<R['data'], R['error']>, 'queryKey' | 'queryFn'>;
 
-export type ConditionalUseSuspenseQueryOptions<T> = UseSuspenseQueryOptions<T> & {
-  enabled: boolean;
-};
-
-export type UseMutationOptions<T> = {
-  reactQuery?: Record<string, unknown>;
-  params?: Omit<ParamsOption<T>['params'], 'query'> & {
-    query?: Record<string, unknown>;
-  };
-  headers?: Record<string, string>;
-  body?: Record<string, unknown> | FormData;
-};
-
-// --- Hook factories: use ApiClient + path; call client GET/POST/etc. and assertOk with signal ---
-
-type GetResponseType<GetOp> = GetOp extends {
-  responses: { 200: { content: { 'application/json': infer T } } };
-}
-  ? T
-  : never;
-
-export function createQueryHook<Paths extends PathsRecord, Path extends PathsWithGet<Paths>>(
-  api: ApiClient<Paths>,
-  path: Path
-) {
-  type GetOp = PathGetOp<Paths, Path>;
-  type R = GetResponseType<GetOp>;
-  const resolvedPath = api.resolvePath(path);
-  const client = api.getClient();
-
-  return function (
-    options: Omit<UseQueryOptions<GetOp>, 'queryKey' | 'queryFn'> & { signal?: AbortSignal }
-  ) {
-    return useQuery<R, Error, R, [Path, typeof options.params]>({
-      ...options.reactQuery,
-      queryKey: [resolvedPath, options.params],
-      queryFn: async ({ signal }) => {
-        const usedSignal = options.signal ?? signal;
-        const { data, error, response } = await (
-          client.GET as (url: keyof Paths, init?: object) => ReturnType<typeof client.GET>
-        )(resolvedPath as keyof Paths, {
-          params: options.params,
-          signal: usedSignal,
-          headers: options.headers,
-        });
-        return assertOk(data, error, response) as R;
-      },
-    });
+  return (arg?: HookArg<I, Opts>): UseQueryResult<R['data'], R['error']> => {
+    if (!arg) return (api.rq.useQuery as AnyFn)('get', resolved);
+    const { reactQuery, ...init } = arg as Record<string, unknown>;
+    return (api.rq.useQuery as AnyFn)('get', resolved, init, reactQuery);
   };
 }
 
 export function createSuspenseQueryHook<
   Paths extends PathsRecord,
-  Path extends PathsWithGet<Paths>,
+  Path extends PathsWithMethod<Paths, 'get'>,
 >(api: ApiClient<Paths>, path: Path) {
-  type GetOp = PathGetOp<Paths, Path>;
-  type R = GetResponseType<GetOp>;
-  const resolvedPath = api.resolvePath(path);
-  const client = api.getClient();
+  const resolved = api.resolvePath(path);
 
-  return function (
-    options: Omit<UseSuspenseQueryOptions<GetOp>, 'queryKey' | 'queryFn'> & {
-      signal?: AbortSignal;
-    }
-  ) {
-    return useSuspenseQuery<R, Error, R, [Path, typeof options.params]>({
-      ...options.reactQuery,
-      queryKey: [resolvedPath, options.params],
-      queryFn: async ({ signal }) => {
-        const usedSignal = options.signal ?? signal;
-        const { data, error, response } = await (
-          client.GET as (url: keyof Paths, init?: object) => ReturnType<typeof client.GET>
-        )(resolvedPath as keyof Paths, {
-          params: options.params,
-          signal: usedSignal,
-          headers: options.headers,
-        });
-        return assertOk(data, error, response) as R;
-      },
-    });
+  type I = InitOf<Paths[Path], 'get'>;
+  type R = RespOf<Paths[Path], 'get'>;
+  type Opts = Omit<UseSuspenseQueryOptions<R['data'], R['error']>, 'queryKey' | 'queryFn'>;
+
+  return (arg?: HookArg<I, Opts>): UseSuspenseQueryResult<R['data'], R['error']> => {
+    if (!arg) return (api.rq.useSuspenseQuery as AnyFn)('get', resolved);
+    const { reactQuery, ...init } = arg as Record<string, unknown>;
+    return (api.rq.useSuspenseQuery as AnyFn)('get', resolved, init, reactQuery);
   };
 }
 
-/** Suspense query hook that supports enabled: when false, queryFn returns null without fetching. */
-export function createConditionalSuspenseQueryHook<
+/** useQuery-based hook that supports `enabled` for conditional fetching */
+export const createConditionalSuspenseQueryHook = createQueryHook;
+
+/* ---------------------------------- */
+/* Query model factory                */
+/* ---------------------------------- */
+
+export function createQueryModel<
   Paths extends PathsRecord,
-  Path extends PathsWithGet<Paths>,
+  Path extends PathsWithMethod<Paths, 'get'>,
 >(api: ApiClient<Paths>, path: Path) {
-  type GetOp = PathGetOp<Paths, Path>;
-  type R = GetResponseType<GetOp>;
-  const resolvedPath = api.resolvePath(path);
-  const client = api.getClient();
+  const resolved = api.resolvePath(path);
 
-  return function (
-    options: Omit<ConditionalUseSuspenseQueryOptions<GetOp>, 'queryKey' | 'queryFn'> & {
-      signal?: AbortSignal;
-    }
-  ) {
-    return useSuspenseQuery<R | null, Error, R | null, [Path, typeof options.params]>({
-      ...options.reactQuery,
-      queryKey: [resolvedPath, options.params],
-      queryFn: async ({ signal }) => {
-        if (!options.enabled) return null;
-        const usedSignal = options.signal ?? signal;
-        const { data, error, response } = await (
-          client.GET as (url: keyof Paths, init?: object) => ReturnType<typeof client.GET>
-        )(resolvedPath as keyof Paths, {
-          params: options.params,
-          signal: usedSignal,
-          headers: options.headers,
-        });
-        return assertOk(data, error, response) as R;
-      },
-    });
+  type I = InitOf<Paths[Path], 'get'>;
+  type InitArg = undefined extends I
+    ? (Exclude<I, undefined> & LooseInit) | undefined
+    : I & LooseInit;
+
+  return {
+    path: resolved,
+
+    queryOptions(arg?: InitArg): ReturnType<typeof api.rq.queryOptions> {
+      return (api.rq.queryOptions as AnyFn)('get', resolved, arg);
+    },
+
+    useQuery: createQueryHook(api, path),
+    useSuspenseQuery: createSuspenseQueryHook(api, path),
+
+    prefetch(queryClient: QueryClient, arg?: InitArg): Promise<void> {
+      return queryClient.prefetchQuery((api.rq.queryOptions as AnyFn)('get', resolved, arg));
+    },
+  } satisfies {
+    path: Path;
+    queryOptions: AnyFn;
+    useQuery: AnyFn;
+    useSuspenseQuery: AnyFn;
+    prefetch: AnyFn;
   };
 }
 
-export function createPostMutationHook<
+/* ---------------------------------- */
+/* Mutation hook factories            */
+/* ---------------------------------- */
+
+/**
+ * Creates a typed `useMutation` hook pre-bound to a mutating endpoint.
+ *
+ * Accepts a single argument `{ params?, body?, reactQuery? }`.
+ * If `params`/`body` are provided at hook-call time they become the
+ * default variables for `mutate()` — callers can override by passing
+ * new variables directly to `mutate(newInit)`.
+ */
+export function createMutationHook<
   Paths extends PathsRecord,
-  Path extends PathsWithPost<Paths>,
->(api: ApiClient<Paths>, path: Path) {
-  const resolvedPath = api.resolvePath(path);
-  const client = api.getClient();
+  Method extends 'post' | 'patch' | 'delete',
+  Path extends PathsWithMethod<Paths, Method>,
+>(api: ApiClient<Paths>, method: Method, path: Path) {
+  const resolved = api.resolvePath(path);
 
-  return function (options: UseMutationOptions<PathPostOp<Paths, Path>>) {
-    const { params, body, reactQuery, headers } = options;
-    return useMutation({
-      ...reactQuery,
-      mutationFn: async () => {
-        const { data, error, response } = await (
-          client.POST as (url: keyof Paths, init?: object) => ReturnType<typeof client.POST>
-        )(resolvedPath as keyof Paths, {
-          params,
-          body,
-          headers,
-        });
-        return assertOk(data, error, response);
-      },
-    });
+  type I = InitOf<Paths[Path], Method>;
+  type R = RespOf<Paths[Path], Method>;
+  type MutOpts = Omit<UseMutationOptions<R['data'], R['error'], I>, 'mutationKey' | 'mutationFn'>;
+
+  return (arg?: HookArg<I, MutOpts>): BoundMutationResult<R['data'], R['error'], I> => {
+    const { reactQuery, ...baseInit } = (arg ?? {}) as Record<string, unknown>;
+    const mutation = (api.rq.useMutation as AnyFn)(
+      method,
+      resolved,
+      reactQuery
+    ) as UseMutationResult<R['data'], R['error'], I>;
+
+    const hasBaseInit = Object.keys(baseInit).length > 0;
+    if (!hasBaseInit) return mutation as BoundMutationResult<R['data'], R['error'], I>;
+
+    return {
+      ...mutation,
+      mutate: (runtimeInit?: I, opts?: Parameters<typeof mutation.mutate>[1]) =>
+        mutation.mutate((runtimeInit ?? baseInit) as I, opts),
+      mutateAsync: (runtimeInit?: I, opts?: Parameters<typeof mutation.mutateAsync>[1]) =>
+        mutation.mutateAsync((runtimeInit ?? baseInit) as I, opts),
+    };
   };
 }
 
-export function createPatchMutationHook<
+export const createPostMutationHook = <
   Paths extends PathsRecord,
-  Path extends PathsWithPatch<Paths>,
->(api: ApiClient<Paths>, path: Path) {
-  const resolvedPath = api.resolvePath(path);
-  const client = api.getClient();
+  Path extends PathsWithMethod<Paths, 'post'>,
+>(
+  api: ApiClient<Paths>,
+  path: Path
+) => createMutationHook(api, 'post', path);
 
-  return function (options: UseMutationOptions<PathPatchOp<Paths, Path>>) {
-    const { params, body, reactQuery, headers } = options;
-    return useMutation({
-      ...reactQuery,
-      mutationFn: async () => {
-        const { data, error, response } = await (
-          client.PATCH as (url: keyof Paths, init?: object) => ReturnType<typeof client.PATCH>
-        )(resolvedPath as keyof Paths, {
-          params,
-          body,
-          headers,
-        });
-        return assertOk(data, error, response);
-      },
-    });
-  };
-}
-
-export function createDeleteMutationHook<
+export const createPatchMutationHook = <
   Paths extends PathsRecord,
-  Path extends PathsWithDelete<Paths>,
->(api: ApiClient<Paths>, path: Path) {
-  const resolvedPath = api.resolvePath(path);
-  const client = api.getClient();
+  Path extends PathsWithMethod<Paths, 'patch'>,
+>(
+  api: ApiClient<Paths>,
+  path: Path
+) => createMutationHook(api, 'patch', path);
 
-  return function (options: UseMutationOptions<PathDeleteOp<Paths, Path>>) {
-    const { params, body, reactQuery, headers } = options;
-    return useMutation({
-      ...reactQuery,
-      mutationFn: async () => {
-        const { data, error, response } = await (
-          client.DELETE as (url: keyof Paths, init?: object) => ReturnType<typeof client.DELETE>
-        )(resolvedPath as keyof Paths, {
-          params,
-          body,
-          headers,
-        });
-        return assertOk(data, error, response);
-      },
-    });
-  };
-}
+export const createDeleteMutationHook = <
+  Paths extends PathsRecord,
+  Path extends PathsWithMethod<Paths, 'delete'>,
+>(
+  api: ApiClient<Paths>,
+  path: Path
+) => createMutationHook(api, 'delete', path);

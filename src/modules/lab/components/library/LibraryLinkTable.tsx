@@ -32,7 +32,7 @@ export const IndividualLibraryTable = ({ individualIdArray }: { individualIdArra
   const libraryModel = useQueryMetadataLibraryModel({
     params: {
       query: {
-        individualId: individualIdArray,
+        individualId: individualIdArray.join(',') as string,
         rowsPerPage: DEFAULT_NON_PAGINATE_PAGE_SIZE,
       },
     },

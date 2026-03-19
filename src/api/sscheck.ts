@@ -1,6 +1,6 @@
 import config from '@/config';
-import type { UseMutationResult } from '@tanstack/react-query';
-import { ApiClient, createPostMutationHook } from './utils';
+import { useMutation, type UseMutationResult } from '@tanstack/react-query';
+import { ApiClient, assertOk } from './utils';
 
 /** Minimal paths type for sscheck (no OpenAPI codegen for this service) */
 interface SsCheckPaths {
@@ -26,19 +26,20 @@ const sscheckApi = new ApiClient<SsCheckPaths>({
 });
 
 export function usePostSSCheck({
-  params,
   body,
   reactQuery,
 }: {
-  params?: Record<string, unknown>;
   body: Record<string, unknown> | FormData;
   reactQuery?: { onSuccess?: () => void; onError?: (error: Error) => void };
 }): UseMutationResult<ValidationResponse, Error, void> {
-  const hook = createPostMutationHook(sscheckApi, '/');
-  const result = hook({
-    params,
-    body: body as Record<string, unknown>,
-    reactQuery,
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async () => {
+      const { data, error, response } = await (sscheckApi.getClient().POST as CallableFunction)(
+        sscheckApi.resolvePath('/'),
+        { body }
+      );
+      return assertOk(data, error, response) as ValidationResponse;
+    },
   });
-  return result as UseMutationResult<ValidationResponse, Error, void>;
 }
