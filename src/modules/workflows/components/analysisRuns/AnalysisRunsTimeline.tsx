@@ -191,10 +191,6 @@ const AnalysisRunsTimeline = () => {
         commentOrcabusId: commentId as string,
       },
     },
-    body: {
-      text: '',
-      createdBy: user?.email ?? '',
-    },
   });
 
   const handleDeleteComment = () => {

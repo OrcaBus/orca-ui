@@ -61,5 +61,5 @@ export type UseMutationOptions<T> = {
     query?: Record<string, unknown>;
   };
   headers?: Record<string, string>;
-  body: Record<string, unknown>;
+  body?: Record<string, unknown>;
 };
