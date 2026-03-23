@@ -131,7 +131,7 @@ export function createWorkflowPatchMutationHook<K extends keyof paths>(path: K) 
 }
 
 export function createWorkflowDeleteMutationHook<K extends keyof paths>(path: K) {
-  return function ({ params, reactQuery, body }: UseMutationOptions<paths[typeof path]['delete']>) {
+  return function ({ params, reactQuery }: UseMutationOptions<paths[typeof path]['delete']>) {
     const versionedPath = getVersionedPath(path);
     return useMutation({
       ...reactQuery,
@@ -139,7 +139,6 @@ export function createWorkflowDeleteMutationHook<K extends keyof paths>(path: K)
         // @ts-expect-error: params is dynamic type type for openapi-fetch
         const { data, error, response } = await client.DELETE(versionedPath, {
           params,
-          body: body,
         });
         if (error) {
           if (typeof error === 'object') {
@@ -193,8 +192,8 @@ export const useWorkflowRunCommentUpdateModel = createWorkflowPatchMutationHook(
   '/api/v1/workflowrun/{orcabusId}/comment/{commentOrcabusId}/'
 );
 
-export const useWorkflowRunCommentDeleteModel = createWorkflowPostMutationHook(
-  '/api/v1/workflowrun/{orcabusId}/comment/{commentOrcabusId}/soft_delete/'
+export const useWorkflowRunCommentDeleteModel = createWorkflowDeleteMutationHook(
+  '/api/v1/workflowrun/{orcabusId}/comment/{commentOrcabusId}/'
 );
 
 // workflow run state creation
@@ -229,8 +228,8 @@ export const useAnalysisRunCommentCreateModel = createWorkflowPostMutationHook(
 export const useAnalysisRunCommentUpdateModel = createWorkflowPatchMutationHook(
   '/api/v1/analysisrun/{orcabusId}/comment/{commentOrcabusId}/'
 );
-export const useAnalysisRunCommentDeleteModel = createWorkflowPostMutationHook(
-  '/api/v1/analysisrun/{orcabusId}/comment/{commentOrcabusId}/soft_delete/'
+export const useAnalysisRunCommentDeleteModel = createWorkflowDeleteMutationHook(
+  '/api/v1/analysisrun/{orcabusId}/comment/{commentOrcabusId}/'
 );
 
 // analysis
