@@ -62,7 +62,7 @@ export const useSequenceRunCommentUpdateModel = createPatchMutationHook(
 );
 export const useSequenceRunCommentDeleteModel = createDeleteMutationHook(
   sequenceRunApi,
-  '/api/v1/sequence_run/{orcabusId}/comment/{id}/soft_delete/'
+  '/api/v1/sequence_run/{orcabusId}/comment/{id}/'
 );
 
 // status count
@@ -100,5 +100,5 @@ export const useSequenceRunSampleSheetsByInstrumentRunIdModel = createQueryHook(
 );
 export const useSequenceRunStateValidMapModel = createQueryHook(
   sequenceRunApi,
-  '/api/v1/sequence/{instrumentRunId}/valid_states_map/'
+  '/api/v1/sequence/{instrumentRunId}/get_states_transition_validation_map/'
 );
