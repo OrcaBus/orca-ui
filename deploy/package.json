@@ -10,22 +10,22 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@types/node": "25.0.3",
+    "@types/node": "25.5.0",
     "@types/regenerator-runtime": "^0.13.8",
-    "aws-cdk": "^2.1100.2",
-    "esbuild": "^0.27.2",
-    "jest": "^30.2.0",
+    "aws-cdk": "^2.1113.0",
+    "esbuild": "^0.27.4",
+    "jest": "^30.3.0",
     "regenerator-runtime": "^0.14.1",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.3"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.962.0",
-    "@aws-sdk/lib-storage": "^3.962.0",
-    "aws-cdk-lib": "^2.233.0",
+    "@aws-sdk/client-s3": "^3.1017.0",
+    "@aws-sdk/lib-storage": "^3.1017.0",
+    "aws-cdk-lib": "^2.244.0",
     "cdk-nag": "^2.37.55",
-    "constructs": "^10.4.4",
+    "constructs": "^10.6.0",
     "source-map-support": "^0.5.21"
   }
 }
