@@ -85,3 +85,33 @@ To test cdk resources in compliance with `cdk-nag`
 ```sh
 yarn test
 ```
+
+To list all stacks, run:
+
+```sh
+yarn cdk ls
+```
+
+Example output:
+
+```sh
+
+OrcaUIPipeline
+OrcaUIPipeline/OrcaUIBeta/ApplicationStack (OrcaUIBeta-ApplicationStack)
+OrcaUIPipeline/OrcaUIGamma/ApplicationStack (OrcaUIGamma-ApplicationStack)
+OrcaUIPipeline/OrcaUIProd/ApplicationStack (OrcaUIProd-ApplicationStack)
+```
+
+To build the CICD pipeline for UI infrasture
+
+```sh
+yarn cdk deploy -e OrcaUIPipeline
+```
+
+To build (test) in the dev account
+
+```sh
+yarn cdk synth -e OrcaUIPipeline/OrcaUIBeta/ApplicationStack
+yarn cdk diff -e OrcaUIPipeline/OrcaUIBeta/ApplicationStack
+yarn cdk deploy -e OrcaUIPipeline/OrcaUIBeta/ApplicationStack
+```
