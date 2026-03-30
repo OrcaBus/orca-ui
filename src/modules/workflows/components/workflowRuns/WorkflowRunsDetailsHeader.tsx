@@ -55,6 +55,7 @@ const WorkflowRunsDetailsHeader = () => {
   } = useWorkflowRunRerunModel({
     params: { path: { orcabusId: orcabusId as string } },
     body: {
+      allowDuplication: false,
       dataset: selectedDataset as DatasetEnum,
     },
     reactQuery: {
