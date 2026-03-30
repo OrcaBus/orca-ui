@@ -102,7 +102,7 @@ OrcaUIPipeline/OrcaUIGamma/ApplicationStack (OrcaUIGamma-ApplicationStack)
 OrcaUIPipeline/OrcaUIProd/ApplicationStack (OrcaUIProd-ApplicationStack)
 ```
 
-To build the CICD pipeline for UI infrasture
+To build the CI/CD pipeline for UI infrastructure
 
 ```sh
 yarn cdk deploy -e OrcaUIPipeline

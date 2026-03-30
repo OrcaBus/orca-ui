@@ -111,14 +111,22 @@ def handler(event, context):
             }
         )
 
+        success_msg = f"env.js uploaded to {bucket_name}"
+        if v2_bucket_name:
+            success_msg += f" and v2/env.js uploaded to {v2_bucket_name}"
+        success_msg += f", and CloudFront cache invalidated for {cloudfront_distribution_id}"
         return {
             'statusCode': 200,
-            'body': f" env.js uploaded to {bucket_name} and {v2_bucket_name}, and CloudFront cache invalidated for {cloudfront_distribution_id}"
+            'body': success_msg
         }
     except Exception as e:
         # Log the error and return a failure response
         logger.error(f"Error: {e}")
+        failure_msg = f"Failed to upload env.js to {bucket_name}"
+        if v2_bucket_name:
+            failure_msg += f" (and v2/env.js to {v2_bucket_name})"
+        failure_msg += f". {e}"
         return {
             'statusCode': 500,
-            'body': f"Failed to upload env.js to {bucket_name} and {v2_bucket_name}. {e}"
+            'body': failure_msg
         }
