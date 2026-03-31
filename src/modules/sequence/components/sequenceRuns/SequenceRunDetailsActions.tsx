@@ -72,7 +72,7 @@ const SequenceRunDetailsActions = () => {
     params: { path: { orcabusId: selectedSequenceRunOrcabusId as string } },
     body: {
       comment: comment,
-      createdBy: user?.email as string,
+      createdBy: user?.email ?? '',
     },
   });
 
@@ -115,12 +115,13 @@ const SequenceRunDetailsActions = () => {
   } = useSequenceRunStateCreateModel({
     params: { path: { orcabusId: selectedSequenceRunOrcabusId as string } },
     body: {
-      status: stateStatus as string,
+      status: stateStatus ?? '',
       comment: stateComment,
     },
   });
 
   const handleStateCreationEvent = () => {
+    if (!stateStatus) return;
     createSequenceRunState();
     setIsOpenAddStateDialog(false);
   };

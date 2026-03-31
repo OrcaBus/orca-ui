@@ -111,7 +111,28 @@ export function getVersionedPath<K extends string>(path: K, apiVersion?: string)
 
 export function assertOk<T>(data: T | undefined, error: unknown, response: Response): T {
   if (error || !response.ok) {
-    throw error ?? new Error(`Request failed: ${response.status}`);
+    let toThrow: Error;
+
+    if (error == null) {
+      const statusText = response.statusText ? ` ${response.statusText}` : '';
+      toThrow = new Error(`Request failed: ${response.status}${statusText}`);
+    } else if (error instanceof Error) {
+      toThrow = error;
+    } else {
+      let message: string;
+      if (typeof error === 'string') {
+        message = error;
+      } else {
+        try {
+          message = JSON.stringify(error);
+        } catch {
+          message = String(error);
+        }
+      }
+      toThrow = new Error(message);
+    }
+
+    throw toThrow;
   }
   return data as T;
 }
@@ -189,8 +210,39 @@ export function createSuspenseQueryHook<
   };
 }
 
-/** useQuery-based hook that supports `enabled` for conditional fetching */
-export const createConditionalSuspenseQueryHook = createQueryHook;
+/**
+ * useQuery-based hook that supports top-level `enabled` for conditional fetching.
+ *
+ * Callers may pass `enabled` at the top level:
+ *   useThing({ params, enabled: false })
+ *
+ * This will be translated into `reactQuery.enabled` and will **not** be forwarded
+ * into the OpenAPI fetch init object.
+ */
+export function createConditionalSuspenseQueryHook<
+  Paths extends PathsRecord,
+  Path extends PathsWithMethod<Paths, 'get'>,
+>(api: ApiClient<Paths>, path: Path) {
+  const resolved = api.resolvePath(path);
+
+  type I = InitOf<Paths[Path], 'get'>;
+  type R = RespOf<Paths[Path], 'get'>;
+  type Opts = Omit<UseQueryOptions<R['data'], R['error']>, 'queryKey' | 'queryFn'>;
+
+  return (
+    arg?: HookArg<I, Opts> & { enabled?: boolean },
+  ): UseQueryResult<R['data'], R['error']> => {
+    if (!arg) return (api.rq.useQuery as AnyFn)('get', resolved);
+
+    const { reactQuery, enabled, ...init } = arg as Record<string, unknown>;
+    const reactQueryWithEnabled =
+      enabled === undefined
+        ? (reactQuery as unknown)
+        : { ...(reactQuery as Record<string, unknown> | undefined), enabled };
+
+    return (api.rq.useQuery as AnyFn)('get', resolved, init, reactQueryWithEnabled);
+  };
+}
 
 /* ---------------------------------- */
 /* Query model factory                */

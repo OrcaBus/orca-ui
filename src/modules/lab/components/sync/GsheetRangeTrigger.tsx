@@ -1,4 +1,4 @@
-import { useEffect, useState, ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/common/buttons';
 import { SpinnerWithText } from '@/components/common/spinner';
 import { useMutationPreviewGsheetRecords, useMutationSyncGsheet } from '@/api/metadata';
@@ -216,7 +216,9 @@ const GsheetRecordPreview = () => {
         content={
           <SuccessTriggerWrapper onClose={cancel}>
             <div className='text-center'>
-              <p className='text-sm text-gray-700 dark:text-gray-300'>{syncData as ReactNode}</p>
+              <p className='text-sm text-gray-700 dark:text-gray-300'>
+                {typeof syncData === 'string' ? syncData : JSON.stringify(syncData)}
+              </p>
             </div>
           </SuccessTriggerWrapper>
         }

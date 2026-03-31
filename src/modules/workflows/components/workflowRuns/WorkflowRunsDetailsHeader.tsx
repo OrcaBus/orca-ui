@@ -130,7 +130,7 @@ const WorkflowRunsDetailsHeader = () => {
     params: { path: { orcabusId: orcabusId as string } },
     body: {
       text: comment,
-      createdBy: user?.email as string,
+      createdBy: user?.email ?? '',
     },
   });
 
@@ -168,12 +168,13 @@ const WorkflowRunsDetailsHeader = () => {
   } = useWorkflowRunStateCreateModel({
     params: { path: { orcabusId: orcabusId as string } },
     body: {
-      status: stateStatus as string,
+      status: stateStatus ?? '',
       comment: stateComment,
     },
   });
 
   const handleStateCreationEvent = () => {
+    if (!stateStatus) return;
     createWorkflowRunState();
     setIsOpenAddStateDialog(false);
   };

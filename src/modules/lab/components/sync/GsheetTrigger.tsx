@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/common/buttons';
 import { SpinnerWithText } from '@/components/common/spinner';
 import { ArrowPathIcon } from '@heroicons/react/20/solid';
@@ -32,7 +32,7 @@ export const GsheetTrigger = () => {
           reset();
         }}
       >
-        {data as ReactNode}
+        {typeof data === 'string' ? data : JSON.stringify(data)}
       </SuccessTriggerWrapper>
     );
   }

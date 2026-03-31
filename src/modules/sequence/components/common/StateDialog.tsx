@@ -159,7 +159,9 @@ const StatesDialog: FC<StatesDialogProps> = ({
       confirmBtn={{
         label: isOpenAddStateDialog ? 'Add State' : 'Update State',
         onClick: isOpenAddStateDialog ? handleStateCreationEvent : handleUpdateState,
-        disabled: validStatesToCreate && validStatesToCreate.length == 0,
+        disabled:
+          isOpenAddStateDialog &&
+          (!selectedState || (validStatesToCreate !== undefined && validStatesToCreate.length === 0)),
       }}
     ></Dialog>
   );
