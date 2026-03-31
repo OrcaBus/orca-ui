@@ -120,8 +120,11 @@ def handler(event, context):
             'body': success_msg
         }
     except Exception as e:
-        # Log the error and return a failure response
-        logger.error(f"Error: {e}")
+        # Log the error and return a failure response (exception includes traceback in CloudWatch)
+        logger.exception(
+            "Failed during env.js upload or CloudFront invalidation for bucket %s",
+            bucket_name,
+        )
         failure_msg = f"Failed to upload env.js to {bucket_name}"
         if v2_bucket_name:
             failure_msg += f" (and v2/env.js to {v2_bucket_name})"
