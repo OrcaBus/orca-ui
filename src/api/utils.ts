@@ -230,7 +230,7 @@ export function createConditionalSuspenseQueryHook<
   type Opts = Omit<UseQueryOptions<R['data'], R['error']>, 'queryKey' | 'queryFn'>;
 
   return (
-    arg?: HookArg<I, Opts> & { enabled?: boolean },
+    arg?: HookArg<I, Opts> & { enabled?: boolean }
   ): UseQueryResult<R['data'], R['error']> => {
     if (!arg) return (api.rq.useQuery as AnyFn)('get', resolved);
 

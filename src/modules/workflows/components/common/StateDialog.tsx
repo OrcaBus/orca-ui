@@ -161,7 +161,8 @@ const StatesDialog: FC<StatesDialogProps> = ({
         onClick: isOpenAddStateDialog ? handleStateCreationEvent : handleUpdateState,
         disabled:
           isOpenAddStateDialog &&
-          (!selectedState || (validStatesToCreate !== undefined && validStatesToCreate.length === 0)),
+          (!selectedState ||
+            (validStatesToCreate !== undefined && validStatesToCreate.length === 0)),
       }}
     ></Dialog>
   );

@@ -89,7 +89,12 @@ const SequenceRunSampleSheet = () => {
     error: errorUploadSequenceRunSampleSheet,
     reset: resetUploadSequenceRunSampleSheet,
   } = useSequenceRunAddSampleSheetModel({
-    body: formData as FormData,
+    body: formData as unknown as {
+      file: string;
+      instrumentRunId: string;
+      createdBy: string;
+      comment: string;
+    },
   });
 
   useEffect(() => {
