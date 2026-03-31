@@ -1,6 +1,6 @@
 import { App, Aspects, Stack } from 'aws-cdk-lib';
 import { Annotations, Match } from 'aws-cdk-lib/assertions';
-import { SynthesisMessage } from 'aws-cdk-lib/cx-api';
+import { SynthesisMessage } from '@aws-cdk/cloud-assembly-api';
 import { AwsSolutionsChecks, NagSuppressions } from 'cdk-nag';
 import { PipelineStack } from '../lib/pipeline-stack';
 
