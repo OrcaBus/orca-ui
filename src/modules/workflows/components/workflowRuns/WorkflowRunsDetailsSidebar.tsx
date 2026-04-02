@@ -24,6 +24,10 @@ const WorkflowRunsDetailsSidebar = () => {
                 key: 'executionId',
                 value: workflowRunDetail.executionId || '-',
               },
+              {
+                key: 'comment',
+                value: workflowRunDetail.comment || '-',
+              },
             ],
             workflowDetails: [
               {
