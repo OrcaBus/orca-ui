@@ -22,6 +22,12 @@ export const cloudFrontBucketNameConfig: Record<AppStage, string> = {
   [AppStage.PROD]: 'orcaui-cloudfront-472057503814',
 };
 
+export const v2CloudFrontBucketNameConfig: Record<AppStage, string | undefined> = {
+  [AppStage.BETA]: 'orcaui-v2-cloudfront-843407916570',
+  [AppStage.GAMMA]: undefined,
+  [AppStage.PROD]: undefined,
+};
+
 export const configLambdaNameConfig: Record<AppStage, string> = {
   [AppStage.BETA]: 'CodeBuildEnvConfigLambdaBeta',
   [AppStage.GAMMA]: 'CodeBuildEnvConfigLambdaGamma',
@@ -33,6 +39,7 @@ export const getAppStackConfig = (appStage: AppStage): ApplicationStackProps => 
     case AppStage.BETA:
       return {
         cloudFrontBucketName: cloudFrontBucketNameConfig[appStage],
+        v2CloudFrontBucketName: v2CloudFrontBucketNameConfig[appStage],
         configLambdaName: configLambdaNameConfig[appStage],
         aliasDomainName: ['orcaui.dev.umccr.org', 'portal.dev.umccr.org'],
         reactBuildEnvVariables: {

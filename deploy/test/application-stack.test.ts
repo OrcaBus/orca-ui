@@ -1,6 +1,6 @@
 import { App, Aspects, Stack } from 'aws-cdk-lib';
-import { Annotations, Match } from 'aws-cdk-lib/assertions';
-import { SynthesisMessage } from 'aws-cdk-lib/cx-api';
+import { Annotations, Match, Template } from 'aws-cdk-lib/assertions';
+import { SynthesisMessage } from '@aws-cdk/cloud-assembly-api';
 import { AwsSolutionsChecks, NagSuppressions } from 'cdk-nag';
 import { ApplicationStack } from '../lib/application-stack';
 import { AppStage, getAppStackConfig } from '../config';
@@ -41,6 +41,53 @@ describe('cdk-nag-stack', () => {
       .findWarning('*', Match.stringLikeRegexp('AwsSolutions-.*'))
       .map(synthesisMessageToString);
     expect(warnings).toHaveLength(0);
+  });
+});
+
+describe('beta-stack-v2-behavior', () => {
+  const app: App = new App({});
+
+  const stack = new ApplicationStack(app, 'BetaApplicationStack', {
+    env: {
+      account: '843407916570',
+      region: 'ap-southeast-2',
+    },
+    tags: {
+      'umccr-org:Product': 'OrcaUI',
+      'umccr-org:Creator': 'CDK',
+    },
+    ...getAppStackConfig(AppStage.BETA),
+  });
+
+  test('synthesizes with /v2/* CloudFront behavior', () => {
+    const template = Template.fromStack(stack);
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: Match.objectLike({
+        CacheBehaviors: Match.arrayWith([
+          Match.objectLike({
+            PathPattern: '/v2/*',
+          }),
+        ]),
+      }),
+    });
+  });
+
+  test('synthesizes v2 S3 bucket', () => {
+    const template = Template.fromStack(stack);
+    template.hasResourceProperties('AWS::S3::Bucket', {
+      BucketName: 'orcaui-v2-cloudfront-843407916570',
+    });
+  });
+
+  test('Lambda has V2_BUCKET_NAME environment variable set', () => {
+    const template = Template.fromStack(stack);
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Environment: Match.objectLike({
+        Variables: Match.objectLike({
+          V2_BUCKET_NAME: 'orcaui-v2-cloudfront-843407916570',
+        }),
+      }),
+    });
   });
 });
 
@@ -105,17 +152,6 @@ function applyNagSuppression(stackId: string, stack: Stack) {
           {
             id: 'AwsSolutions-CFR3',
             reason: 'No access logs required for now',
-          },
-        ]
-      );
-
-      NagSuppressions.addResourceSuppressionsByPath(
-        stack,
-        `/ApplicationStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource`,
-        [
-          {
-            id: 'AwsSolutions-IAM5',
-            reason: 'Allow to use the default log group retention policy',
           },
         ]
       );
