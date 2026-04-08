@@ -155,8 +155,6 @@ const SequenceRunListTable = () => {
         // Encode the URL parameters properly
         const filesParams = new URLSearchParams([
           ['key', `*${instrumentRunId}_multiqc_report.html`],
-          ['keyOp', 'or'],
-          ['bucketOp', 'or'],
         ]);
 
         const vaultParams = new URLSearchParams({
