@@ -153,7 +153,6 @@ const SequenceRunTable = () => {
         // Encode the URL parameters properly
         const filesParams = new URLSearchParams([
           ['key', `*${instrumentRunId}_multiqc_report.html`],
-          ['key', `*${instrumentRunId}_*_qlims.csv`],
           ['keyOp', 'or'],
           ['bucketOp', 'or'],
         ]);
