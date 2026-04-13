@@ -26,7 +26,7 @@ const DetailedErrorBoundary = ({ children, errorTitle, onCloseError }: ErrorBoun
         </div>
         <div className='rounded-md bg-red-50 p-4 dark:bg-red-900/10'>
           <pre className='font-mono text-sm break-words whitespace-pre-wrap text-red-600 dark:text-red-400'>
-            {error.message}
+            {error instanceof Error ? error.message : String(error as Error)}
           </pre>
         </div>
       </div>

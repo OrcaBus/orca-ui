@@ -265,9 +265,6 @@ const SequenceRunDetailsTimeline: FC<SequenceRunDetailsTimelineProps> = ({
     reset: resetDeleteSequenceRunComment,
   } = useSequenceRunCommentDeleteModel({
     params: { path: { orcabusId: sequenceRunOrcabusId as string, id: commentId as string } },
-    body: {
-      createdBy: user?.email,
-    },
   });
 
   const handleDeleteComment = () => {

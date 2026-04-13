@@ -32,9 +32,12 @@ export const IndividualLibraryTable = ({ individualIdArray }: { individualIdArra
   const libraryModel = useQueryMetadataLibraryModel({
     params: {
       query: {
-        individualId: individualIdArray,
+        ...(individualIdArray.length > 0 && { individualId: individualIdArray.join(',') }),
         rowsPerPage: DEFAULT_NON_PAGINATE_PAGE_SIZE,
       },
+    },
+    reactQuery: {
+      enabled: individualIdArray.length > 0,
     },
   });
   const libraryData = libraryModel.data;

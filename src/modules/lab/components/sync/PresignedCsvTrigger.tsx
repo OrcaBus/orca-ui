@@ -31,7 +31,7 @@ export const PresignedCsvTrigger = () => {
           reset();
         }}
       >
-        {data}
+        {String(data)}
       </SuccessTriggerWrapper>
     );
   }

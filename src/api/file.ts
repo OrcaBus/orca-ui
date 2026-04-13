@@ -1,158 +1,27 @@
 import config from '@/config';
-import createClient from 'openapi-fetch';
-import type { paths } from './types/file';
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import type { paths, components } from './types/file';
 import {
-  authMiddleware,
-  ConditionalUseSuspenseQueryOptions,
-  UseSuspenseQueryOptions,
+  ApiClient,
+  createQueryHook,
+  createSuspenseQueryHook,
+  createConditionalSuspenseQueryHook,
 } from './utils';
 
-const client = createClient<paths>({
+const fileApi = new ApiClient<paths>({
   baseUrl: config.apiEndpoint.file,
 });
-client.use(authMiddleware);
 
-type UseQueryOptions<T> = UseSuspenseQueryOptions<T> & {
-  reactQuery?: {
-    enabled?: boolean;
-  };
-};
+export type S3Record = components['schemas']['ListResponse_S3']['results'][number];
 
-const s3Path = '/api/v1/s3';
-export type S3Record =
-  paths[typeof s3Path]['get']['responses']['200']['content']['application/json']['results'][number];
-export function useQueryFileObject({
-  params,
-  reactQuery,
-}: UseSuspenseQueryOptions<paths[typeof s3Path]['get']>) {
-  return useQuery({
-    ...reactQuery,
-    queryKey: ['GET', s3Path, params],
-    queryFn: async ({ signal }) => {
-      const { data, error, response } = await client.GET(s3Path, {
-        params,
-        signal, // allows React Query to cancel request
-      });
-      if (error) {
-        if (typeof error === 'object') {
-          throw new Error(JSON.stringify(error));
-        }
-        throw new Error((response as Response).statusText);
-      }
+export const useQueryFileObject = createQueryHook(fileApi, '/api/v1/s3');
 
-      return data;
-    },
-  });
-}
+export const usePresignedFileObjectId = createConditionalSuspenseQueryHook(
+  fileApi,
+  '/api/v1/s3/presign/{id}'
+);
 
-const s3PresignObjIdPath = '/api/v1/s3/presign/{id}';
-export function usePresignedFileObjectId({
-  params,
-  reactQuery,
-  headers,
-  enabled,
-}: ConditionalUseSuspenseQueryOptions<paths[typeof s3PresignObjIdPath]['get']>) {
-  return useSuspenseQuery({
-    ...reactQuery,
-    queryKey: ['GET', s3PresignObjIdPath, params],
-    queryFn: async ({ signal }) => {
-      if (!enabled) {
-        return null;
-      }
+export const useQueryPresignedFileObjectId = createQueryHook(fileApi, '/api/v1/s3/presign/{id}');
 
-      const { data, error, response } = await client.GET(s3PresignObjIdPath, {
-        params,
-        signal, // allows React Query to cancel request
-        headers: {
-          ...headers,
-        },
-      });
-      if (error) {
-        if (typeof error === 'object') {
-          throw new Error(JSON.stringify(error));
-        }
-        throw new Error((response as Response).statusText);
-      }
+export const usePresignedFileList = createSuspenseQueryHook(fileApi, '/api/v1/s3/presign');
 
-      return data;
-    },
-    staleTime: 300,
-  });
-}
-
-export function useQueryPresignedFileObjectId({
-  params,
-  reactQuery,
-}: UseQueryOptions<paths[typeof s3PresignObjIdPath]['get']>) {
-  return useQuery({
-    ...reactQuery,
-    queryKey: ['GET', s3PresignObjIdPath, params],
-    queryFn: async ({ signal }) => {
-      const { data, error, response } = await client.GET(s3PresignObjIdPath, {
-        params,
-        signal, // allows React Query to cancel request
-      });
-      if (error) {
-        if (typeof error === 'object') {
-          throw new Error(JSON.stringify(error));
-        }
-        throw new Error((response as Response).statusText);
-      }
-
-      return data;
-    },
-    staleTime: 300,
-  });
-}
-
-const s3PresignIdListPath = '/api/v1/s3/presign';
-export function usePresignedFileList({
-  params,
-  reactQuery,
-}: UseSuspenseQueryOptions<paths[typeof s3PresignIdListPath]['get']>) {
-  return useSuspenseQuery({
-    ...reactQuery,
-    queryKey: ['GET', s3PresignIdListPath, params],
-    queryFn: async ({ signal }) => {
-      const { data, error, response } = await client.GET(s3PresignIdListPath, {
-        params,
-        signal, // allows React Query to cancel request
-      });
-      if (error) {
-        if (typeof error === 'object') {
-          throw new Error(JSON.stringify(error));
-        }
-        throw new Error((response as Response).statusText);
-      }
-
-      return data;
-    },
-    staleTime: 300,
-  });
-}
-
-export function useQueryPresignedFileList({
-  params,
-  reactQuery,
-}: UseQueryOptions<paths[typeof s3PresignIdListPath]['get']>) {
-  return useQuery({
-    ...reactQuery,
-    queryKey: ['GET', s3PresignIdListPath, params],
-    queryFn: async ({ signal }) => {
-      const { data, error, response } = await client.GET(s3PresignIdListPath, {
-        params,
-        signal, // allows React Query to cancel request
-      });
-      if (error) {
-        if (typeof error === 'object') {
-          throw new Error(JSON.stringify(error));
-        }
-        throw new Error((response as Response).statusText);
-      }
-
-      return data;
-    },
-    staleTime: 300,
-  });
-}
+export const useQueryPresignedFileList = createQueryHook(fileApi, '/api/v1/s3/presign');

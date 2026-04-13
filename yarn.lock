@@ -9404,6 +9404,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"openapi-react-query@npm:^0.5.4":
+  version: 0.5.4
+  resolution: "openapi-react-query@npm:0.5.4"
+  dependencies:
+    openapi-typescript-helpers: "npm:^0.1.0"
+  peerDependencies:
+    "@tanstack/react-query": ^5.80.0
+    openapi-fetch: ^0.17.0
+  checksum: 10c0/c893049d1246b35516acb70bc359917c3e55f373d6e85d6bab05e2fedf90aa763b890eb15cf3bbf1c5899a2e99d4277aaba94ce81a845c6716ff312952664d7a
+  languageName: node
+  linkType: hard
+
 "openapi-typescript-helpers@npm:^0.1.0":
   version: 0.1.0
   resolution: "openapi-typescript-helpers@npm:0.1.0"
@@ -9490,6 +9502,7 @@ __metadata:
     igv: "npm:^3.8.0"
     mime-db: "npm:^1.54.0"
     openapi-fetch: "npm:^0.17.0"
+    openapi-react-query: "npm:^0.5.4"
     openapi-typescript: "npm:^7.13.0"
     pako: "npm:^2.1.0"
     papaparse: "npm:^5.5.3"
