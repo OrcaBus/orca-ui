@@ -10,7 +10,7 @@ import prettierOptions from './prettier.config.js'; // Import Prettier configura
 
 export default [
   {
-    ignores: ['dist/**/*'],
+    ignores: ['dist/**/*', 'deploy/lambda/*.js'],
   },
   { files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'] },
   {

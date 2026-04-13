@@ -6,6 +6,10 @@ import {
   PriceClass,
   SecurityPolicyProtocol,
   SSLMethod,
+  Function as CloudFrontFunction,
+  FunctionEventType,
+  FunctionCode,
+  FunctionRuntime,
 } from 'aws-cdk-lib/aws-cloudfront';
 import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
@@ -22,8 +26,10 @@ import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Function } from 'aws-cdk-lib/aws-lambda';
 import { TOOLCHAIN_ACCOUNT_ID } from '../config';
 import { Key } from 'aws-cdk-lib/aws-kms';
+
 export type ApplicationStackProps = {
   cloudFrontBucketName: string;
+  v2CloudFrontBucketName?: string;
   configLambdaName: string;
   aliasDomainName: string[];
   reactBuildEnvVariables: Record<string, string>;
@@ -43,7 +49,23 @@ export class ApplicationStack extends Stack {
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
     });
 
-    const distribution = this.setupS3CloudFrontIntegration(clientBucket, props.aliasDomainName);
+    const clientv2Bucket = props.v2CloudFrontBucketName
+      ? new Bucket(this, 'OrcaUIv2AssetCloudFrontBucket', {
+          bucketName: props.v2CloudFrontBucketName,
+          autoDeleteObjects: true,
+          enforceSSL: true,
+          removalPolicy: RemovalPolicy.DESTROY,
+          websiteIndexDocument: 'index.html',
+          websiteErrorDocument: 'index.html',
+          blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+        })
+      : undefined;
+
+    const distribution = this.setupS3CloudFrontIntegration(
+      clientBucket,
+      clientv2Bucket,
+      props.aliasDomainName
+    );
 
     /*
       Trigger CodeBuild pipeline to build and deploy the react app
@@ -69,6 +91,7 @@ export class ApplicationStack extends Stack {
       environment: {
         VITE_REGION: 'ap-southeast-2',
         BUCKET_NAME: clientBucket.bucketName,
+        V2_BUCKET_NAME: props.v2CloudFrontBucketName ?? '',
         CLOUDFRONT_DISTRIBUTION_ID: distribution.distributionId,
         ...props.reactBuildEnvVariables,
         VITE_COG_APP_CLIENT_ID: '/orcaui/cog_app_client_id_stage',
@@ -81,6 +104,9 @@ export class ApplicationStack extends Stack {
     });
 
     clientBucket.grantReadWrite(configLambda);
+    if (props.v2CloudFrontBucketName) {
+      clientv2Bucket!.grantReadWrite(configLambda);
+    }
     distribution.grantCreateInvalidation(configLambda);
     // Grant SSM read permissions to the Lambda function
     // Grant KMS decrypt permissions for secure string parameters
@@ -103,10 +129,20 @@ export class ApplicationStack extends Stack {
     */
     clientBucket.grantDelete(new AccountPrincipal(TOOLCHAIN_ACCOUNT_ID));
     clientBucket.grantReadWrite(new AccountPrincipal(TOOLCHAIN_ACCOUNT_ID));
+
+    if (props.v2CloudFrontBucketName) {
+      clientv2Bucket?.grantDelete(new AccountPrincipal(TOOLCHAIN_ACCOUNT_ID));
+      clientv2Bucket?.grantReadWrite(new AccountPrincipal(TOOLCHAIN_ACCOUNT_ID));
+    }
+
     configLambda.grantInvoke(new AccountPrincipal(TOOLCHAIN_ACCOUNT_ID));
   }
 
-  private setupS3CloudFrontIntegration(s3Bucket: IBucket, aliasDomainName: string[]): Distribution {
+  private setupS3CloudFrontIntegration(
+    s3Bucket: IBucket,
+    v2s3Bucket: IBucket | undefined,
+    aliasDomainName: string[]
+  ): Distribution {
     const hostedZoneName = StringParameter.valueForStringParameter(this, '/hosted_zone/umccr/name');
     const hostedZoneId = StringParameter.valueForStringParameter(this, '/hosted_zone/umccr/id');
 
@@ -122,21 +158,42 @@ export class ApplicationStack extends Stack {
       comment: 'orca-ui OAI',
     });
 
+    const spaRewriteFn = new CloudFrontFunction(this, 'SpaRewriteFn', {
+      runtime: FunctionRuntime.JS_2_0,
+      code: FunctionCode.fromFile({
+        filePath: path.join(__dirname, '../lambda/spa-rewrite.js'),
+      }),
+    });
+
     const cloudFrontDistribution = new Distribution(this, 'CloudFrontDistribution', {
       defaultBehavior: {
         origin: S3BucketOrigin.withOriginAccessIdentity(s3Bucket, {
           originAccessIdentity: cloudFrontOAI,
         }),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        functionAssociations: [
+          {
+            function: spaRewriteFn,
+            eventType: FunctionEventType.VIEWER_REQUEST,
+          },
+        ],
       },
-      errorResponses: [
-        {
-          httpStatus: 403,
-          responseHttpStatus: 200,
-          responsePagePath: '/index.html',
-          ttl: Duration.minutes(1),
-        },
-      ],
+      additionalBehaviors: v2s3Bucket
+        ? {
+            '/v2/*': {
+              origin: S3BucketOrigin.withOriginAccessIdentity(v2s3Bucket, {
+                originAccessIdentity: cloudFrontOAI,
+              }),
+              viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+              functionAssociations: [
+                {
+                  function: spaRewriteFn,
+                  eventType: FunctionEventType.VIEWER_REQUEST,
+                },
+              ],
+            },
+          }
+        : undefined,
       defaultRootObject: 'index.html',
       priceClass: PriceClass.PRICE_CLASS_ALL,
       enableIpv6: false,

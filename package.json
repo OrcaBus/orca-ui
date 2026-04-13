@@ -1,6 +1,6 @@
 {
   "name": "orca-ui",
-  "packageManager": "yarn@4.6.0",
+  "packageManager": "yarn@4.13.0",
   "private": true,
   "version": "0.0.1",
   "type": "module",

@@ -2,11 +2,14 @@
 import os
 import boto3
 import json
+import logging
 
 ssm = boto3.client('ssm')
 s3 = boto3.client('s3')
 cloudfront = boto3.client('cloudfront')
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 def get_ssm_parameter(name, with_decryption=False):
     """Fetch a SSM parameter"""
@@ -14,14 +17,14 @@ def get_ssm_parameter(name, with_decryption=False):
         response = ssm.get_parameter(Name=name, WithDecryption=with_decryption)
         return response['Parameter']['Value']
     except Exception as e:
-        print(f"Error fetching SSM parameter {name}: {e}")
+        logger.error(f"Error fetching SSM parameter {name}: {e}")
         return None
 
 
 def update_api_versions(event):
     """Update API versions from event with validation and logging"""
     if not event or not isinstance(event, dict):
-        print("No update event data received, skipping API version updates")
+        logger.info("No update event data received, skipping API version updates")
         return
 
     api_version_mappings = {
@@ -34,7 +37,7 @@ def update_api_versions(event):
 
     # Check if any version keys exist in the event
     if not any(key in event for key in api_version_mappings):
-        print("No API version updates found in event")
+        logger.info("No API version updates found in event")
         return
 
     # update the environment variables
@@ -42,7 +45,7 @@ def update_api_versions(event):
         version = event.get(event_key)
         if version and isinstance(version, str):
             os.environ[env_key] = version
-            print(f"Updated {env_key} to {version}")
+            logger.info(f"Updated {env_key} to {version}")
 
 
 def handler(event, context):
@@ -53,6 +56,7 @@ def handler(event, context):
 
     bucket_name = os.environ['BUCKET_NAME']
     cloudfront_distribution_id = os.environ['CLOUDFRONT_DISTRIBUTION_ID']
+    v2_bucket_name = os.environ.get('V2_BUCKET_NAME', None)
 
     # List of SSM parameters to fetch
     env_vars = {
@@ -88,7 +92,13 @@ def handler(event, context):
     try:
         s3.put_object(Bucket=bucket_name, Key='env.js',
                       Body=env_js_content, ContentType='text/javascript')
-
+        logger.info(f"env.js uploaded to {bucket_name}")
+        if v2_bucket_name is not None and v2_bucket_name != '':
+            s3.put_object(Bucket=v2_bucket_name, Key='v2/env.js',
+                          Body=env_js_content, ContentType='text/javascript')
+            logger.info(f"v2/env.js uploaded to {v2_bucket_name}")
+        else:
+            logger.info("v2_bucket_name is not set, skipping v2/env.js upload")
         # invalidate cloudfront distribution for all files (clear cache)
         cloudfront.create_invalidation(
             DistributionId=cloudfront_distribution_id,
@@ -101,15 +111,25 @@ def handler(event, context):
             }
         )
 
+        success_msg = f"env.js uploaded to {bucket_name}"
+        if v2_bucket_name:
+            success_msg += f" and v2/env.js uploaded to {v2_bucket_name}"
+        success_msg += f", and CloudFront cache invalidated for {cloudfront_distribution_id}"
         return {
             'statusCode': 200,
-            'body': f" env.js uploaded to {bucket_name}, and CloudFront cache invalidated for {cloudfront_distribution_id}"
+            'body': success_msg
         }
     except Exception as e:
-        # Log the error and return a failure response
-        print("Error:")
-        print(e)
+        # Log the error and return a failure response (exception includes traceback in CloudWatch)
+        logger.exception(
+            "Failed during env.js upload or CloudFront invalidation for bucket %s",
+            bucket_name,
+        )
+        failure_msg = f"Failed to upload env.js to {bucket_name}"
+        if v2_bucket_name:
+            failure_msg += f" (and v2/env.js to {v2_bucket_name})"
+        failure_msg += f". {e}"
         return {
             'statusCode': 500,
-            'body': f"Failed to upload env.js to {bucket_name}. {e}"
+            'body': failure_msg
         }
