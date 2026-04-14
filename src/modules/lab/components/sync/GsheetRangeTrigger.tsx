@@ -138,9 +138,7 @@ const GsheetRecordPreview = () => {
     isError: isPreviewError,
     error: previewError,
     mutate: fetchPreview,
-  } = useMutationPreviewGsheetRecords({
-    body: { year: year.toString(), ranges: sanitizeRanges(ranges) },
-  });
+  } = useMutationPreviewGsheetRecords();
 
   const {
     data: syncData,
@@ -150,13 +148,11 @@ const GsheetRecordPreview = () => {
     error: syncError,
     mutate: syncRecords,
     reset: resetSync,
-  } = useMutationSyncGsheet({
-    body: { year: year.toString(), ranges: sanitizeRanges(ranges) },
-  });
+  } = useMutationSyncGsheet();
 
   useEffect(() => {
-    fetchPreview();
-  }, [fetchPreview]);
+    fetchPreview({ body: { year: year.toString(), ranges: sanitizeRanges(ranges) } });
+  }, [fetchPreview, ranges, year]);
 
   if (isPreviewError) {
     throw previewError;
@@ -232,7 +228,7 @@ const GsheetRecordPreview = () => {
   }
 
   const handleConfirm = () => {
-    syncRecords();
+    syncRecords({ body: { year: year.toString(), ranges: sanitizeRanges(ranges) } });
   };
 
   const preview = previewData as { columns: string[]; values: string[][] } | undefined;
