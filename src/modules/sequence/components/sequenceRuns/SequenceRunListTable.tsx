@@ -221,7 +221,7 @@ const SequenceRunListTable = () => {
         isFetchingData={isFetching}
         paginationProps={{
           totalCount: sequenceRunsData?.pagination?.count ?? 0,
-          rowsPerPage: sequenceRunsData?.pagination?.rows_per_page ?? DEFAULT_PAGE_SIZE,
+          rowsPerPage: sequenceRunsData?.pagination?.rowsPerPage ?? DEFAULT_PAGE_SIZE,
           currentPage: sequenceRunsData?.pagination?.page ?? 0,
           setPage: (n: number) => {
             setQueryParams({ page: n });
