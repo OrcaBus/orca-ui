@@ -68,7 +68,7 @@ export const useSequenceRunCommentDeleteModel = createDeleteMutationHook(
 // status count
 export const useSequenceRunStatusCountModel = createQueryHook(
   sequenceRunApi,
-  '/api/v1/sequence_run/stats/status_counts/'
+  '/api/v1/stats/instrument_run_status_counts/'
 );
 
 // sample sheet
