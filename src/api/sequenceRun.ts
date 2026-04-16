@@ -19,6 +19,7 @@ const sequenceRunApi = new ApiClient<paths>({
 
 // export component types for consumers
 export type SequenceRunModel = components['schemas']['SequenceRun'];
+export type StatusEnum = components['schemas']['StatusEnum'];
 
 // sequence run list
 export const useSequenceRunListModel = createQueryHook(sequenceRunApi, '/api/v1/sequence_run/');
