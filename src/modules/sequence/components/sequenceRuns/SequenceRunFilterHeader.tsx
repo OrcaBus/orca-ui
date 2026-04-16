@@ -2,7 +2,7 @@ import { Search } from '@/components/common/search';
 import { Button, ButtonGroup } from '@/components/common/buttons';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { DateRangePicker } from '@/components/common/datepicker';
-import { useSequenceRunStatusCountModel } from '@/api/sequenceRun';
+import { useSequenceRunStatusCountModel, type StatusEnum } from '@/api/sequenceRun';
 import { keepPreviousData } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { XCircleIcon } from '@heroicons/react/24/outline';
@@ -42,7 +42,7 @@ const SequenceRunFilterHeader = () => {
               if (status === 'all') {
                 setQueryParams({ sequenceRunStatus: null });
               } else {
-                setQueryParams({ sequenceRunStatus: status });
+                setQueryParams({ sequenceRunStatus: status.toUpperCase() as StatusEnum });
               }
             },
           })),
@@ -55,7 +55,9 @@ const SequenceRunFilterHeader = () => {
               if (status === 'All') {
                 setQueryParams({ sequenceRunStatus: null });
               } else {
-                setQueryParams({ sequenceRunStatus: status.toLowerCase() });
+                setQueryParams({
+                  sequenceRunStatus: status.toUpperCase() as StatusEnum,
+                });
               }
             },
           })),
