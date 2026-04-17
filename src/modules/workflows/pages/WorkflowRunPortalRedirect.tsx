@@ -18,7 +18,7 @@ const WorkflowRunPortalRedirect = () => {
         page: 1,
         rowsPerPage: 100,
         portal_run_id: portalRunId ?? undefined,
-        order_by: '-timestamp', // latest first; when multiple matches, we show the first (latest)
+        ordering: '-timestamp', // latest first; when multiple matches, we show the first (latest)
       },
     },
     reactQuery: {

@@ -33,7 +33,7 @@ const WorkflowRunsTable = ({ libraryOrcabusId }: { libraryOrcabusId?: string }) 
         start_time: getQueryParams().startDate || undefined,
         end_time: getQueryParams().endDate || undefined,
         libraries__orcabusId: libraryOrcabusId ? libraryOrcabusId : undefined,
-        order_by: getQueryParams().orderBy || '-timestamp',
+        ordering: getQueryParams().orderBy || '-timestamp',
       },
     },
     reactQuery: {

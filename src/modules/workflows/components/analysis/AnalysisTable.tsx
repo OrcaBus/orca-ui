@@ -6,9 +6,9 @@ import { DEFAULT_PAGE_SIZE } from '@/utils/constant';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { RedirectLink } from '@/components/common/link';
 import { Tooltip } from '@/components/common/tooltips';
-import { EyeIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import { EyeIcon } from '@heroicons/react/24/outline';
 import { classNames } from '@/utils/commonUtils';
-import toaster from '@/components/common/toaster';
+// import toaster from '@/components/common/toaster';
 import AnalysisTypeDetailsDrawer from './AnalysisTypeDetailsDrawer';
 
 const DRAWER_QUERY_PARAM = 'analysisTypeId';
@@ -43,6 +43,11 @@ const AnalysisTable = () => {
         search: getQueryParams().search || '',
         page: getQueryParams().page || 1,
         rowsPerPage: getPaginationParams().rowsPerPage || DEFAULT_PAGE_SIZE,
+        status: ['ACTIVE', 'INACTIVE'].includes(
+          getQueryParams().analysisStatus?.toUpperCase() ?? ''
+        )
+          ? getQueryParams().analysisStatus.toUpperCase()
+          : undefined,
       },
     },
   });
@@ -120,29 +125,10 @@ const AnalysisTable = () => {
         cell: (orcabusId: unknown) => {
           const id = orcabusId as string;
           return (
-            <div className='group flex flex-row items-center gap-2'>
+            <div className='group flex flex-row items-center justify-center gap-2'>
               <Tooltip text='View Details' size='small' background='light'>
                 <button type='button' onClick={() => openDrawer(id)} className='rounded p-0.5'>
                   <EyeIcon
-                    className={classNames(
-                      'h-4 w-4 cursor-pointer',
-                      'text-gray-400 dark:text-gray-500',
-                      'transition-all duration-200',
-                      'hover:text-gray-600 dark:hover:text-gray-300'
-                    )}
-                  />
-                </button>
-              </Tooltip>
-              <Tooltip text='Copy id' size='small' background='light'>
-                <button
-                  type='button'
-                  onClick={() => {
-                    navigator.clipboard.writeText(id);
-                    toaster.success({ title: 'Copied orcabusId to clipboard' });
-                  }}
-                  className='rounded p-0.5'
-                >
-                  <DocumentDuplicateIcon
                     className={classNames(
                       'h-4 w-4 cursor-pointer',
                       'text-gray-400 dark:text-gray-500',

@@ -22,6 +22,8 @@ const AnalysisRunsTable = () => {
         rowsPerPage: getPaginationParams().rowsPerPage || DEFAULT_PAGE_SIZE,
         search: getQueryParams().search || undefined,
         analysis__orcabus_id: getQueryParams().analysisTypeId || undefined,
+        start_time: getQueryParams().startDate || undefined,
+        end_time: getQueryParams().endDate || undefined,
         status: ['succeeded', 'failed', 'aborted', 'resolved', 'deprecated'].includes(
           getQueryParams().analysisRunStatus
         )
@@ -122,7 +124,7 @@ const AnalysisRunsTable = () => {
   );
 
   return (
-    <div>
+    <div className='mt-4'>
       <Table
         columns={[...analysisRunColumn]}
         tableData={analysisRunsData?.results ?? []}

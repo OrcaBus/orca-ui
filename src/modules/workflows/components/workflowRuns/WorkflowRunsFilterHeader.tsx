@@ -101,7 +101,7 @@ const WorkflowRunsFilterHeader = () => {
             })),
           ]
         : [
-            ...['All', 'Succeeded', 'Aborted', 'Failed', 'Resolved', 'Deprecated'].map(
+            ...['All', 'SUCCEEDED', 'ABORTED', 'FAILED', 'RESOLVED', 'DEPRECATED', 'ONGOING'].map(
               (status) => ({
                 label: status,
                 subLabel: '',
