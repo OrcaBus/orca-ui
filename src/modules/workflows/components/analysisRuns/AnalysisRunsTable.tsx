@@ -24,11 +24,12 @@ const AnalysisRunsTable = () => {
         analysis__orcabus_id: getQueryParams().analysisTypeId || undefined,
         start_time: getQueryParams().startDate || undefined,
         end_time: getQueryParams().endDate || undefined,
-        status: ['succeeded', 'failed', 'aborted', 'resolved', 'deprecated'].includes(
+        status: ['succeeded', 'failed', 'aborted', 'resolved', 'deprecated', 'running'].includes(
           getQueryParams().analysisRunStatus
         )
           ? getQueryParams().analysisRunStatus
           : undefined,
+        is_ongoing: getQueryParams().analysisRunStatus == 'ongoing' || undefined,
       },
     },
     reactQuery: {

@@ -96,7 +96,7 @@ const AnalysisRunsFilterHeader = () => {
             })),
           ]
         : [
-            ...['All', 'Succeeded', 'Aborted', 'Failed', 'Resolved', 'Deprecated'].map(
+            ...['All', 'Succeeded', 'Aborted', 'Failed', 'Resolved', 'Deprecated', 'Ongoing'].map(
               (status) => ({
                 label: status,
                 subLabel: '',

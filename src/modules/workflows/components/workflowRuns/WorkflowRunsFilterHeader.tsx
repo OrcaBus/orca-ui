@@ -101,19 +101,26 @@ const WorkflowRunsFilterHeader = () => {
             })),
           ]
         : [
-            ...['All', 'SUCCEEDED', 'ABORTED', 'FAILED', 'RESOLVED', 'DEPRECATED', 'ONGOING'].map(
-              (status) => ({
-                label: status,
-                subLabel: '',
-                onClick: () => {
-                  if (status === 'All') {
-                    setQueryParams({ workflowRunStatus: null });
-                  } else {
-                    setQueryParams({ workflowRunStatus: status.toLowerCase() });
-                  }
-                },
-              })
-            ),
+            ...[
+              'All',
+              'SUCCEEDED',
+              'ABORTED',
+              'FAILED',
+              'RESOLVED',
+              'DEPRECATED',
+              'DRAFT',
+              'ONGOING',
+            ].map((status) => ({
+              label: status,
+              subLabel: '',
+              onClick: () => {
+                if (status === 'All') {
+                  setQueryParams({ workflowRunStatus: null });
+                } else {
+                  setQueryParams({ workflowRunStatus: status.toLowerCase() });
+                }
+              },
+            })),
           ],
     [setQueryParams, workflowRunStatusCountData]
   );
