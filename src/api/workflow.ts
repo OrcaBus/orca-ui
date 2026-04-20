@@ -178,5 +178,21 @@ export const useWorkflowRunRerunValidateModel = createQueryHook(
 // statistics model
 export const useWorkflowRunStatusCountModel = createQueryHook(
   workflowApi,
-  '/api/v1/workflowrun/stats/count_by_status/'
+  '/api/v1/stats/workflow_run/status_counts/'
+);
+export const useWorkflowStatusCountModel = createQueryHook(
+  workflowApi,
+  '/api/v1/stats/workflow/status_counts/'
+);
+export const useGroupedWorkflowStatusCountModel = createQueryHook(
+  workflowApi,
+  '/api/v1/stats/grouped_workflow/status_counts/'
+);
+export const useAnalysisRunStatusCountModel = createQueryHook(
+  workflowApi,
+  '/api/v1/stats/analysis_run/status_counts/'
+);
+export const useAnalysisStatusCountModel = createQueryHook(
+  workflowApi,
+  '/api/v1/stats/analysis/status_counts/'
 );

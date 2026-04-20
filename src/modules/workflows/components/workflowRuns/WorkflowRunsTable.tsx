@@ -24,7 +24,7 @@ const WorkflowRunsTable = ({ libraryOrcabusId }: { libraryOrcabusId?: string }) 
         rowsPerPage: getPaginationParams().rowsPerPage || DEFAULT_PAGE_SIZE,
         search: getQueryParams().search || undefined,
         workflow__orcabus_id: getQueryParams().workflowTypeId || undefined,
-        status: ['succeeded', 'failed', 'aborted', 'resolved', 'deprecated'].includes(
+        status: ['succeeded', 'failed', 'aborted', 'resolved', 'deprecated', 'draft'].includes(
           getQueryParams().workflowRunStatus
         )
           ? getQueryParams().workflowRunStatus
@@ -33,7 +33,7 @@ const WorkflowRunsTable = ({ libraryOrcabusId }: { libraryOrcabusId?: string }) 
         start_time: getQueryParams().startDate || undefined,
         end_time: getQueryParams().endDate || undefined,
         libraries__orcabusId: libraryOrcabusId ? libraryOrcabusId : undefined,
-        order_by: getQueryParams().orderBy || '-timestamp',
+        ordering: getQueryParams().orderBy || '-timestamp',
       },
     },
     reactQuery: {
