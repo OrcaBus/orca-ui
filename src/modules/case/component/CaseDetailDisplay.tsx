@@ -21,12 +21,6 @@ function CaseDetailDisplay({ caseData }: { caseData: components['schemas']['Case
       </div>
       <div>
         <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
-          Creation Status
-        </p>
-        <p className='font-medium text-slate-800 dark:text-gray-200'>{caseData.creationStatus}</p>
-      </div>
-      <div>
-        <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
           Alias
         </p>
         {caseData.alias && caseData.alias.length > 0 ? (
@@ -47,7 +41,35 @@ function CaseDetailDisplay({ caseData }: { caseData: components['schemas']['Case
         </p>
         <p className='font-medium text-slate-800 dark:text-gray-200'>{caseData.type ?? '-'}</p>
       </div>
+      <div>
+        <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
+          Study Type
+        </p>
+        <p className='font-medium text-slate-800 dark:text-gray-200'>{caseData.studyType ?? '-'}</p>
+      </div>
+      <div>
+        <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
+          Trello URL
+        </p>
+        <p className='font-medium text-slate-800 dark:text-gray-200'>{caseData.trelloUrl ?? '-'}</p>
+      </div>
+      <div>
+        <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
+          Report Required
+        </p>
+        <p className='font-medium text-slate-800 dark:text-gray-200'>
+          {caseData.isReportRequired === undefined ? '-' : caseData.isReportRequired ? 'Yes' : 'No'}
+        </p>
+      </div>
 
+      <div>
+        <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
+          NATA Accredited
+        </p>
+        <p className='font-medium text-slate-800 dark:text-gray-200'>
+          {caseData.isNataAccredited === undefined ? '-' : caseData.isNataAccredited ? 'Yes' : 'No'}
+        </p>
+      </div>
       <div>
         <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
           Description
@@ -58,9 +80,15 @@ function CaseDetailDisplay({ caseData }: { caseData: components['schemas']['Case
       </div>
       <div>
         <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
-          Trello URL
+          Last Status
         </p>
-        <p className='font-medium text-slate-800 dark:text-gray-200'>{caseData.trelloUrl ?? '-'}</p>
+        <p className='font-medium text-slate-800 dark:text-gray-200'>
+          {Array.isArray(caseData.stateSet) &&
+          caseData.stateSet.length > 0 &&
+          caseData.stateSet[0]?.status
+            ? caseData.stateSet[0].status
+            : '-'}
+        </p>
       </div>
     </div>
   );

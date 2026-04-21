@@ -5,7 +5,6 @@ import { classNames } from '@/utils/commonUtils';
 import { RedirectLink } from '@/components/common/link';
 import { dayjs, TIMESTAMP_FORMAT } from '@/utils/dayjs';
 import { Search } from '@/components/common/search';
-import CaseGenerateButton from '../component/CaseGenerationButton';
 import { Button } from '@/components/common/buttons';
 import { useNavigate } from 'react-router-dom';
 import { PlusIcon } from '@heroicons/react/24/outline';
@@ -39,7 +38,10 @@ export const CaseListAPITable = () => {
               <PlusIcon className='h-5 w-5' />
               New Case
             </Button>
-            <CaseGenerateButton />
+            {/* Disabling now as moving forward will based on explicit case generation through REDCAP
+                rather than auto-reference based on workflows
+            */}
+            {/* <CaseGenerateButton /> */}
             <div className='w-full md:w-1/5'>
               <Search
                 onSearch={(s) => setQueryParams({ search: s })}
@@ -94,6 +96,18 @@ export const CaseListAPITable = () => {
           accessor: 'type',
         },
         {
+          header: 'NATA Accredited',
+          headerClassName: standardClassName,
+          accessor: 'isNataAccredited',
+          cell: (cellData: unknown) => ((cellData as boolean) ? 'yes' : 'no'),
+        },
+        {
+          header: 'Report Required',
+          headerClassName: standardClassName,
+          accessor: 'isReportRequired',
+          cell: (cellData: unknown) => ((cellData as boolean) ? 'yes' : 'no'),
+        },
+        {
           header: 'Last modified',
           headerClassName: standardClassName,
           accessor: 'lastModified',
@@ -107,6 +121,8 @@ export const CaseListAPITable = () => {
         type: a.type ?? '-',
         lastModified: dayjs(a.lastModified).format(TIMESTAMP_FORMAT),
         alias: a.alias,
+        isReportRequired: a.isReportRequired,
+        isNataAccredited: a.isNataAccredited,
       }))}
       paginationProps={{
         totalCount: pagination?.count ?? 0,

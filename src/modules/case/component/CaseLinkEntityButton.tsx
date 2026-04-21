@@ -182,7 +182,6 @@ function CaseLinkEntityButton<TData>({
             if (selectedEntity) {
               mutate({
                 addedVia: 'console',
-                case: caseOrcabusId,
                 externalEntity: selectedEntity.orcabusId,
               });
             }

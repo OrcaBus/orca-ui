@@ -9,9 +9,17 @@ const caseApi = new ApiClient<paths>({
 
 export const casePath = '/api/v1/case/';
 export const caseDetailPath = '/api/v1/case/{orcabusId}/';
+export const caseHistoryPath = '/api/v1/case/{orcabusId}/history/';
+
+// mutation
+const caseExternalEntityPath =
+  '/api/v1/case/{orcabusId}/external-entity/{externalEntityOrcabusId}/' as const;
+const caseLinkPath = '/api/v1/case/link/external-entity/' as const;
+const caseCreateStatePath = '/api/v1/state/' as const;
 
 export const useQueryCaseListObject = createSuspenseQueryHook(caseApi, casePath);
 export const useQueryCaseDetailObject = createSuspenseQueryHook(caseApi, caseDetailPath);
+export const useQueryCaseHistoryObject = createSuspenseQueryHook(caseApi, caseHistoryPath);
 
 // Mutations that take body at call time (mutate(body)) or fixed params - use getClient + assertOk
 const getClient = () => caseApi.getClient();
@@ -49,7 +57,7 @@ export function useMutationCaseCreate({
 }) {
   return useMutation({
     ...reactQuery,
-    mutationFn: async (body: components['schemas']['CaseRequest']) => {
+    mutationFn: async (body: components['schemas']['CaseDetailRequest']) => {
       const c = getClient();
       const { data, error, response } = await (
         c.POST as (url: string, init?: object) => ReturnType<typeof c.POST>
@@ -58,11 +66,6 @@ export function useMutationCaseCreate({
     },
   });
 }
-
-const caseExternalEntityPath =
-  '/api/v1/case/{orcabusId}/external-entity/{externalEntityOrcabusId}/' as const;
-const caseLinkPath = '/api/v1/case/link/external-entity/' as const;
-const caseGeneratePath = '/api/v1/case/generate/' as const;
 
 export function useMutationCaseUnlinkEntity({
   caseOrcabusId,
@@ -104,37 +107,18 @@ export function useMutationCaseLinkEntity({
   });
 }
 
-export function useMutationCaseGenerate({
+export function useMutationCaseStateCreate({
   reactQuery,
 }: {
   reactQuery?: { onSuccess?: () => void; onError?: (error: Error) => void };
 }) {
   return useMutation({
     ...reactQuery,
-    mutationFn: async () => {
+    mutationFn: async (body: components['schemas']['StateRequest']) => {
       const c = getClient();
       const { data, error, response } = await (
         c.POST as (url: string, init?: object) => ReturnType<typeof c.POST>
-      )(resolvePath(caseGeneratePath as keyof paths), {});
-      return assertOk(data, error, response);
-    },
-  });
-}
-
-export function useMutationCaseDelete({
-  orcabusId,
-  reactQuery,
-}: {
-  orcabusId: string;
-  reactQuery?: { onSuccess?: () => void; onError?: (error: Error) => void };
-}) {
-  return useMutation({
-    ...reactQuery,
-    mutationFn: async () => {
-      const c = getClient();
-      const { data, error, response } = await (
-        c.DELETE as (url: string, init?: object) => ReturnType<typeof c.DELETE>
-      )(resolvePath(caseDetailPath), { params: { path: { orcabusId } } });
+      )(resolvePath(caseCreateStatePath as keyof paths), { body });
       return assertOk(data, error, response);
     },
   });

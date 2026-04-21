@@ -10,7 +10,8 @@ import CaseLinkLibraryButton from '../component/CaseLinkLibraryButton';
 import CaseLinkWorkflowRunButton from '../component/CaseLinkWorkflowRunButton';
 import CaseDetailDisplay from '../component/CaseDetailDisplay';
 import CaseFileViewer from '../component/CaseFileViewer';
-import CaseDeletionButton from '../component/CaseDeletionButton';
+import CaseHistoryTable from '../component/CaseHistory';
+import CaseStateTable from '../component/CaseStateTable';
 
 const selectedClassName =
   'inline-flex items-center gap-2 p-4 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 rounded-t-lg font-medium transition-colors duration-200';
@@ -20,7 +21,7 @@ const regularClassName =
 export const CaseDetailAPITable = () => {
   const navigate = useNavigate();
   const { getQueryParams, setQueryParams } = useQueryParams();
-  const currentTabSelection = getQueryParams().tab ?? 'Libraries';
+  const currentTabSelection = getQueryParams().tab ?? 'States';
   const { caseOrcabusId } = useParams();
   if (!caseOrcabusId) {
     throw new Error('No case id in URL path!');
@@ -33,6 +34,14 @@ export const CaseDetailAPITable = () => {
   const caseData = caseModel.data;
 
   const tabs = [
+    {
+      label: 'States',
+      content: (
+        <>
+          <CaseStateTable caseOrcabusId={caseData.orcabusId} stateSet={caseData.stateSet} />
+        </>
+      ),
+    },
     {
       label: 'Libraries',
       content: (
@@ -69,6 +78,14 @@ export const CaseDetailAPITable = () => {
         </>
       ),
     },
+    {
+      label: 'History',
+      content: (
+        <>
+          <CaseHistoryTable caseOrcabusId={caseOrcabusId} />
+        </>
+      ),
+    },
   ];
 
   return (
@@ -81,7 +98,6 @@ export const CaseDetailAPITable = () => {
           </h1>
         </div>
         <div className='flex gap-2'>
-          <CaseDeletionButton caseOrcabusId={caseOrcabusId} />
           <Button
             onClick={() => navigate('./edit')}
             type='primary'
