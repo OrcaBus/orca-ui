@@ -28,13 +28,13 @@ function CaseForm({
     components['schemas']['CaseDetailRequest']
   >(
     initialData ?? {
-      title: '',
+      requestFormId: '',
       description: '',
       type: 'wgts',
       studyType: 'research',
       isReportRequired: false,
       isNataAccredited: false,
-      trelloUrl: '',
+      links: {},
       alias: [],
     }
   );
@@ -48,17 +48,17 @@ function CaseForm({
       <div className='p-6 sm:p-8'>
         {/* Form Fields */}
         <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'>
-          {/* Title */}
+          {/* Request Form Id */}
           <div className='sm:col-span-2 lg:col-span-3'>
-            <label htmlFor='title' className={labelClassName}>
-              Title
+            <label htmlFor='requestFormId' className={labelClassName}>
+              Request Form Id
             </label>
             <input
-              id='title'
+              id='requestFormId'
               type='text'
-              value={draftDataUpdate.title ?? ''}
-              onChange={(e) => caseDataOnChange('title', e.target.value)}
-              placeholder='Enter case title'
+              value={draftDataUpdate.requestFormId ?? ''}
+              onChange={(e) => caseDataOnChange('requestFormId', e.target.value)}
+              placeholder='Enter case requestFormId'
               className={inputClassName}
             />
           </div>
@@ -111,19 +111,72 @@ function CaseForm({
             </select>
           </div>
 
-          {/* Trello URL */}
-          <div>
-            <label htmlFor='trelloUrl' className={labelClassName}>
-              Trello URL
-            </label>
-            <input
-              id='trelloUrl'
-              type='url'
-              value={draftDataUpdate.trelloUrl ?? ''}
-              onChange={(e) => caseDataOnChange('trelloUrl', e.target.value)}
-              placeholder='https://trello.com/...'
-              className={inputClassName}
-            />
+          {/* Links */}
+          <div className='sm:col-span-2 lg:col-span-3'>
+            <label className={labelClassName}>Links</label>
+            <div className='space-y-2'>
+              {Object.entries(draftDataUpdate.links ?? {}).map(([key, value], index) => (
+                <div key={index} className='flex items-center gap-2'>
+                  <input
+                    type='text'
+                    value={key}
+                    onChange={(e) => {
+                      const entries = Object.entries(draftDataUpdate.links ?? {});
+                      entries[index] = [e.target.value, value as string];
+                      setDraftDataUpdate((prev) => ({
+                        ...prev,
+                        links: Object.fromEntries(entries),
+                      }));
+                    }}
+                    placeholder='Link name'
+                    className={classNames(inputClassName, 'flex-1')}
+                  />
+                  <input
+                    type='url'
+                    value={value as string}
+                    onChange={(e) => {
+                      const entries = Object.entries(draftDataUpdate.links ?? {});
+                      entries[index] = [key, e.target.value];
+                      setDraftDataUpdate((prev) => ({
+                        ...prev,
+                        links: Object.fromEntries(entries),
+                      }));
+                    }}
+                    placeholder='https://...'
+                    className={classNames(inputClassName, 'flex-1')}
+                  />
+                  <button
+                    type='button'
+                    onClick={() => {
+                      const entries = Object.entries(draftDataUpdate.links ?? {}).filter(
+                        (_, i) => i !== index
+                      );
+                      setDraftDataUpdate((prev) => ({
+                        ...prev,
+                        links: Object.fromEntries(entries),
+                      }));
+                    }}
+                    className='rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30'
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <button
+                type='button'
+                onClick={() => {
+                  const entries = Object.entries(draftDataUpdate.links ?? {});
+                  entries.push(['', '']);
+                  setDraftDataUpdate((prev) => ({
+                    ...prev,
+                    links: Object.fromEntries(entries),
+                  }));
+                }}
+                className='rounded-md bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30'
+              >
+                + Add Link
+              </button>
+            </div>
           </div>
 
           {/* Report Required */}

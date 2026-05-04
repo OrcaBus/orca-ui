@@ -62,6 +62,7 @@ function CaseLinkEntityButton<TData>({
   });
   const queryResults = responseUseQuery.data?.results ?? [];
   const { isPending, isError, error, mutate } = useMutationCaseLinkEntity({
+    caseOrcabusId: caseOrcabusId,
     reactQuery: {
       onSuccess: async () => {
         await queryClient.invalidateQueries({
@@ -181,7 +182,6 @@ function CaseLinkEntityButton<TData>({
           onClick: () => {
             if (selectedEntity) {
               mutate({
-                addedVia: 'console',
                 externalEntity: selectedEntity.orcabusId,
               });
             }

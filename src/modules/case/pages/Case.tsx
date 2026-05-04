@@ -3,7 +3,6 @@ import { Table } from '@/components/tables';
 import { useQueryCaseListObject } from '@/api/case';
 import { classNames } from '@/utils/commonUtils';
 import { RedirectLink } from '@/components/common/link';
-import { dayjs, TIMESTAMP_FORMAT } from '@/utils/dayjs';
 import { Search } from '@/components/common/search';
 import { Button } from '@/components/common/buttons';
 import { useNavigate } from 'react-router-dom';
@@ -53,9 +52,9 @@ export const CaseListAPITable = () => {
       }
       columns={[
         {
-          header: 'Title',
+          header: 'Request ID Form',
           headerClassName: standardClassName,
-          accessor: 'title',
+          accessor: 'requestFormId',
           cell: (cellData: unknown) => {
             const { text, orcabusId } = cellData as { text: string; orcabusId: string };
             return (
@@ -116,10 +115,9 @@ export const CaseListAPITable = () => {
       ]}
       tableData={data.results.map((a) => ({
         orcabusId: a.orcabusId,
-        title: { text: a.title, orcabusId: a.orcabusId },
+        requestFormId: { text: a.requestFormId, orcabusId: a.orcabusId },
         description: a.description ?? '-',
         type: a.type ?? '-',
-        lastModified: dayjs(a.lastModified).format(TIMESTAMP_FORMAT),
         alias: a.alias,
         isReportRequired: a.isReportRequired,
         isNataAccredited: a.isNataAccredited,

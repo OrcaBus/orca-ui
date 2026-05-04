@@ -1,19 +1,18 @@
 import { Table } from '@/components/tables';
 import { dayjs, TIMESTAMP_FORMAT } from '@/utils/dayjs';
-import { components } from '@/api/types/case';
 import CaseAddStateButton from './CaseAddStateButton';
+import { useQueryCaseStatesObject } from '@/api/case';
 
-const CaseStateTable = ({
-  stateSet,
-  caseOrcabusId,
-}: {
-  stateSet: components['schemas']['State'][];
-  caseOrcabusId: string;
-}) => {
-  const tableData = stateSet.map((s) => ({
+const CaseStateTable = ({ caseOrcabusId }: { caseOrcabusId: string }) => {
+  const caseStates = useQueryCaseStatesObject({
+    params: { path: { orcabusId: caseOrcabusId } },
+  });
+
+  const tableData = (caseStates.data?.results ?? []).map((s) => ({
     orcabusId: s.orcabusId,
     status: s.status,
-    timestamp: dayjs(s.timestamp).format(TIMESTAMP_FORMAT),
+    eventAt: dayjs(s.eventAt).format(TIMESTAMP_FORMAT),
+    createdAt: dayjs(s.createdAt).format(TIMESTAMP_FORMAT),
   }));
 
   return (
@@ -25,7 +24,8 @@ const CaseStateTable = ({
         inCard={false}
         columns={[
           { header: 'Status', accessor: 'status' },
-          { header: 'Timestamp', accessor: 'timestamp' },
+          { header: 'Event At', accessor: 'eventAt' },
+          { header: 'Created At', accessor: 'createdAt' },
           { header: 'ID', accessor: 'orcabusId' },
         ]}
         tableData={tableData}

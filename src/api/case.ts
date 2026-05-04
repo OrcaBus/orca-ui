@@ -9,17 +9,20 @@ const caseApi = new ApiClient<paths>({
 
 export const casePath = '/api/v1/case/';
 export const caseDetailPath = '/api/v1/case/{orcabusId}/';
-export const caseHistoryPath = '/api/v1/case/{orcabusId}/history/';
+export const caseActivityPath = '/api/v1/case/{orcabusId}/activity/' as const;
+export const caseUserPath = '/api/v1/case/{orcabusId}/user/' as const;
+export const caseUserDetailPath = '/api/v1/case/{orcabusId}/user/{userOrcabusId}/' as const;
+export const caseStatesPath = '/api/v1/case/{orcabusId}/states/' as const;
 
-// mutation
 const caseExternalEntityPath =
   '/api/v1/case/{orcabusId}/external-entity/{externalEntityOrcabusId}/' as const;
-const caseLinkPath = '/api/v1/case/link/external-entity/' as const;
+const caseLinkPath = '/api/v1/case/{orcabusId}/external-entity/' as const;
 const caseCreateStatePath = '/api/v1/state/' as const;
 
 export const useQueryCaseListObject = createSuspenseQueryHook(caseApi, casePath);
 export const useQueryCaseDetailObject = createSuspenseQueryHook(caseApi, caseDetailPath);
-export const useQueryCaseHistoryObject = createSuspenseQueryHook(caseApi, caseHistoryPath);
+export const useQueryCaseActivityObject = createSuspenseQueryHook(caseApi, caseActivityPath);
+export const useQueryCaseStatesObject = createSuspenseQueryHook(caseApi, caseStatesPath);
 
 // Mutations that take body at call time (mutate(body)) or fixed params - use getClient + assertOk
 const getClient = () => caseApi.getClient();
@@ -91,8 +94,10 @@ export function useMutationCaseUnlinkEntity({
 }
 
 export function useMutationCaseLinkEntity({
+  caseOrcabusId,
   reactQuery,
 }: {
+  caseOrcabusId: string;
   reactQuery?: { onSuccess?: () => void; onError?: (error: Error) => void };
 }) {
   return useMutation({
@@ -101,7 +106,10 @@ export function useMutationCaseLinkEntity({
       const c = getClient();
       const { data, error, response } = await (
         c.POST as (url: string, init?: object) => ReturnType<typeof c.POST>
-      )(resolvePath(caseLinkPath as keyof paths), { body });
+      )(resolvePath(caseLinkPath as keyof paths), {
+        params: { path: { orcabusId: caseOrcabusId } },
+        body,
+      });
       return assertOk(data, error, response);
     },
   });
@@ -114,12 +122,84 @@ export function useMutationCaseStateCreate({
 }) {
   return useMutation({
     ...reactQuery,
-    mutationFn: async (body: components['schemas']['StateRequest']) => {
+    mutationFn: async (body: components['schemas']['StateDetailRequest']) => {
       const c = getClient();
       const { data, error, response } = await (
         c.POST as (url: string, init?: object) => ReturnType<typeof c.POST>
       )(resolvePath(caseCreateStatePath as keyof paths), { body });
       return assertOk(data, error, response);
+    },
+  });
+}
+
+export function useMutationCaseUserCreate({
+  caseOrcabusId,
+  reactQuery,
+}: {
+  caseOrcabusId: string;
+  reactQuery?: {
+    onSuccess?: (data: components['schemas']['CaseUserCreate']) => void;
+    onError?: (error: Error) => void;
+  };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async (body: components['schemas']['CaseUserCreateRequest']) => {
+      const c = getClient();
+      const { data, error, response } = await (
+        c.POST as (url: string, init?: object) => ReturnType<typeof c.POST>
+      )(resolvePath(caseUserPath as keyof paths), {
+        params: { path: { orcabusId: caseOrcabusId } },
+        body,
+      });
+      return assertOk(data, error, response) as components['schemas']['CaseUserCreate'];
+    },
+  });
+}
+
+export function useMutationCaseUserDelete({
+  caseOrcabusId,
+  userOrcabusId,
+  reactQuery,
+}: {
+  caseOrcabusId: string;
+  userOrcabusId: string;
+  reactQuery?: { onSuccess?: () => void; onError?: (error: Error) => void };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async () => {
+      const c = getClient();
+      const { data, error, response } = await (
+        c.DELETE as (url: string, init?: object) => ReturnType<typeof c.DELETE>
+      )(resolvePath(caseUserDetailPath as keyof paths), {
+        params: { path: { orcabusId: caseOrcabusId, userOrcabusId } },
+      });
+      return assertOk(data, error, response);
+    },
+  });
+}
+
+const commentPath = '/api/v1/comment/' as const;
+
+export const useQueryCommentList = createSuspenseQueryHook(caseApi, commentPath);
+
+export function useMutationCommentCreate({
+  reactQuery,
+}: {
+  reactQuery?: {
+    onSuccess?: (data: components['schemas']['Comment']) => void;
+    onError?: (error: Error) => void;
+  };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async (body: components['schemas']['CommentRequest']) => {
+      const c = getClient();
+      const { data, error, response } = await (
+        c.POST as (url: string, init?: object) => ReturnType<typeof c.POST>
+      )(resolvePath(commentPath as keyof paths), { body });
+      return assertOk(data, error, response) as components['schemas']['Comment'];
     },
   });
 }

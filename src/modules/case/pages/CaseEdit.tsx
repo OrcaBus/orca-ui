@@ -64,13 +64,13 @@ export default function CaseEditPage() {
       <DetailedErrorBoundary>
         <CaseForm
           initialData={{
-            title: caseData.title,
+            requestFormId: caseData.requestFormId,
             description: caseData.description,
             type: caseData.type,
             studyType: caseData.studyType,
             isReportRequired: caseData.isReportRequired,
             isNataAccredited: caseData.isNataAccredited,
-            trelloUrl: caseData.trelloUrl,
+            links: caseData.links,
             alias: caseData.alias ?? [],
           }}
           onSubmit={handleSubmit}

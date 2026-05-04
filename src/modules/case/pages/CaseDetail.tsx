@@ -10,8 +10,10 @@ import CaseLinkLibraryButton from '../component/CaseLinkLibraryButton';
 import CaseLinkWorkflowRunButton from '../component/CaseLinkWorkflowRunButton';
 import CaseDetailDisplay from '../component/CaseDetailDisplay';
 import CaseFileViewer from '../component/CaseFileViewer';
-import CaseHistoryTable from '../component/CaseHistory';
+import CaseActivityTable from '../component/CaseActivity';
+import CaseCommentTable from '../component/CaseCommentTable';
 import CaseStateTable from '../component/CaseStateTable';
+import CaseUserTable from '../component/CaseUserTable';
 
 const selectedClassName =
   'inline-flex items-center gap-2 p-4 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 rounded-t-lg font-medium transition-colors duration-200';
@@ -32,13 +34,20 @@ export const CaseDetailAPITable = () => {
   });
 
   const caseData = caseModel.data;
-
   const tabs = [
     {
       label: 'States',
       content: (
         <>
-          <CaseStateTable caseOrcabusId={caseData.orcabusId} stateSet={caseData.stateSet} />
+          <CaseStateTable caseOrcabusId={caseData.orcabusId} />
+        </>
+      ),
+    },
+    {
+      label: 'Users',
+      content: (
+        <>
+          <CaseUserTable caseOrcabusId={caseData.orcabusId} userSet={caseData.userSet} />
         </>
       ),
     },
@@ -82,7 +91,15 @@ export const CaseDetailAPITable = () => {
       label: 'History',
       content: (
         <>
-          <CaseHistoryTable caseOrcabusId={caseOrcabusId} />
+          <CaseActivityTable caseOrcabusId={caseOrcabusId} />
+        </>
+      ),
+    },
+    {
+      label: 'Comments',
+      content: (
+        <>
+          <CaseCommentTable commentSet={caseData.commentSet} />
         </>
       ),
     },
@@ -94,7 +111,7 @@ export const CaseDetailAPITable = () => {
       <div className='flex flex-wrap items-start justify-between gap-6'>
         <div className='space-y-2'>
           <h1 className='text-2xl font-semibold text-slate-900 dark:text-gray-100'>
-            {caseData.title}
+            {caseData.requestFormId}
           </h1>
         </div>
         <div className='flex gap-2'>

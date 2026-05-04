@@ -29,6 +29,7 @@ const STATUS_OPTIONS: SelectItems[] = [
 function CaseAddStateButton({ caseOrcabusId }: { caseOrcabusId: string }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selected, setSelected] = useState<SelectItems>(STATUS_OPTIONS[0]);
+  const [eventAt, setEventAt] = useState<string>('');
   const queryClient = useQueryClient();
 
   const { isPending, isError, error, mutate } = useMutationCaseStateCreate({
@@ -75,6 +76,17 @@ function CaseAddStateButton({ caseOrcabusId }: { caseOrcabusId: string }) {
               options={STATUS_OPTIONS}
               onChange={setSelected}
             />
+            <div className='mt-4'>
+              <label className='mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300'>
+                Event At (optional)
+              </label>
+              <input
+                type='date'
+                value={eventAt}
+                onChange={(e) => setEventAt(e.target.value)}
+                className='w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-blue-400'
+              />
+            </div>
           </div>
         }
         onClose={() => setIsDialogOpen(false)}
@@ -84,7 +96,11 @@ function CaseAddStateButton({ caseOrcabusId }: { caseOrcabusId: string }) {
           className:
             'text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 shadow-md hover:shadow-lg border-none',
           onClick: () => {
-            mutate({ status: selected.value as StatusEnum, case: caseOrcabusId });
+            mutate({
+              status: selected.value as StatusEnum,
+              case: caseOrcabusId,
+              ...(eventAt && { eventAt }),
+            });
           },
         }}
       />
