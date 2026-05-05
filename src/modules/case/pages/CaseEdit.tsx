@@ -1,4 +1,4 @@
-import { caseDetailPath, useMutationCaseUpdate, useQueryCaseDetailObject } from '@/api/case';
+import { useMutationCaseUpdate, useQueryCaseDetailObject } from '@/api/case';
 import { useNavigate, useParams } from 'react-router-dom';
 import { components } from '@/api/types/case';
 import { SpinnerWithText } from '@/components/common/spinner';
@@ -25,9 +25,7 @@ export default function CaseEditPage() {
     orcabusId: caseOrcabusId,
     reactQuery: {
       onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: ['GET', caseDetailPath],
-        });
+        await queryClient.invalidateQueries();
         toaster.success({ title: 'Changes saved' });
         navigate(`/case/${caseOrcabusId}`, { replace: true });
       },
@@ -66,11 +64,13 @@ export default function CaseEditPage() {
       <DetailedErrorBoundary>
         <CaseForm
           initialData={{
-            title: caseData.title,
+            requestFormId: caseData.requestFormId,
             description: caseData.description,
             type: caseData.type,
-            creationStatus: caseData.creationStatus,
-            trelloUrl: caseData.trelloUrl,
+            studyType: caseData.studyType,
+            isReportRequired: caseData.isReportRequired,
+            isNataAccredited: caseData.isNataAccredited,
+            links: caseData.links,
             alias: caseData.alias ?? [],
           }}
           onSubmit={handleSubmit}

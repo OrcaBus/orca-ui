@@ -10,6 +10,13 @@ import CaseCreatePage from './pages/CaseCreatePage';
 
 const CasePage = lazy(() => import('@/modules/case/pages/Case'));
 
+// function RedirectToV2Cases() {
+//   useEffect(() => {
+//     window.location.replace('/v2/cases');
+//   }, []);
+//   return null;
+// }
+
 export const Router: RouteObject = {
   path: 'case',
   children: [

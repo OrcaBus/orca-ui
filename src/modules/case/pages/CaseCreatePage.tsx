@@ -23,8 +23,9 @@ export default function CaseCreatePage() {
     },
   });
 
-  const handleSubmit = (data: components['schemas']['CaseDetailRequest']) => {
+  const handleSubmit = async (data: components['schemas']['CaseDetailRequest']) => {
     mutate(data);
+    await queryClient.invalidateQueries();
   };
 
   const handleCancel = () => {
