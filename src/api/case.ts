@@ -18,6 +18,7 @@ const caseExternalEntityPath =
   '/api/v1/case/{orcabusId}/external-entity/{externalEntityOrcabusId}/' as const;
 const caseLinkPath = '/api/v1/case/{orcabusId}/external-entity/' as const;
 const caseCreateStatePath = '/api/v1/state/' as const;
+const caseStateArchivePath = '/api/v1/state/{orcabusId}/archive/' as const;
 
 export const useQueryCaseListObject = createSuspenseQueryHook(caseApi, casePath);
 export const useQueryCaseDetailObject = createSuspenseQueryHook(caseApi, caseDetailPath);
@@ -156,7 +157,24 @@ export function useMutationCaseUserCreate({
     },
   });
 }
-
+export function useMutationCaseStateArchive({
+  reactQuery,
+}: {
+  reactQuery?: { onSuccess?: () => void; onError?: (error: Error) => void };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async (orcabusId: string) => {
+      const c = getClient();
+      const { data, error, response } = await (
+        c.PATCH as (url: string, init?: object) => ReturnType<typeof c.PATCH>
+      )(resolvePath(caseStateArchivePath as keyof paths), {
+        params: { path: { orcabusId } },
+      });
+      return assertOk(data, error, response);
+    },
+  });
+}
 export function useMutationCaseUserDelete({
   caseOrcabusId,
   userOrcabusId,
@@ -181,6 +199,7 @@ export function useMutationCaseUserDelete({
 }
 
 const commentPath = '/api/v1/comment/' as const;
+const commentArchivePath = '/api/v1/comment/{orcabusId}/archive/' as const;
 
 export const useQueryCommentList = createSuspenseQueryHook(caseApi, commentPath);
 
@@ -200,6 +219,25 @@ export function useMutationCommentCreate({
         c.POST as (url: string, init?: object) => ReturnType<typeof c.POST>
       )(resolvePath(commentPath as keyof paths), { body });
       return assertOk(data, error, response) as components['schemas']['Comment'];
+    },
+  });
+}
+
+export function useMutationCommentArchive({
+  reactQuery,
+}: {
+  reactQuery?: { onSuccess?: () => void; onError?: (error: Error) => void };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async (orcabusId: string) => {
+      const c = getClient();
+      const { data, error, response } = await (
+        c.PATCH as (url: string, init?: object) => ReturnType<typeof c.PATCH>
+      )(resolvePath(commentArchivePath as keyof paths), {
+        params: { path: { orcabusId } },
+      });
+      return assertOk(data, error, response);
     },
   });
 }

@@ -99,7 +99,7 @@ export const CaseDetailAPITable = () => {
       label: 'Comments',
       content: (
         <>
-          <CaseCommentTable commentSet={caseData.commentSet} />
+          <CaseCommentTable commentSet={caseData.commentSet} caseOrcabusId={caseOrcabusId} />
         </>
       ),
     },

@@ -106,12 +106,6 @@ export const CaseListAPITable = () => {
           accessor: 'isReportRequired',
           cell: (cellData: unknown) => ((cellData as boolean) ? 'yes' : 'no'),
         },
-        {
-          header: 'Last modified',
-          headerClassName: standardClassName,
-          accessor: 'lastModified',
-          sortDirection: 'desc',
-        },
       ]}
       tableData={data.results.map((a) => ({
         orcabusId: a.orcabusId,
