@@ -58,7 +58,7 @@ export class V2PipelineStack extends Stack {
             ],
           },
           build: {
-            commands: ['set -eu', 'pnpm build'],
+            commands: ['set -eu', 'make generate-openapi-types', 'pnpm build'],
           },
         },
         artifacts: {
