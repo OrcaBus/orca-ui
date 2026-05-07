@@ -24,8 +24,8 @@ export const cloudFrontBucketNameConfig: Record<AppStage, string> = {
 
 export const v2CloudFrontBucketNameConfig: Record<AppStage, string | undefined> = {
   [AppStage.BETA]: 'orcaui-v2-cloudfront-843407916570',
-  [AppStage.GAMMA]: undefined,
-  [AppStage.PROD]: undefined,
+  [AppStage.GAMMA]: 'orcaui-v2-cloudfront-455634345446',
+  [AppStage.PROD]: 'orcaui-v2-cloudfront-472057503814',
 };
 
 export const configLambdaNameConfig: Record<AppStage, string> = {
