@@ -173,13 +173,13 @@ export class OrcaUIV2CodePipelineStack extends Stack {
         })
       : undefined;
 
-    const codesStarSourceName = 'orcauiV2AppSrc';
+    const codeStarSourceName = 'orcauiV2AppSrc';
     const stages: StageProps[] = [
       {
         stageName: 'Source',
         actions: [
           new CodeStarConnectionsSourceAction({
-            actionName: codesStarSourceName,
+            actionName: codeStarSourceName,
             owner: 'OrcaBus',
             repo: 'orca-ui-v2',
             branch: ghBranchName,
