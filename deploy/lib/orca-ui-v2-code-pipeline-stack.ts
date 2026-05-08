@@ -31,7 +31,7 @@ import {
   v2CloudFrontBucketNameConfig,
 } from '../config';
 
-export class V2PipelineStack extends Stack {
+export class OrcaUIV2CodePipelineStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps) {
     super(scope, id, props);
 

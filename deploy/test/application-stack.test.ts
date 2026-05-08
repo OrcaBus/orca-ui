@@ -1,13 +1,26 @@
 import { App, Aspects, Stack } from 'aws-cdk-lib';
 import { Annotations, Match, Template } from 'aws-cdk-lib/assertions';
 import { SynthesisMessage } from '@aws-cdk/cloud-assembly-api';
+import { describe, expect, test } from '@jest/globals';
 import { AwsSolutionsChecks, NagSuppressions } from 'cdk-nag';
 import { ApplicationStack } from '../lib/application-stack';
-import { AppStage, getAppStackConfig } from '../config';
+import { accountIdAlias, AppStage, getAppStackConfig } from '../config';
 
 function synthesisMessageToString(sm: SynthesisMessage): string {
   return `${sm.entry.data} [${sm.id}]`;
 }
+
+type CfnResource = {
+  Properties?: Record<string, unknown>;
+};
+
+type CloudFrontDistributionResource = {
+  Properties: {
+    DistributionConfig?: {
+      CacheBehaviors?: Array<Record<string, unknown>>;
+    };
+  };
+};
 
 describe('cdk-nag-stack', () => {
   const app: App = new App({});
@@ -85,6 +98,53 @@ describe('beta-stack-v2-behavior', () => {
       Environment: Match.objectLike({
         Variables: Match.objectLike({
           V2_BUCKET_NAME: 'orcaui-v2-cloudfront-843407916570',
+        }),
+      }),
+    });
+  });
+});
+
+describe.each([AppStage.GAMMA, AppStage.PROD])('%s-stack-v2-disabled-behavior', (appStage) => {
+  const app: App = new App({});
+
+  const stack = new ApplicationStack(app, `${appStage}ApplicationStack`, {
+    env: {
+      account: accountIdAlias[appStage],
+      region: 'ap-southeast-2',
+    },
+    tags: {
+      'umccr-org:Product': 'OrcaUI',
+      'umccr-org:Creator': 'CDK',
+    },
+    ...getAppStackConfig(appStage),
+  });
+
+  test('does not synthesize a v2 S3 bucket or /v2/* CloudFront behavior', () => {
+    const template = Template.fromStack(stack);
+    const buckets = Object.values(template.findResources('AWS::S3::Bucket')) as CfnResource[];
+    const distributions = Object.values(
+      template.findResources('AWS::CloudFront::Distribution')
+    ) as CloudFrontDistributionResource[];
+    const cacheBehaviors = distributions[0]?.Properties.DistributionConfig?.CacheBehaviors ?? [];
+
+    expect(
+      buckets.some((bucket) => {
+        const bucketName = bucket.Properties?.BucketName;
+        return typeof bucketName === 'string' && bucketName.startsWith('orcaui-v2-cloudfront-');
+      })
+    ).toBe(false);
+
+    expect(cacheBehaviors).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ PathPattern: '/v2/*' })])
+    );
+  });
+
+  test('Lambda leaves V2_BUCKET_NAME empty', () => {
+    const template = Template.fromStack(stack);
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Environment: Match.objectLike({
+        Variables: Match.objectLike({
+          V2_BUCKET_NAME: '',
         }),
       }),
     });
