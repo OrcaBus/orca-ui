@@ -12,14 +12,7 @@ import {
   CodeStarConnectionsSourceAction,
   ManualApprovalAction,
 } from 'aws-cdk-lib/aws-codepipeline-actions';
-import {
-  AccountPrincipal,
-  CompositePrincipal,
-  Effect,
-  PolicyStatement,
-  Role,
-  ServicePrincipal,
-} from 'aws-cdk-lib/aws-iam';
+import { Effect, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import {
@@ -76,19 +69,8 @@ export class OrcaUIV2CodePipelineStack extends Stack {
       }
 
       const deployProjectRole = new Role(this, `OrcaUIV2DeployProjectRole${env}`, {
-        assumedBy: new CompositePrincipal(
-          new ServicePrincipal('codebuild.amazonaws.com'),
-          new AccountPrincipal(accountIdAlias[env])
-        ),
+        assumedBy: new ServicePrincipal('codebuild.amazonaws.com'),
       });
-
-      deployProjectRole.assumeRolePolicy?.addStatements(
-        new PolicyStatement({
-          actions: ['sts:AssumeRole'],
-          effect: Effect.ALLOW,
-          principals: [new AccountPrincipal(this.account)],
-        })
-      );
 
       deployProjectRole.addToPolicy(
         new PolicyStatement({
@@ -231,19 +213,20 @@ export class OrcaUIV2CodePipelineStack extends Stack {
             input: buildOutput,
             runOrder: 2,
           }),
-          ...(v2CloudFrontBucketNameConfig[AppStage.PROD]
-            ? [
-                new ManualApprovalAction({
-                  actionName: 'DeployToProdApproval',
-                  runOrder: 3,
-                }),
-              ]
-            : []),
         ],
       });
     }
 
     if (v2CloudFrontBucketNameConfig[AppStage.PROD]) {
+      stages.push({
+        stageName: 'DeployToProdApproval',
+        actions: [
+          new ManualApprovalAction({
+            actionName: 'ApproveDeployToProd',
+          }),
+        ],
+      });
+
       stages.push({
         stageName: 'DeployToProd',
         actions: [

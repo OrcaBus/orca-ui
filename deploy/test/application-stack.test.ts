@@ -4,7 +4,12 @@ import { SynthesisMessage } from '@aws-cdk/cloud-assembly-api';
 import { describe, expect, test } from '@jest/globals';
 import { AwsSolutionsChecks, NagSuppressions } from 'cdk-nag';
 import { ApplicationStack } from '../lib/application-stack';
-import { accountIdAlias, AppStage, getAppStackConfig } from '../config';
+import {
+  accountIdAlias,
+  AppStage,
+  getAppStackConfig,
+  v2CloudFrontBucketNameConfig,
+} from '../config';
 
 function synthesisMessageToString(sm: SynthesisMessage): string {
   return `${sm.entry.data} [${sm.id}]`;
@@ -57,66 +62,79 @@ describe('cdk-nag-stack', () => {
   });
 });
 
-describe('beta-stack-v2-behavior', () => {
-  const app: App = new App({});
+const configuredV2Stages = Object.values(AppStage)
+  .filter((appStage) => v2CloudFrontBucketNameConfig[appStage])
+  .map((appStage) => ({
+    appStage,
+    expectedBucketName: v2CloudFrontBucketNameConfig[appStage]!,
+  }));
 
-  const stack = new ApplicationStack(app, 'BetaApplicationStack', {
-    env: {
-      account: '843407916570',
-      region: 'ap-southeast-2',
-    },
-    tags: {
-      'umccr-org:Product': 'OrcaUI',
-      'umccr-org:Creator': 'CDK',
-    },
-    ...getAppStackConfig(AppStage.BETA),
-  });
+describe.each(configuredV2Stages)(
+  '$appStage-stack-v2-enabled-behavior',
+  ({ appStage, expectedBucketName }) => {
+    const app: App = new App({});
 
-  test('synthesizes with /v2/* CloudFront behavior', () => {
-    const template = Template.fromStack(stack);
-    template.hasResourceProperties('AWS::CloudFront::Distribution', {
-      DistributionConfig: Match.objectLike({
-        CacheBehaviors: Match.arrayWith([
-          Match.objectLike({
-            PathPattern: '/v2/*',
-          }),
-        ]),
-      }),
+    const stack = new ApplicationStack(app, `${appStage}ApplicationStack`, {
+      env: {
+        account: accountIdAlias[appStage],
+        region: 'ap-southeast-2',
+      },
+      tags: {
+        'umccr-org:Product': 'OrcaUI',
+        'umccr-org:Creator': 'CDK',
+      },
+      ...getAppStackConfig(appStage),
     });
-  });
 
-  test('synthesizes v2 S3 bucket', () => {
-    const template = Template.fromStack(stack);
-    template.hasResourceProperties('AWS::S3::Bucket', {
-      BucketName: 'orcaui-v2-cloudfront-843407916570',
-    });
-  });
-
-  test('Lambda has V2_BUCKET_NAME environment variable set', () => {
-    const template = Template.fromStack(stack);
-    template.hasResourceProperties('AWS::Lambda::Function', {
-      Environment: Match.objectLike({
-        Variables: Match.objectLike({
-          V2_BUCKET_NAME: 'orcaui-v2-cloudfront-843407916570',
+    test('synthesizes with /v2/* CloudFront behavior', () => {
+      const template = Template.fromStack(stack);
+      template.hasResourceProperties('AWS::CloudFront::Distribution', {
+        DistributionConfig: Match.objectLike({
+          CacheBehaviors: Match.arrayWith([
+            Match.objectLike({
+              PathPattern: '/v2/*',
+            }),
+          ]),
         }),
-      }),
+      });
     });
-  });
-});
 
-describe.each([AppStage.GAMMA, AppStage.PROD])('%s-stack-v2-disabled-behavior', (appStage) => {
+    test('synthesizes v2 S3 bucket', () => {
+      const template = Template.fromStack(stack);
+      template.hasResourceProperties('AWS::S3::Bucket', {
+        BucketName: expectedBucketName,
+      });
+    });
+
+    test('Lambda has V2_BUCKET_NAME environment variable set', () => {
+      const template = Template.fromStack(stack);
+      template.hasResourceProperties('AWS::Lambda::Function', {
+        Environment: Match.objectLike({
+          Variables: Match.objectLike({
+            V2_BUCKET_NAME: expectedBucketName,
+          }),
+        }),
+      });
+    });
+  }
+);
+
+describe('application-stack-v2-disabled-behavior', () => {
   const app: App = new App({});
 
-  const stack = new ApplicationStack(app, `${appStage}ApplicationStack`, {
+  const stack = new ApplicationStack(app, 'V2DisabledApplicationStack', {
     env: {
-      account: accountIdAlias[appStage],
+      account: accountIdAlias[AppStage.BETA],
       region: 'ap-southeast-2',
     },
     tags: {
       'umccr-org:Product': 'OrcaUI',
       'umccr-org:Creator': 'CDK',
     },
-    ...getAppStackConfig(appStage),
+    cloudFrontBucketName: 'orcaui-cloudfront-v2-disabled-test',
+    configLambdaName: 'CodeBuildEnvConfigLambdaV2DisabledTest',
+    aliasDomainName: ['orcaui.disabled.test'],
+    reactBuildEnvVariables: {},
   });
 
   test('does not synthesize a v2 S3 bucket or /v2/* CloudFront behavior', () => {
@@ -197,6 +215,17 @@ function applyNagSuppression(stackId: string, stack: Stack) {
       NagSuppressions.addResourceSuppressionsByPath(
         stack,
         `/ApplicationStack/OrcaUIAssetCloudFrontBucket/Resource`,
+        [
+          {
+            id: 'AwsSolutions-S1',
+            reason: 'No access logs required for now',
+          },
+        ]
+      );
+
+      NagSuppressions.addResourceSuppressionsByPath(
+        stack,
+        `/ApplicationStack/OrcaUIv2AssetCloudFrontBucket/Resource`,
         [
           {
             id: 'AwsSolutions-S1',

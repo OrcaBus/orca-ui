@@ -27,6 +27,9 @@ type PipelineFilePaths = { Includes?: string[]; Excludes?: string[] };
 type CfnResource = { Properties?: Record<string, unknown> };
 type PipelineAction = {
   Name: string;
+  ActionTypeId?: {
+    Category?: string;
+  };
   Configuration?: Record<string, unknown>;
 };
 type PipelineStage = {
@@ -47,10 +50,26 @@ type CodeBuildProjectProperties = {
     EnvironmentVariables?: Array<Record<string, unknown>>;
   };
 };
+type IamRoleProperties = {
+  AssumeRolePolicyDocument?: {
+    Statement?: Array<{
+      Action?: string | string[];
+      Principal?: Record<string, unknown>;
+    }>;
+  };
+};
 
-const configuredV2DeployStages = Object.values(AppStage)
-  .filter((appStage) => v2CloudFrontBucketNameConfig[appStage])
-  .map((appStage) => `DeployTo${stageLabel(appStage)}`);
+const configuredV2DeployStages = Object.values(AppStage).flatMap((appStage) => {
+  if (!v2CloudFrontBucketNameConfig[appStage]) {
+    return [];
+  }
+
+  if (appStage === AppStage.PROD) {
+    return ['DeployToProdApproval', 'DeployToProd'];
+  }
+
+  return [`DeployTo${stageLabel(appStage)}`];
+});
 
 const pipelineStacks: {
   stackId: string;
@@ -217,6 +236,55 @@ describe('OrcaUIV2CodePipelineStack deployment behavior', () => {
       );
     }
   });
+
+  test('requires manual approval immediately before prod deployment', () => {
+    const pipeline = getPipelineProperties(Template.fromStack(stack), 'OrcaUIV2CodeCICDPipeline');
+    const prodStageIndex = pipeline.Stages.findIndex((stage) => stage.Name === 'DeployToProd');
+    const approvalStage = pipeline.Stages[prodStageIndex - 1];
+
+    expect(prodStageIndex).toBeGreaterThan(0);
+    expect(approvalStage).toMatchObject({
+      Name: 'DeployToProdApproval',
+      Actions: [
+        expect.objectContaining({
+          Name: 'ApproveDeployToProd',
+          ActionTypeId: expect.objectContaining({
+            Category: 'Approval',
+          }),
+        }),
+      ],
+    });
+  });
+
+  test('v2 deploy roles are only assumable by CodeBuild', () => {
+    const template = Template.fromStack(stack);
+    const configuredStages = Object.values(AppStage).filter(
+      (appStage) => v2CloudFrontBucketNameConfig[appStage]
+    );
+
+    for (const appStage of configuredStages) {
+      const role = getIamRoleProperties(template, `OrcaUIV2DeployProjectRole${appStage}`);
+      const statements = role.AssumeRolePolicyDocument?.Statement ?? [];
+
+      expect(statements).toEqual([
+        expect.objectContaining({
+          Action: 'sts:AssumeRole',
+          Principal: {
+            Service: 'codebuild.amazonaws.com',
+          },
+        }),
+      ]);
+      expect(statements).not.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            Principal: expect.objectContaining({
+              AWS: expect.anything(),
+            }),
+          }),
+        ])
+      );
+    }
+  });
 });
 
 function getPipelineProperties(template: Template, pipelineName: string): PipelineProperties {
@@ -252,6 +320,15 @@ function getCodeBuildProjectPropertiesByName(
     },
     {} as Record<string, CodeBuildProjectProperties>
   );
+}
+
+function getIamRoleProperties(template: Template, logicalIdPrefix: string): IamRoleProperties {
+  const role = Object.entries(template.findResources('AWS::IAM::Role')).find(([logicalId]) =>
+    logicalId.startsWith(logicalIdPrefix)
+  )?.[1];
+
+  expect(role).toBeDefined();
+  return cfnResourceProperties(role) as IamRoleProperties;
 }
 
 function cfnResourceProperties(resource: unknown): Record<string, unknown> {
