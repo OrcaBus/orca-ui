@@ -277,7 +277,7 @@ export class OrcaUIV2CodePipelineStack extends Stack {
               },
             },
           ],
-          SourceActionName: codesStarSourceName,
+          SourceActionName: codeStarSourceName,
         },
         ProviderType: 'CodeStarSourceConnection',
       },

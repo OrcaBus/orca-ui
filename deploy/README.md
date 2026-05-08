@@ -34,7 +34,7 @@ Application code deploys independently:
 - `OrcaUICodePipeline` builds `OrcaBus/orca-ui`, syncs the `dist/` artifact to the primary bucket root, then invokes the env config Lambda.
 - `OrcaUIV2CodePipeline` builds `OrcaBus/orca-ui-v2`, syncs the `build/` artifact to `s3://<v2-bucket>/v2/`, then invokes the same env config Lambda.
 
-UI v2 is currently enabled only where `v2CloudFrontBucketNameConfig` is set in [`config.ts`](./config.ts). At the time of writing, that is beta only. See [`docs/ui-v2-deployment-strategy.md`](../docs/ui-v2-deployment-strategy.md) for the dual-bucket `/v2/` hosting details.
+UI v2 is currently enabled only where `v2CloudFrontBucketNameConfig` is set in [`config.ts`](./config.ts). See [`docs/ui-v2-deployment-strategy.md`](../docs/ui-v2-deployment-strategy.md) for the dual-bucket `/v2/` hosting details.
 
 ## Env Config Lambda
 

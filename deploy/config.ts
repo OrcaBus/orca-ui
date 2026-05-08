@@ -56,6 +56,7 @@ export const getAppStackConfig = (appStage: AppStage): ApplicationStackProps => 
     case AppStage.GAMMA:
       return {
         cloudFrontBucketName: cloudFrontBucketNameConfig[appStage],
+        v2CloudFrontBucketName: v2CloudFrontBucketNameConfig[appStage],
         configLambdaName: configLambdaNameConfig[appStage],
         aliasDomainName: ['orcaui.stg.umccr.org', 'portal.stg.umccr.org'],
         reactBuildEnvVariables: {
@@ -71,6 +72,7 @@ export const getAppStackConfig = (appStage: AppStage): ApplicationStackProps => 
     case AppStage.PROD:
       return {
         cloudFrontBucketName: cloudFrontBucketNameConfig[appStage],
+        v2CloudFrontBucketName: v2CloudFrontBucketNameConfig[appStage],
         configLambdaName: configLambdaNameConfig[appStage],
         aliasDomainName: [
           'orcaui.umccr.org',
