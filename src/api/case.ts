@@ -217,12 +217,14 @@ export function useMutationCaseSyncFromRedcap({
       beforeDate: string | null;
     }) => {
       const c = getClient();
-      const query: Record<string, string> = {};
-      if (afterDate) query['afterDate'] = afterDate;
-      if (beforeDate) query['beforeDate'] = beforeDate;
+      const body: Record<string, string> = {};
+      if (afterDate) body['afterDate'] = afterDate;
+      if (beforeDate) body['beforeDate'] = beforeDate;
       const { data, error, response } = await (
         c.POST as (url: string, init?: object) => ReturnType<typeof c.POST>
-      )(caseSyncFromRedcapPath as keyof paths, { params: { query } });
+      )(resolvePath(caseSyncFromRedcapPath as keyof paths), {
+        body,
+      });
       return assertOk(data, error, response);
     },
   });

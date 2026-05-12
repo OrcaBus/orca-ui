@@ -37,10 +37,16 @@ export const CaseDetailAPITable = () => {
     reactQuery: {
       onSuccess: async () => {
         toaster.success({
-          title: 'Successfully Refresh Case',
+          title: 'Case Refreshed Successfully',
           message: 'Refresh case from REDCap has been triggered successfully.',
         });
         await queryClient.invalidateQueries();
+      },
+      onError: (error) => {
+        toaster.error({
+          title: 'Failed to Refresh Case',
+          message: error instanceof Error ? error.message : 'Refresh case from REDCap failed.',
+        });
       },
     },
   });
