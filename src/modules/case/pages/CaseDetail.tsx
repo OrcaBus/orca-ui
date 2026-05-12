@@ -1,6 +1,8 @@
-import { useQueryCaseDetailObject } from '@/api/case';
+import { useQueryCaseDetailObject, useMutationCaseSyncFromRedcapById } from '@/api/case';
 import { Fragment, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import toaster from '@/components/common/toaster';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import CaseLibraryTable from '../component/CaseLibrary';
 import WorkflowRunTable from '../component/CaseWorkflowRun';
@@ -22,12 +24,26 @@ const regularClassName =
 
 export const CaseDetailAPITable = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { getQueryParams, setQueryParams } = useQueryParams();
   const currentTabSelection = getQueryParams().tab ?? 'States';
   const { caseOrcabusId } = useParams();
   if (!caseOrcabusId) {
     throw new Error('No case id in URL path!');
   }
+
+  const syncMutation = useMutationCaseSyncFromRedcapById({
+    orcabusId: caseOrcabusId,
+    reactQuery: {
+      onSuccess: async () => {
+        toaster.success({
+          title: 'Successfully Refresh Case',
+          message: 'Refresh case from REDCap has been triggered successfully.',
+        });
+        await queryClient.invalidateQueries();
+      },
+    },
+  });
 
   const caseModel = useQueryCaseDetailObject({
     params: { path: { orcabusId: caseOrcabusId } },
@@ -115,6 +131,15 @@ export const CaseDetailAPITable = () => {
           </h1>
         </div>
         <div className='flex gap-2'>
+          <Button
+            onClick={() => syncMutation.mutate()}
+            type='secondary'
+            size='md'
+            disabled={syncMutation.isPending}
+            className='px-6 shadow-sm transition-shadow duration-200 hover:shadow-md'
+          >
+            {syncMutation.isPending ? 'Refreshing...' : 'Refresh from REDCap'}
+          </Button>
           <Button
             onClick={() => navigate('./edit')}
             type='primary'

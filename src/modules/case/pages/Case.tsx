@@ -7,6 +7,7 @@ import { Search } from '@/components/common/search';
 import { Button } from '@/components/common/buttons';
 import { useNavigate } from 'react-router-dom';
 import { PlusIcon } from '@heroicons/react/24/outline';
+import CaseRedCapDateImportButton from '../component/CaseRedCapDateImportButton';
 
 const standardClassName = classNames(
   'text-gray-900 dark:text-gray-100',
@@ -37,10 +38,8 @@ export const CaseListAPITable = () => {
               <PlusIcon className='h-5 w-5' />
               New Case
             </Button>
-            {/* Disabling now as moving forward will based on explicit case generation through REDCAP
-                rather than auto-reference based on workflows
-            */}
-            {/* <CaseGenerateButton /> */}
+
+            <CaseRedCapDateImportButton />
             <div className='w-full md:w-1/5'>
               <Search
                 onSearch={(s) => setQueryParams({ search: s })}
