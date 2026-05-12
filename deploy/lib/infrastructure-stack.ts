@@ -27,7 +27,7 @@ import { Function } from 'aws-cdk-lib/aws-lambda';
 import { TOOLCHAIN_ACCOUNT_ID } from '../config';
 import { Key } from 'aws-cdk-lib/aws-kms';
 
-export type ApplicationStackProps = {
+export type InfrastructureStackProps = {
   cloudFrontBucketName: string;
   v2CloudFrontBucketName?: string;
   configLambdaName: string;
@@ -35,8 +35,8 @@ export type ApplicationStackProps = {
   reactBuildEnvVariables: Record<string, string>;
 };
 
-export class ApplicationStack extends Stack {
-  constructor(scope: Construct, id: string, props: ApplicationStackProps & StackProps) {
+export class InfrastructureStack extends Stack {
+  constructor(scope: Construct, id: string, props: InfrastructureStackProps & StackProps) {
     super(scope, id, props);
 
     const clientBucket = new Bucket(this, 'OrcaUIAssetCloudFrontBucket', {

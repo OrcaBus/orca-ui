@@ -3,11 +3,11 @@ import { Annotations, Match, Template } from 'aws-cdk-lib/assertions';
 import { SynthesisMessage } from '@aws-cdk/cloud-assembly-api';
 import { describe, expect, test } from '@jest/globals';
 import { AwsSolutionsChecks, NagSuppressions } from 'cdk-nag';
-import { ApplicationStack } from '../lib/application-stack';
+import { InfrastructureStack } from '../lib/infrastructure-stack';
 import {
   accountIdAlias,
   AppStage,
-  getAppStackConfig,
+  getInfrastructureStackConfig,
   v2CloudFrontBucketNameConfig,
 } from '../config';
 
@@ -30,7 +30,7 @@ type CloudFrontDistributionResource = {
 describe('cdk-nag-stack', () => {
   const app: App = new App({});
 
-  const stack = new ApplicationStack(app, 'ApplicationStack', {
+  const stack = new InfrastructureStack(app, 'InfrastructureStack', {
     env: {
       account: '123456789',
       region: 'ap-southeast-2',
@@ -39,7 +39,7 @@ describe('cdk-nag-stack', () => {
       'umccr-org:Product': 'OrcaUI',
       'umccr-org:Creator': 'CDK',
     },
-    ...getAppStackConfig(AppStage.PROD),
+    ...getInfrastructureStackConfig(AppStage.PROD),
   });
 
   const stackId = stack.node.id;
@@ -74,7 +74,7 @@ describe.each(configuredV2Stages)(
   ({ appStage, expectedBucketName }) => {
     const app: App = new App({});
 
-    const stack = new ApplicationStack(app, `${appStage}ApplicationStack`, {
+    const stack = new InfrastructureStack(app, `${appStage}InfrastructureStack`, {
       env: {
         account: accountIdAlias[appStage],
         region: 'ap-southeast-2',
@@ -83,7 +83,7 @@ describe.each(configuredV2Stages)(
         'umccr-org:Product': 'OrcaUI',
         'umccr-org:Creator': 'CDK',
       },
-      ...getAppStackConfig(appStage),
+      ...getInfrastructureStackConfig(appStage),
     });
 
     test('synthesizes with /v2/* CloudFront behavior', () => {
@@ -119,10 +119,10 @@ describe.each(configuredV2Stages)(
   }
 );
 
-describe('application-stack-v2-disabled-behavior', () => {
+describe('infrastructure-stack-v2-disabled-behavior', () => {
   const app: App = new App({});
 
-  const stack = new ApplicationStack(app, 'V2DisabledApplicationStack', {
+  const stack = new InfrastructureStack(app, 'V2DisabledInfrastructureStack', {
     env: {
       account: accountIdAlias[AppStage.BETA],
       region: 'ap-southeast-2',
@@ -185,10 +185,10 @@ function applyNagSuppression(stackId: string, stack: Stack) {
   );
 
   switch (stackId) {
-    case 'ApplicationStack':
+    case 'InfrastructureStack':
       NagSuppressions.addResourceSuppressionsByPath(
         stack,
-        `/ApplicationStack/CloudFrontDistribution/Resource`,
+        `/InfrastructureStack/CloudFrontDistribution/Resource`,
         [
           {
             id: 'AwsSolutions-CFR1',
@@ -203,7 +203,7 @@ function applyNagSuppression(stackId: string, stack: Stack) {
 
       NagSuppressions.addResourceSuppressionsByPath(
         stack,
-        `/ApplicationStack/EnvConfigLambda/ServiceRole/DefaultPolicy/Resource`,
+        `/InfrastructureStack/EnvConfigLambda/ServiceRole/DefaultPolicy/Resource`,
         [
           {
             id: 'AwsSolutions-IAM5',
@@ -214,7 +214,7 @@ function applyNagSuppression(stackId: string, stack: Stack) {
 
       NagSuppressions.addResourceSuppressionsByPath(
         stack,
-        `/ApplicationStack/OrcaUIAssetCloudFrontBucket/Resource`,
+        `/InfrastructureStack/OrcaUIAssetCloudFrontBucket/Resource`,
         [
           {
             id: 'AwsSolutions-S1',
@@ -225,7 +225,7 @@ function applyNagSuppression(stackId: string, stack: Stack) {
 
       NagSuppressions.addResourceSuppressionsByPath(
         stack,
-        `/ApplicationStack/OrcaUIv2AssetCloudFrontBucket/Resource`,
+        `/InfrastructureStack/OrcaUIv2AssetCloudFrontBucket/Resource`,
         [
           {
             id: 'AwsSolutions-S1',
@@ -236,7 +236,7 @@ function applyNagSuppression(stackId: string, stack: Stack) {
 
       NagSuppressions.addResourceSuppressionsByPath(
         stack,
-        `/ApplicationStack/CloudFrontDistribution/Resource`,
+        `/InfrastructureStack/CloudFrontDistribution/Resource`,
         [
           {
             id: 'AwsSolutions-CFR3',
@@ -247,7 +247,7 @@ function applyNagSuppression(stackId: string, stack: Stack) {
 
       NagSuppressions.addResourceSuppressionsByPath(
         stack,
-        `/ApplicationStack/CloudFrontDistribution/Resource`,
+        `/InfrastructureStack/CloudFrontDistribution/Resource`,
         [
           {
             id: 'AwsSolutions-CFR7',

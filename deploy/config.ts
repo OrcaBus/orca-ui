@@ -1,4 +1,4 @@
-import { ApplicationStackProps } from './lib/application-stack';
+import { InfrastructureStackProps } from './lib/infrastructure-stack';
 
 export enum AppStage {
   BETA = 'beta',
@@ -34,7 +34,7 @@ export const configLambdaNameConfig: Record<AppStage, string> = {
   [AppStage.PROD]: 'CodeBuildEnvConfigLambdaProd',
 };
 
-export const getAppStackConfig = (appStage: AppStage): ApplicationStackProps => {
+export const getInfrastructureStackConfig = (appStage: AppStage): InfrastructureStackProps => {
   switch (appStage) {
     case AppStage.BETA:
       return {

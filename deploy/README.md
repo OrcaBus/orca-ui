@@ -6,13 +6,13 @@ This directory contains the AWS CDK app for OrcaUI hosting infrastructure and CI
 
 The CDK app is composed in [`bin.ts`](./bin.ts) and creates three top-level pipeline stacks in the toolchain account:
 
-| CDK stack                      | CodePipeline name          | Source repository           | Trigger              | Purpose                                                                                 |
-| ------------------------------ | -------------------------- | --------------------------- | -------------------- | --------------------------------------------------------------------------------------- |
-| `OrcaUIInfrastructurePipeline` | `OrcaUIInfrastructure`     | `OrcaBus/orca-ui` `main`    | `deploy/**` only     | Synthesizes CDK and deploys `ApplicationStack` to beta, gamma, and prod.                |
-| `OrcaUICodePipeline`           | `OrcaUICodeCICDPipeline`   | `OrcaBus/orca-ui` `main`    | excludes `deploy/**` | Builds and deploys the current UI app to the primary CloudFront bucket.                 |
-| `OrcaUIV2CodePipeline`         | `OrcaUIV2CodeCICDPipeline` | `OrcaBus/orca-ui-v2` `main` | excludes `deploy/**` | Builds and deploys UI v2 to the configured v2 CloudFront bucket under the `v2/` prefix. |
+| CDK stack                      | CodePipeline name              | Source repository           | Trigger              | Purpose                                                                                 |
+| ------------------------------ | ------------------------------ | --------------------------- | -------------------- | --------------------------------------------------------------------------------------- |
+| `OrcaUIInfrastructurePipeline` | `OrcaBus-OrcaUIInfrastructure` | `OrcaBus/orca-ui` `main`    | `deploy/**` only     | Synthesizes CDK and deploys `InfrastructureStack` to beta, gamma, and prod.             |
+| `OrcaUIAppPipeline`            | `OrcaUIAppCICDPipeline`        | `OrcaBus/orca-ui` `main`    | excludes `deploy/**` | Builds and deploys the current UI app to the primary CloudFront bucket.                 |
+| `OrcaUIV2AppPipeline`          | `OrcaUIV2AppCICDPipeline`      | `OrcaBus/orca-ui-v2` `main` | excludes `deploy/**` | Builds and deploys UI v2 to the configured v2 CloudFront bucket under the `v2/` prefix. |
 
-`ApplicationStack` owns the hosted app infrastructure in each target account:
+`InfrastructureStack` owns the hosted app infrastructure in each target account:
 
 - S3 bucket for the current UI app.
 - Optional v2 S3 bucket when `v2CloudFrontBucketName` is configured.
@@ -27,12 +27,12 @@ Infrastructure changes flow through `OrcaUIInfrastructurePipeline`:
 1. A push to `OrcaBus/orca-ui` on `main` under `deploy/**` triggers the infrastructure pipeline.
 2. The pipeline runs `cd deploy`, installs dependencies, and runs `yarn cdk synth`.
 3. CDK self-mutation updates the pipeline when needed.
-4. `ApplicationStack` is deployed to beta, gamma, then prod. Gamma has a manual approval before promotion to prod.
+4. `InfrastructureStack` is deployed to beta, gamma, then prod. Gamma has a manual approval before promotion to prod.
 
 Application code deploys independently:
 
-- `OrcaUICodePipeline` builds `OrcaBus/orca-ui`, syncs the `dist/` artifact to the primary bucket root, then invokes the env config Lambda.
-- `OrcaUIV2CodePipeline` builds `OrcaBus/orca-ui-v2`, syncs the `build/` artifact to `s3://<v2-bucket>/v2/`, then invokes the same env config Lambda.
+- `OrcaUIAppPipeline` builds `OrcaBus/orca-ui`, syncs the `dist/` artifact to the primary bucket root, then invokes the env config Lambda.
+- `OrcaUIV2AppPipeline` builds `OrcaBus/orca-ui-v2`, syncs the `build/` artifact to `s3://<v2-bucket>/v2/`, then invokes the same env config Lambda.
 
 UI v2 is currently enabled only where `v2CloudFrontBucketNameConfig` is set in [`config.ts`](./config.ts). See [`docs/ui-v2-deployment-strategy.md`](../docs/ui-v2-deployment-strategy.md) for the dual-bucket `/v2/` hosting details.
 
@@ -127,31 +127,31 @@ Example stack output:
 
 ```sh
 OrcaUIInfrastructurePipeline
-OrcaUIInfrastructurePipeline/OrcaUIBeta/ApplicationStack (OrcaUIBeta-ApplicationStack)
-OrcaUIInfrastructurePipeline/OrcaUIGamma/ApplicationStack (OrcaUIGamma-ApplicationStack)
-OrcaUIInfrastructurePipeline/OrcaUIProd/ApplicationStack (OrcaUIProd-ApplicationStack)
-OrcaUICodePipeline
-OrcaUIV2CodePipeline
+OrcaUIAppPipeline
+OrcaUIV2AppPipeline
+OrcaUIInfrastructurePipeline/DeploymentPipeline/OrcaBusBeta/OrcaUIInfrastructureStack (OrcaBusBeta-OrcaUIInfrastructureStack)
+OrcaUIInfrastructurePipeline/DeploymentPipeline/OrcaBusGamma/OrcaUIInfrastructureStack (OrcaBusGamma-OrcaUIInfrastructureStack)
+OrcaUIInfrastructurePipeline/DeploymentPipeline/OrcaBusProd/OrcaUIInfrastructureStack (OrcaBusProd-OrcaUIInfrastructureStack)
 ```
 
 Deploy the top-level pipeline stacks:
 
 ```sh
 yarn cdk deploy -e OrcaUIInfrastructurePipeline
-yarn cdk deploy -e OrcaUICodePipeline
-yarn cdk deploy -e OrcaUIV2CodePipeline
+yarn cdk deploy -e OrcaUIAppPipeline
+yarn cdk deploy -e OrcaUIV2AppPipeline
 ```
 
-Work directly with the beta application stack:
+Work directly with the beta infrastructure stack:
 
 ```sh
-yarn cdk synth -e OrcaUIInfrastructurePipeline/OrcaUIBeta/ApplicationStack
-yarn cdk diff -e OrcaUIInfrastructurePipeline/OrcaUIBeta/ApplicationStack
-yarn cdk deploy -e OrcaUIInfrastructurePipeline/OrcaUIBeta/ApplicationStack
+yarn cdk synth -e OrcaUIInfrastructurePipeline/DeploymentPipeline/OrcaBusBeta/OrcaUIInfrastructureStack
+yarn cdk diff -e OrcaUIInfrastructurePipeline/DeploymentPipeline/OrcaBusBeta/OrcaUIInfrastructureStack
+yarn cdk deploy -e OrcaUIInfrastructurePipeline/DeploymentPipeline/OrcaBusBeta/OrcaUIInfrastructureStack
 ```
 
 Direct application stack deploys require AWS credentials for the target account and the usual CDK bootstrap roles.
 
 ## Migration Note
 
-The CDK app now uses three top-level stack IDs instead of the older combined `OrcaUIPipeline` stack. If `OrcaUIPipeline` already exists in AWS, do not deploy the new stacks blindly: named resources such as CodePipeline and CodeBuild projects may still be owned by the old stack. Plan the migration so ownership of existing resources is handled intentionally.
+The CDK app now uses three top-level stack IDs instead of the older combined `OrcaUIPipeline` stack, and the app CI/CD stacks are named `OrcaUIAppPipeline` and `OrcaUIV2AppPipeline`. If older pipeline stacks already exist in AWS, do not deploy the new stacks blindly: named resources such as CodePipeline and CodeBuild projects may still be owned by an old stack. Plan the migration so ownership of existing resources is handled intentionally.

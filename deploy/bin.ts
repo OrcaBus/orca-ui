@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { InfrastructurePipelineStack } from './lib/infrastructure-pipeline-stack';
-import { OrcaUICodePipelineStack } from './lib/orca-ui-code-pipeline-stack';
-import { OrcaUIV2CodePipelineStack } from './lib/orca-ui-v2-code-pipeline-stack';
+import { InfrastructureDeploymentStack } from './lib/infrastructure-deployment-stack';
+import { OrcaUIAppPipelineStack } from './lib/orca-ui-app-pipeline-stack';
+import { OrcaUIV2AppPipelineStack } from './lib/orca-ui-v2-app-pipeline-stack';
 import { TOOLCHAIN_ACCOUNT_ID, REGION } from './config';
 
 const app = new cdk.App();
 
-new InfrastructurePipelineStack(app, 'OrcaUIInfrastructurePipeline', {
+new InfrastructureDeploymentStack(app, 'OrcaUIInfrastructurePipeline', {
   env: {
     account: TOOLCHAIN_ACCOUNT_ID,
     region: REGION,
@@ -19,24 +19,24 @@ new InfrastructurePipelineStack(app, 'OrcaUIInfrastructurePipeline', {
   },
 });
 
-new OrcaUICodePipelineStack(app, 'OrcaUICodePipeline', {
+new OrcaUIAppPipelineStack(app, 'OrcaUIAppPipeline', {
   env: {
     account: TOOLCHAIN_ACCOUNT_ID,
     region: REGION,
   },
   tags: {
-    'umccr-org:Stack': 'OrcaUICodePipeline',
+    'umccr-org:Stack': 'OrcaUIAppPipeline',
     'umccr-org:Product': 'OrcaUI',
   },
 });
 
-new OrcaUIV2CodePipelineStack(app, 'OrcaUIV2CodePipeline', {
+new OrcaUIV2AppPipelineStack(app, 'OrcaUIV2AppPipeline', {
   env: {
     account: TOOLCHAIN_ACCOUNT_ID,
     region: REGION,
   },
   tags: {
-    'umccr-org:Stack': 'OrcaUIV2CodePipeline',
+    'umccr-org:Stack': 'OrcaUIV2AppPipeline',
     'umccr-org:Product': 'OrcaUI',
   },
 });

@@ -19,16 +19,19 @@ import {
   accountIdAlias,
   AppStage,
   configLambdaNameConfig,
-  getAppStackConfig,
+  getInfrastructureStackConfig,
   REGION,
   v2CloudFrontBucketNameConfig,
 } from '../config';
 
-export class OrcaUIV2CodePipelineStack extends Stack {
+export class OrcaUIV2AppPipelineStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps) {
     super(scope, id, props);
 
     const ghBranchName = 'main';
+    const buildImage = LinuxArmBuildImage.AMAZON_LINUX_2023_STANDARD_3_0;
+    const validateEnvConfigLambdaResponse =
+      "python3 -c \"import json, sys; meta=json.load(open('invoke-result.json')); payload=json.load(open('response.json')); print(payload.get('body', payload)); sys.exit(1 if meta.get('FunctionError') or payload.get('statusCode') != 200 else 0)\"";
     const codeStarArn = StringParameter.valueForStringParameter(this, 'codestar_github_arn');
     const sourceOutput = new Artifact();
     const buildOutput = new Artifact();
@@ -59,7 +62,7 @@ export class OrcaUIV2CodePipelineStack extends Stack {
           'base-directory': 'build/',
         },
       }),
-      environment: { buildImage: LinuxArmBuildImage.AMAZON_LINUX_2_STANDARD_3_0 },
+      environment: { buildImage },
     });
 
     const deployProject = (env: AppStage) => {
@@ -101,13 +104,14 @@ export class OrcaUIV2CodePipelineStack extends Stack {
           phases: {
             build: {
               commands: [
-                'aws s3 rm s3://${DESTINATION_BUCKET_NAME}/v2/ --recursive && aws s3 sync . s3://${DESTINATION_BUCKET_NAME}/v2/',
-                'aws lambda invoke --function-name arn:aws:lambda:${REGION}:${DESTINATION_ACCOUNT_ID}:function:${CONFIG_LAMBDA_NAME} response.json',
+                'aws s3 sync . s3://${DESTINATION_BUCKET_NAME}/v2/ --delete',
+                'aws lambda invoke --function-name arn:aws:lambda:${REGION}:${DESTINATION_ACCOUNT_ID}:function:${CONFIG_LAMBDA_NAME} response.json > invoke-result.json',
+                validateEnvConfigLambdaResponse,
               ],
             },
           },
         }),
-        environment: { buildImage: LinuxArmBuildImage.AMAZON_LINUX_2_STANDARD_3_0 },
+        environment: { buildImage },
         environmentVariables: {
           DESTINATION_BUCKET_NAME: {
             value: destinationBucketName,
@@ -126,7 +130,7 @@ export class OrcaUIV2CodePipelineStack extends Stack {
       });
     };
 
-    const gammaConfig = getAppStackConfig(AppStage.GAMMA);
+    const gammaConfig = getInfrastructureStackConfig(AppStage.GAMMA);
     const openApiTsCheck = v2CloudFrontBucketNameConfig[AppStage.GAMMA]
       ? new PipelineProject(this, 'OrcaUIV2OpenApiTSCheck', {
           projectName: 'OrcaUIV2-OpenApiTSCheck',
@@ -151,7 +155,7 @@ export class OrcaUIV2CodePipelineStack extends Stack {
               },
             },
           }),
-          environment: { buildImage: LinuxArmBuildImage.AMAZON_LINUX_2_STANDARD_3_0 },
+          environment: { buildImage },
         })
       : undefined;
 
@@ -239,9 +243,9 @@ export class OrcaUIV2CodePipelineStack extends Stack {
       });
     }
 
-    const appCiCdPipeline = new Pipeline(this, 'OrcaUIV2CodeCICDPipeline', {
+    const appCiCdPipeline = new Pipeline(this, 'OrcaUIV2AppCICDPipeline', {
       pipelineType: PipelineType.V2,
-      pipelineName: 'OrcaUIV2CodeCICDPipeline',
+      pipelineName: 'OrcaUIV2AppCICDPipeline',
       crossAccountKeys: false,
       stages,
     });

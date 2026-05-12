@@ -4,15 +4,15 @@ import { SynthesisMessage } from '@aws-cdk/cloud-assembly-api';
 import { describe, expect, jest, test } from '@jest/globals';
 import { AwsSolutionsChecks, NagSuppressions } from 'cdk-nag';
 import type { Construct } from 'constructs';
-import { InfrastructurePipelineStack } from '../lib/infrastructure-pipeline-stack';
-import { OrcaUICodePipelineStack } from '../lib/orca-ui-code-pipeline-stack';
-import { OrcaUIV2CodePipelineStack } from '../lib/orca-ui-v2-code-pipeline-stack';
+import { InfrastructureDeploymentStack } from '../lib/infrastructure-deployment-stack';
+import { OrcaUIAppPipelineStack } from '../lib/orca-ui-app-pipeline-stack';
+import { OrcaUIV2AppPipelineStack } from '../lib/orca-ui-v2-app-pipeline-stack';
 import { AppStage, v2CloudFrontBucketNameConfig } from '../config';
 
-// we are mocking the deployment stack here, as we have a dedicated cdk-nag test for deployment stack
-jest.mock('../lib/application-stack', () => {
+// we are mocking the infrastructure stack here, as we have a dedicated cdk-nag test for it
+jest.mock('../lib/infrastructure-stack', () => {
   return {
-    ApplicationStack: jest.fn((value: Construct) => {
+    InfrastructureStack: jest.fn((value: Construct) => {
       return new Stack(value, 'mockStack', {});
     }),
   };
@@ -82,18 +82,18 @@ const pipelineStacks: {
   exactStages?: boolean;
 }[] = [
   {
-    stackId: 'TestInfrastructurePipelineStack',
-    StackClass: InfrastructurePipelineStack,
-    pipelineName: 'OrcaUIInfrastructure',
+    stackId: 'TestInfrastructureDeploymentStack',
+    StackClass: InfrastructureDeploymentStack,
+    pipelineName: 'OrcaBus-OrcaUIInfrastructure',
     repository: 'OrcaBus/orca-ui',
-    sourceActionName: 'infra-src',
+    sourceActionName: 'pipeline-src',
     filePaths: { Includes: ['deploy/**'] },
-    expectedStages: ['Source', 'Build', 'OrcaUIBeta', 'OrcaUIGamma', 'OrcaUIProd'],
+    expectedStages: ['Source', 'Build', 'OrcaBusBeta', 'OrcaBusGamma', 'OrcaBusProd'],
   },
   {
-    stackId: 'TestOrcaUICodePipelineStack',
-    StackClass: OrcaUICodePipelineStack,
-    pipelineName: 'OrcaUICodeCICDPipeline',
+    stackId: 'TestOrcaUIAppPipelineStack',
+    StackClass: OrcaUIAppPipelineStack,
+    pipelineName: 'OrcaUIAppCICDPipeline',
     repository: 'OrcaBus/orca-ui',
     sourceActionName: 'orcauiAppSrc',
     filePaths: { Excludes: ['deploy/**'] },
@@ -101,9 +101,9 @@ const pipelineStacks: {
     exactStages: true,
   },
   {
-    stackId: 'TestOrcaUIV2CodePipelineStack',
-    StackClass: OrcaUIV2CodePipelineStack,
-    pipelineName: 'OrcaUIV2CodeCICDPipeline',
+    stackId: 'TestOrcaUIV2AppPipelineStack',
+    StackClass: OrcaUIV2AppPipelineStack,
+    pipelineName: 'OrcaUIV2AppCICDPipeline',
     repository: 'OrcaBus/orca-ui-v2',
     sourceActionName: 'orcauiV2AppSrc',
     filePaths: { Excludes: ['deploy/**'] },
@@ -194,9 +194,82 @@ describe.each(pipelineStacks)(
   }
 );
 
-describe('OrcaUIV2CodePipelineStack deployment behavior', () => {
+describe('InfrastructureDeploymentStack build command behavior', () => {
   const app: App = new App({});
-  const stack = new OrcaUIV2CodePipelineStack(app, 'TestOrcaUIV2DeploymentBehavior', {
+  const stack = new InfrastructureDeploymentStack(app, 'TestInfrastructureBuildCommands', {
+    env: {
+      account: '123456789',
+      region: 'ap-southeast-2',
+    },
+  });
+
+  test('uses deploy Yarn commands instead of default root pnpm commands', () => {
+    const buildSpecs = getCodeBuildProjectBuildSpecs(Template.fromStack(stack)).join('\n');
+
+    expect(buildSpecs).toContain('"cd deploy"');
+    expect(buildSpecs).toContain('"yarn install --immutable"');
+    expect(buildSpecs).toContain('"yarn cdk synth"');
+    expect(buildSpecs).toContain('"yarn run test"');
+    expect(buildSpecs).not.toContain('pnpm test');
+    expect(buildSpecs).not.toContain('pnpm install --frozen-lockfile');
+  });
+});
+
+describe('OrcaUIAppPipelineStack deployment behavior', () => {
+  const app: App = new App({});
+  const stack = new OrcaUIAppPipelineStack(app, 'TestOrcaUIAppDeploymentBehavior', {
+    env: {
+      account: '123456789',
+      region: 'ap-southeast-2',
+    },
+  });
+
+  test('deploys stages with sync delete and checked Lambda invocation', () => {
+    const codeBuildProjects = getCodeBuildProjectPropertiesByName(Template.fromStack(stack));
+
+    for (const appStage of Object.values(AppStage)) {
+      const project = codeBuildProjects[`ReactDeployProject${appStage}`];
+      expect(project).toBeDefined();
+      expect(project.Source.BuildSpec).toContain(
+        'aws s3 sync . s3://${DESTINATION_BUCKET_NAME} --delete'
+      );
+      expect(project.Source.BuildSpec).toContain('invoke-result.json');
+      expect(project.Source.BuildSpec).toContain("payload.get('statusCode') != 200");
+      expect(project.Source.BuildSpec).toContain("meta.get('FunctionError')");
+    }
+  });
+
+  test('deploy roles are only assumable by CodeBuild', () => {
+    const template = Template.fromStack(stack);
+
+    for (const appStage of Object.values(AppStage)) {
+      const role = getIamRoleProperties(template, `ReactDeployProjectRole${appStage}`);
+      const statements = role.AssumeRolePolicyDocument?.Statement ?? [];
+
+      expect(statements).toEqual([
+        expect.objectContaining({
+          Action: 'sts:AssumeRole',
+          Principal: {
+            Service: 'codebuild.amazonaws.com',
+          },
+        }),
+      ]);
+      expect(statements).not.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            Principal: expect.objectContaining({
+              AWS: expect.anything(),
+            }),
+          }),
+        ])
+      );
+    }
+  });
+});
+
+describe('OrcaUIV2AppPipelineStack deployment behavior', () => {
+  const app: App = new App({});
+  const stack = new OrcaUIV2AppPipelineStack(app, 'TestOrcaUIV2DeploymentBehavior', {
     env: {
       account: '123456789',
       region: 'ap-southeast-2',
@@ -224,8 +297,11 @@ describe('OrcaUIV2CodePipelineStack deployment behavior', () => {
       const project = codeBuildProjects[`OrcaUIV2DeployProject${appStage}`];
       expect(project).toBeDefined();
       expect(project.Source.BuildSpec).toContain(
-        'aws s3 rm s3://${DESTINATION_BUCKET_NAME}/v2/ --recursive && aws s3 sync . s3://${DESTINATION_BUCKET_NAME}/v2/'
+        'aws s3 sync . s3://${DESTINATION_BUCKET_NAME}/v2/ --delete'
       );
+      expect(project.Source.BuildSpec).toContain('invoke-result.json');
+      expect(project.Source.BuildSpec).toContain("payload.get('statusCode') != 200");
+      expect(project.Source.BuildSpec).toContain("meta.get('FunctionError')");
       expect(project.Environment?.EnvironmentVariables ?? []).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -238,7 +314,7 @@ describe('OrcaUIV2CodePipelineStack deployment behavior', () => {
   });
 
   test('requires manual approval immediately before prod deployment', () => {
-    const pipeline = getPipelineProperties(Template.fromStack(stack), 'OrcaUIV2CodeCICDPipeline');
+    const pipeline = getPipelineProperties(Template.fromStack(stack), 'OrcaUIV2AppCICDPipeline');
     const prodStageIndex = pipeline.Stages.findIndex((stage) => stage.Name === 'DeployToProd');
     const approvalStage = pipeline.Stages[prodStageIndex - 1];
 
@@ -320,6 +396,13 @@ function getCodeBuildProjectPropertiesByName(
     },
     {} as Record<string, CodeBuildProjectProperties>
   );
+}
+
+function getCodeBuildProjectBuildSpecs(template: Template): string[] {
+  return Object.values(template.findResources('AWS::CodeBuild::Project'))
+    .map((resource) => (cfnResourceProperties(resource) as CodeBuildProjectProperties).Source)
+    .map((source) => source.BuildSpec)
+    .filter((buildSpec): buildSpec is string => typeof buildSpec === 'string');
 }
 
 function getIamRoleProperties(template: Template, logicalIdPrefix: string): IamRoleProperties {

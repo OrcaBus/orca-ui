@@ -6,14 +6,7 @@ import {
   CodeStarConnectionsSourceAction,
   ManualApprovalAction,
 } from 'aws-cdk-lib/aws-codepipeline-actions';
-import {
-  AccountPrincipal,
-  CompositePrincipal,
-  Effect,
-  PolicyStatement,
-  Role,
-  ServicePrincipal,
-} from 'aws-cdk-lib/aws-iam';
+import { Effect, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import {
@@ -21,15 +14,18 @@ import {
   AppStage,
   cloudFrontBucketNameConfig,
   configLambdaNameConfig,
-  getAppStackConfig,
+  getInfrastructureStackConfig,
   REGION,
 } from '../config';
 
-export class OrcaUICodePipelineStack extends Stack {
+export class OrcaUIAppPipelineStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps) {
     super(scope, id, props);
 
     const ghBranchName = 'main';
+    const buildImage = LinuxArmBuildImage.AMAZON_LINUX_2023_STANDARD_3_0;
+    const validateEnvConfigLambdaResponse =
+      "python3 -c \"import json, sys; meta=json.load(open('invoke-result.json')); payload=json.load(open('response.json')); print(payload.get('body', payload)); sys.exit(1 if meta.get('FunctionError') or payload.get('statusCode') != 200 else 0)\"";
 
     // A connection where the pipeline get its source code
     const codeStarArn = StringParameter.valueForStringParameter(this, 'codestar_github_arn');
@@ -68,31 +64,19 @@ export class OrcaUICodePipelineStack extends Stack {
           'base-directory': 'dist/',
         },
       }),
-      environment: { buildImage: LinuxArmBuildImage.AMAZON_LINUX_2_STANDARD_3_0 },
+      environment: { buildImage },
     });
 
     /**
      * Deploy project
      * This project is used to deploy the react app to the specified environment
-     * two commands are executed:
-     * 1. remove all files in the bucket and sync the build artifact to destination bucket
-     * 2. trigger the lambda to update config and invalidate cloudfront cache
+     * The build artifact is synced to the destination bucket, then the config Lambda
+     * updates env.js and invalidates CloudFront.
      */
     const deployProject = (env: AppStage) => {
       const deployProjectRole = new Role(this, `ReactDeployProjectRole${env}`, {
-        assumedBy: new CompositePrincipal(
-          new ServicePrincipal('codebuild.amazonaws.com'),
-          new AccountPrincipal(accountIdAlias[env])
-        ),
+        assumedBy: new ServicePrincipal('codebuild.amazonaws.com'),
       });
-      // Add a trust relationship to allow the bastion account to assume this role
-      deployProjectRole.assumeRolePolicy?.addStatements(
-        new PolicyStatement({
-          actions: ['sts:AssumeRole'],
-          effect: Effect.ALLOW,
-          principals: [new AccountPrincipal(this.account)],
-        })
-      );
       // Grant bucket access permission
       deployProjectRole.addToPolicy(
         new PolicyStatement({
@@ -123,16 +107,15 @@ export class OrcaUICodePipelineStack extends Stack {
           phases: {
             build: {
               commands: [
-                // remove all files in the bucket and sync the dist
-                'aws s3 rm s3://${DESTINATION_BUCKET_NAME}/ --recursive && aws s3 sync . s3://${DESTINATION_BUCKET_NAME}',
-
-                // trigger the lambda to update config and invalidate cloudfront cache
-                'aws lambda invoke --function-name arn:aws:lambda:${REGION}:${DESTINATION_ACCOUNT_ID}:function:${CONFIG_LAMBDA_NAME} response.json',
+                // Sync build artifact to S3 bucket, then trigger Lambda to update config and invalidate CloudFront cache
+                'aws s3 sync . s3://${DESTINATION_BUCKET_NAME} --delete',
+                'aws lambda invoke --function-name arn:aws:lambda:${REGION}:${DESTINATION_ACCOUNT_ID}:function:${CONFIG_LAMBDA_NAME} response.json > invoke-result.json',
+                validateEnvConfigLambdaResponse,
               ],
             },
           },
         }),
-        environment: { buildImage: LinuxArmBuildImage.AMAZON_LINUX_2_STANDARD_3_0 },
+        environment: { buildImage },
         environmentVariables: {
           DESTINATION_BUCKET_NAME: {
             value: cloudFrontBucketNameConfig[env],
@@ -151,7 +134,7 @@ export class OrcaUICodePipelineStack extends Stack {
       });
     };
 
-    const gammaConfig = getAppStackConfig(AppStage.GAMMA);
+    const gammaConfig = getInfrastructureStackConfig(AppStage.GAMMA);
     const openApiTsCheck = new PipelineProject(this, 'OpenApiTSCheck', {
       projectName: 'OrcaUI-OpenApiTSCheck',
       description: 'Test artifact with OpenAPI schema from relevant STG stage.',
@@ -161,7 +144,7 @@ export class OrcaUICodePipelineStack extends Stack {
         phases: {
           install: {
             'runtime-versions': {
-              nodejs: 20,
+              nodejs: 22,
             },
             commands: ['node -v', 'corepack enable', 'yarn --version', 'yarn install --immutable'],
           },
@@ -170,16 +153,16 @@ export class OrcaUICodePipelineStack extends Stack {
           },
         },
       }),
-      environment: { buildImage: LinuxArmBuildImage.AMAZON_LINUX_2_STANDARD_3_0 },
+      environment: { buildImage },
     });
 
     /**
      * React Build and Deploy Pipeline
      */
     const codesStarSourceName = 'orcauiAppSrc';
-    const appCiCdPipeline = new Pipeline(this, 'OrcaUICodeCICDPipeline', {
+    const appCiCdPipeline = new Pipeline(this, 'OrcaUIAppCICDPipeline', {
       pipelineType: PipelineType.V2,
-      pipelineName: 'OrcaUICodeCICDPipeline',
+      pipelineName: 'OrcaUIAppCICDPipeline',
       crossAccountKeys: false,
       stages: [
         {
