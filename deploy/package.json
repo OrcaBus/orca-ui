@@ -23,6 +23,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1017.0",
     "@aws-sdk/lib-storage": "^3.1017.0",
+    "@orcabus/platform-cdk-constructs": "^1.4.0",
     "aws-cdk-lib": "^2.244.0",
     "cdk-nag": "^2.37.55",
     "constructs": "^10.6.0",

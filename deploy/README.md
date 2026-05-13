@@ -1,117 +1,157 @@
 # OrcaUI Deployment
 
-The IaC for the deployment of IaC is in AWS CDK.
+This directory contains the AWS CDK app for OrcaUI hosting infrastructure and CI/CD pipelines.
 
 ## Overview
 
-The React application is deployed using AWS CloudFront and S3, utilizing a custom subdomain prefixed with `orcaui` and appended with the respective domain name within their AWS account. Deployment is managed within the toolchain (build) account, enabling the stack to be deployed across multiple accounts.
+The CDK app is composed in [`bin.ts`](./bin.ts) and creates three top-level pipeline stacks in the toolchain account:
 
-For each account, the React assets are built and then pushed to a designated S3 bucket using AWS CodeBuild and Lambda functions. Specifically, a Lambda function uploads the assets to S3 and subsequently triggers CodeBuild. CodeBuild then compiles the React application and uploads the built assets back to S3.
+| CDK stack                      | CodePipeline name              | Source repository           | Trigger              | Purpose                                                                                 |
+| ------------------------------ | ------------------------------ | --------------------------- | -------------------- | --------------------------------------------------------------------------------------- |
+| `OrcaUIInfrastructurePipeline` | `OrcaBus-OrcaUIInfrastructure` | `OrcaBus/orca-ui` `main`    | `deploy/**` only     | Synthesizes CDK and deploys `InfrastructureStack` to beta, gamma, and prod.             |
+| `OrcaUIAppPipeline`            | `OrcaUIAppCICDPipeline`        | `OrcaBus/orca-ui` `main`    | excludes `deploy/**` | Builds and deploys the current UI app to the primary CloudFront bucket.                 |
+| `OrcaUIV2AppPipeline`          | `OrcaUIV2AppCICDPipeline`      | `OrcaBus/orca-ui-v2` `main` | excludes `deploy/**` | Builds and deploys UI v2 to the configured v2 CloudFront bucket under the `v2/` prefix. |
+
+`InfrastructureStack` owns the hosted app infrastructure in each target account:
+
+- S3 bucket for the current UI app.
+- Optional v2 S3 bucket when `v2CloudFrontBucketName` is configured.
+- Shared CloudFront distribution and Route 53 aliases.
+- CloudFront Function for SPA routing, including `/v2/...` routes.
+- Env config Lambda for `env.js`, optional `v2/env.js`, and CloudFront invalidation.
 
 ## Deployment Strategy
 
-The deployment strategy is to deploy the React application to the toolchain account, and then use AWS CodePipeline to deploy the application to the respective accounts.
-![ORCA UI DUAL PIPELINE](../docs/orca-ui-dual-pipeline.png)
+Infrastructure changes flow through `OrcaUIInfrastructurePipeline`:
 
-## env config lambda
+1. A push to `OrcaBus/orca-ui` on `main` under `deploy/**` triggers the infrastructure pipeline.
+2. The pipeline runs `cd deploy`, installs dependencies, and runs `yarn cdk synth`.
+3. CDK self-mutation updates the pipeline when needed.
+4. `InfrastructureStack` is deployed to beta, gamma, then prod. Gamma has a manual approval before promotion to prod.
 
-The env config lambda is used to update the env.js file in the S3 bucket. Env Config Lmabda [here](./lambda/env_config_and_cdn_refresh.py)
+Application code deploys independently:
 
-Normally, the lambda function is invoked by the CodeBuild project. This is done by adding a code build action in the CodeBuild project to invoke the lambda function.
+- `OrcaUIAppPipeline` builds `OrcaBus/orca-ui`, syncs the `dist/` artifact to the primary bucket root, then invokes the env config Lambda.
+- `OrcaUIV2AppPipeline` builds `OrcaBus/orca-ui-v2`, syncs the `build/` artifact to `s3://<v2-bucket>/v2/`, then invokes the same env config Lambda.
 
-If you want to invoke the lambda function manually, you can use the following command (without payload):
+UI v2 is currently enabled only where `v2CloudFrontBucketNameConfig` is set in [`config.ts`](./config.ts). See [`docs/ui-v2-deployment-strategy.md`](../docs/ui-v2-deployment-strategy.md) for the dual-bucket `/v2/` hosting details.
 
-```sh
-aws lambda invoke \
-    --function-name CodeBuildEnvConfigLambdaBeta \
-    response.json
-```
+## Env Config Lambda
 
-if you wanna invoke manually with payload to update the api version, you can use the following command:
+The env config Lambda is defined in [`lambda/env_config_and_cdn_refresh.py`](./lambda/env_config_and_cdn_refresh.py).
 
-```sh
-aws lambda invoke \
-    --function-name CodeBuildEnvConfigLambdaBeta \
-    --payload '{"metadata_api_version": "v2"}' \
-    response.json
-```
+The app deploy CodeBuild projects invoke this Lambda after syncing assets to S3. The Lambda:
 
-Update multiple API versions
+- writes `env.js` to the primary UI bucket;
+- writes `v2/env.js` to the v2 bucket when `V2_BUCKET_NAME` is set;
+- creates a CloudFront invalidation for the shared distribution.
+
+Invoke manually without a payload:
 
 ```sh
 aws lambda invoke \
-    --function-name CodeBuildEnvConfigLambdaBeta \
-    --payload '{
-        "metadata_api_version": "v2",
-        "workflow_api_version": "v2",
-        "sequence_run_api_version": "v1",
-        "file_api_version": "v2"
-    }' \
-    response.json
+  --function-name CodeBuildEnvConfigLambdaBeta \
+  response.json
 ```
 
-invoke with a specific AWS profile:
+Invoke manually with a payload to update API versions:
 
 ```sh
 aws lambda invoke \
-    --profile your-profile-name \
-    --function-name CodeBuildEnvConfigLambdaBeta \
-    --payload '{"metadata_api_version": "v2"}' \
-    response.json
+  --function-name CodeBuildEnvConfigLambdaBeta \
+  --cli-binary-format raw-in-base64-out \
+  --payload '{"metadata_api_version": "v2"}' \
+  response.json
 ```
+
+Update multiple API versions:
+
+```sh
+aws lambda invoke \
+  --function-name CodeBuildEnvConfigLambdaBeta \
+  --cli-binary-format raw-in-base64-out \
+  --payload '{
+    "metadata_api_version": "v2",
+    "workflow_api_version": "v2",
+    "sequence_run_api_version": "v1",
+    "file_api_version": "v2"
+  }' \
+  response.json
+```
+
+Invoke with a specific AWS profile:
+
+```sh
+aws lambda invoke \
+  --profile your-profile-name \
+  --function-name CodeBuildEnvConfigLambdaBeta \
+  --cli-binary-format raw-in-base64-out \
+  --payload '{"metadata_api_version": "v2"}' \
+  response.json
+```
+
+Use the stage-specific function name when targeting another environment:
+
+- `CodeBuildEnvConfigLambdaBeta`
+- `CodeBuildEnvConfigLambdaGamma`
+- `CodeBuildEnvConfigLambdaProd`
 
 ## Development
 
-Change to the deploy directory
+Change to the deploy directory:
 
 ```sh
 cd deploy
 ```
 
-Install the dependencies
+Install dependencies:
 
 ```sh
-yarn install
+corepack enable
+yarn install --immutable
 ```
 
-To deploy the cdk
-
-```sh
-yarn cdk deploy
-```
-
-To test cdk resources in compliance with `cdk-nag`
+Run tests:
 
 ```sh
 yarn test
 ```
 
-To list all stacks, run:
+List CDK stacks:
 
 ```sh
 yarn cdk ls
 ```
 
-Example output:
+Example stack output:
 
 ```sh
-
-OrcaUIPipeline
-OrcaUIPipeline/OrcaUIBeta/ApplicationStack (OrcaUIBeta-ApplicationStack)
-OrcaUIPipeline/OrcaUIGamma/ApplicationStack (OrcaUIGamma-ApplicationStack)
-OrcaUIPipeline/OrcaUIProd/ApplicationStack (OrcaUIProd-ApplicationStack)
+OrcaUIInfrastructurePipeline
+OrcaUIAppPipeline
+OrcaUIV2AppPipeline
+OrcaUIInfrastructurePipeline/DeploymentPipeline/OrcaBusBeta/OrcaUIInfrastructureStack (OrcaBusBeta-OrcaUIInfrastructureStack)
+OrcaUIInfrastructurePipeline/DeploymentPipeline/OrcaBusGamma/OrcaUIInfrastructureStack (OrcaBusGamma-OrcaUIInfrastructureStack)
+OrcaUIInfrastructurePipeline/DeploymentPipeline/OrcaBusProd/OrcaUIInfrastructureStack (OrcaBusProd-OrcaUIInfrastructureStack)
 ```
 
-To build the CI/CD pipeline for UI infrastructure
+Deploy the top-level pipeline stacks:
 
 ```sh
-yarn cdk deploy -e OrcaUIPipeline
+yarn cdk deploy -e OrcaUIInfrastructurePipeline
+yarn cdk deploy -e OrcaUIAppPipeline
+yarn cdk deploy -e OrcaUIV2AppPipeline
 ```
 
-To build (test) in the dev account
+Work directly with the beta infrastructure stack:
 
 ```sh
-yarn cdk synth -e OrcaUIPipeline/OrcaUIBeta/ApplicationStack
-yarn cdk diff -e OrcaUIPipeline/OrcaUIBeta/ApplicationStack
-yarn cdk deploy -e OrcaUIPipeline/OrcaUIBeta/ApplicationStack
+yarn cdk synth -e OrcaUIInfrastructurePipeline/DeploymentPipeline/OrcaBusBeta/OrcaUIInfrastructureStack
+yarn cdk diff -e OrcaUIInfrastructurePipeline/DeploymentPipeline/OrcaBusBeta/OrcaUIInfrastructureStack
+yarn cdk deploy -e OrcaUIInfrastructurePipeline/DeploymentPipeline/OrcaBusBeta/OrcaUIInfrastructureStack
 ```
+
+Direct application stack deploys require AWS credentials for the target account and the usual CDK bootstrap roles.
+
+## Migration Note
+
+The CDK app now uses three top-level stack IDs instead of the older combined `OrcaUIPipeline` stack, and the app CI/CD stacks are named `OrcaUIAppPipeline` and `OrcaUIV2AppPipeline`. If older pipeline stacks already exist in AWS, do not deploy the new stacks blindly: named resources such as CodePipeline and CodeBuild projects may still be owned by an old stack. Plan the migration so ownership of existing resources is handled intentionally.
