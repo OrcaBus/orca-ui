@@ -198,6 +198,63 @@ export function useMutationCaseUserDelete({
   });
 }
 
+const caseSyncFromRedcapPath = '/api/v1/case/sync-from-redcap/' as const;
+export function useMutationCaseSyncFromRedcap({
+  reactQuery,
+}: {
+  reactQuery?: {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+  };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async ({
+      afterDate,
+      beforeDate,
+    }: {
+      afterDate: string | null;
+      beforeDate: string | null;
+    }) => {
+      const c = getClient();
+      const body: Record<string, string> = {};
+      if (afterDate) body['afterDate'] = afterDate;
+      if (beforeDate) body['beforeDate'] = beforeDate;
+      const { data, error, response } = await (
+        c.POST as (url: string, init?: object) => ReturnType<typeof c.POST>
+      )(resolvePath(caseSyncFromRedcapPath as keyof paths), {
+        body,
+      });
+      return assertOk(data, error, response);
+    },
+  });
+}
+
+const caseSyncFromRedcapByIdPath = '/api/v1/case/{orcabusId}/sync-from-redcap/' as const;
+export function useMutationCaseSyncFromRedcapById({
+  orcabusId,
+  reactQuery,
+}: {
+  orcabusId: string;
+  reactQuery?: {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+  };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async () => {
+      const c = getClient();
+      const { data, error, response } = await (
+        c.POST as (url: string, init?: object) => ReturnType<typeof c.POST>
+      )(resolvePath(caseSyncFromRedcapByIdPath as keyof paths), {
+        params: { path: { orcabusId } },
+      });
+      return assertOk(data, error, response);
+    },
+  });
+}
+
 const commentPath = '/api/v1/comment/' as const;
 const commentArchivePath = '/api/v1/comment/{orcabusId}/archive/' as const;
 

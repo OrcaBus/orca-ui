@@ -11,6 +11,7 @@ interface DateSinglePickerProps {
   selectedDate: string | null;
   onDateChange: (date: string | null) => void;
   className?: string;
+  maxDate?: Date | string;
 }
 
 const DateSinglePicker: FC<DateSinglePickerProps> = ({
@@ -18,6 +19,7 @@ const DateSinglePicker: FC<DateSinglePickerProps> = ({
   selectedDate,
   onDateChange,
   className,
+  maxDate,
 }) => {
   const [selectedStartDate, setSelectedStartDate] = useState<string | null>(selectedDate);
 
@@ -30,6 +32,7 @@ const DateSinglePicker: FC<DateSinglePickerProps> = ({
     static: true,
     monthSelectorType: 'static',
     dateFormat: 'j M Y',
+    maxDate: maxDate,
     // defaultDate: `${dayjs().subtract(1, 'month').format('DD/MM/YYYY')} to ${new Date().toLocaleDateString()}`,
     prevArrow:
       '<svg class="fill-current" width="7" height="11" viewBox="0 0 7 11"><path d="M5.4 10.8l1.4-1.4-4-4 4-4L5.4 0 0 5.4z" /></svg>',
