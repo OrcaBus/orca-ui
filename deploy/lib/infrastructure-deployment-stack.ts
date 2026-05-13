@@ -8,7 +8,13 @@ export class InfrastructureDeploymentStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const deployInstallCommands = ['cd deploy', 'yarn install --immutable'];
+    const deployInstallCommands = [
+      'node -v',
+      'corepack enable',
+      'cd deploy',
+      'yarn --version',
+      'yarn install --immutable',
+    ];
 
     new DeploymentStackPipeline(this, 'DeploymentPipeline', {
       githubBranch: 'main',

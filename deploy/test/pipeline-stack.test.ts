@@ -206,7 +206,9 @@ describe('InfrastructureDeploymentStack build command behavior', () => {
   test('uses deploy Yarn commands instead of default root pnpm commands', () => {
     const buildSpecs = getCodeBuildProjectBuildSpecs(Template.fromStack(stack)).join('\n');
 
+    expect(buildSpecs).toContain('"corepack enable"');
     expect(buildSpecs).toContain('"cd deploy"');
+    expect(buildSpecs).toContain('"yarn --version"');
     expect(buildSpecs).toContain('"yarn install --immutable"');
     expect(buildSpecs).toContain('"yarn cdk synth"');
     expect(buildSpecs).toContain('"yarn run test"');
