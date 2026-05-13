@@ -25,7 +25,6 @@ import { AccountPrincipal, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Function } from 'aws-cdk-lib/aws-lambda';
 import { TOOLCHAIN_ACCOUNT_ID } from '../config';
-import { Key } from 'aws-cdk-lib/aws-kms';
 
 export type InfrastructureStackProps = {
   cloudFrontBucketName: string;
@@ -109,17 +108,29 @@ export class InfrastructureStack extends Stack {
     }
     distribution.grantCreateInvalidation(configLambda);
     // Grant SSM read permissions to the Lambda function
-    // Grant KMS decrypt permissions for secure string parameters
-    const kmsKey = Key.fromLookup(this, 'SSMKey', { aliasName: 'alias/aws/ssm' });
-    kmsKey.grantDecrypt(configLambda);
     configLambda.addToRolePolicy(
       new PolicyStatement({
-        actions: ['ssm:Get*', 'kms:Decrypt'],
+        actions: ['ssm:Get*'],
         resources: [
           `arn:aws:ssm:${this.region}:${this.account}:parameter/orcaui/*`,
           `arn:aws:ssm:${this.region}:${this.account}:parameter/data_portal/*`,
-          kmsKey.keyArn,
         ],
+      })
+    );
+    // Grant KMS decrypt for SecureString parameters encrypted with the AWS managed SSM key.
+    configLambda.addToRolePolicy(
+      new PolicyStatement({
+        actions: ['kms:Decrypt'],
+        resources: [`arn:aws:kms:${this.region}:${this.account}:key/*`],
+        conditions: {
+          StringEquals: {
+            'kms:CallerAccount': this.account,
+            'kms:ViaService': `ssm.${this.region}.amazonaws.com`,
+          },
+          'ForAnyValue:StringEquals': {
+            'kms:ResourceAliases': 'alias/aws/ssm',
+          },
+        },
       })
     );
 

@@ -60,6 +60,30 @@ describe('cdk-nag-stack', () => {
       .map(synthesisMessageToString);
     expect(warnings).toHaveLength(0);
   });
+
+  test(`${stackId}: grants SecureString decrypt without CDK context lookup`, () => {
+    const template = Template.fromStack(stack);
+
+    template.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: Match.objectLike({
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Action: 'kms:Decrypt',
+            Condition: {
+              StringEquals: {
+                'kms:CallerAccount': '123456789',
+                'kms:ViaService': 'ssm.ap-southeast-2.amazonaws.com',
+              },
+              'ForAnyValue:StringEquals': {
+                'kms:ResourceAliases': 'alias/aws/ssm',
+              },
+            },
+            Resource: 'arn:aws:kms:ap-southeast-2:123456789:key/*',
+          }),
+        ]),
+      }),
+    });
+  });
 });
 
 const configuredV2Stages = Object.values(AppStage)
