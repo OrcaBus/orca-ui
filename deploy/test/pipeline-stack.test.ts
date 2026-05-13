@@ -207,11 +207,11 @@ describe('InfrastructureDeploymentStack build command behavior', () => {
     const buildSpecs = getCodeBuildProjectBuildSpecs(Template.fromStack(stack)).join('\n');
 
     expect(buildSpecs).toContain('"corepack enable"');
-    expect(buildSpecs).toContain('"cd deploy"');
-    expect(buildSpecs).toContain('"yarn --version"');
-    expect(buildSpecs).toContain('"yarn install --immutable"');
-    expect(buildSpecs).toContain('"yarn cdk synth"');
-    expect(buildSpecs).toContain('"yarn run test"');
+    expect(buildSpecs).toContain('"yarn --cwd deploy --version"');
+    expect(buildSpecs).toContain('"yarn --cwd deploy install --immutable"');
+    expect(buildSpecs).toContain('"yarn --cwd deploy cdk synth"');
+    expect(buildSpecs).toContain('"yarn --cwd deploy run test"');
+    expect(buildSpecs).not.toContain('"cd deploy"');
     expect(buildSpecs).not.toContain('pnpm test');
     expect(buildSpecs).not.toContain('pnpm install --frozen-lockfile');
   });

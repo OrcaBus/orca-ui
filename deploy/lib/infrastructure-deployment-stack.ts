@@ -11,9 +11,8 @@ export class InfrastructureDeploymentStack extends Stack {
     const deployInstallCommands = [
       'node -v',
       'corepack enable',
-      'cd deploy',
-      'yarn --version',
-      'yarn install --immutable',
+      'yarn --cwd deploy --version',
+      'yarn --cwd deploy install --immutable',
     ];
 
     new DeploymentStackPipeline(this, 'DeploymentPipeline', {
@@ -29,11 +28,11 @@ export class InfrastructureDeploymentStack extends Stack {
       },
       pipelineName: 'OrcaBus-OrcaUIInfrastructure',
       synthInstallCommands: deployInstallCommands,
-      cdkSynthCmd: ['cd deploy', 'yarn cdk synth'],
+      cdkSynthCmd: ['yarn --cwd deploy cdk synth'],
       cdkOut: 'deploy/cdk.out',
       enableSlackNotification: true,
       unitIacTestConfig: {
-        command: ['cd deploy', 'yarn run test'],
+        command: ['yarn --cwd deploy run test'],
         installCommands: deployInstallCommands,
       },
       unitAppTestConfig: {
