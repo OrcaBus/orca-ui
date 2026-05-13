@@ -179,7 +179,7 @@ export class OrcaUIV2AppPipelineStack extends Stack {
         stageName: 'Build',
         actions: [
           new CodeBuildAction({
-            actionName: 'BuildAndDeploy',
+            actionName: 'BuildReactApp',
             project: buildProject,
             input: sourceOutput,
             outputs: [buildOutput],
