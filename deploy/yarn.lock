@@ -1956,6 +1956,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@orcabus/platform-cdk-constructs@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "@orcabus/platform-cdk-constructs@npm:1.4.0"
+  peerDependencies:
+    "@aws-cdk/aws-lambda-python-alpha": ^2.244.0-alpha.0
+    aws-cdk-lib: ^2.244.0
+    constructs: ^10.6.0
+  checksum: 10c0/306f40fec8da636348f95cba0d2831aba566338f33dd8ad610e5a6f7967f662d2926f76cd3f19dab6600e64ebb0e50665615e1b639f4cef426c24463a1d58166
+  languageName: node
+  linkType: hard
+
 "@pkgjs/parseargs@npm:^0.11.0":
   version: 0.11.0
   resolution: "@pkgjs/parseargs@npm:0.11.0"
@@ -3483,6 +3494,7 @@ __metadata:
   dependencies:
     "@aws-sdk/client-s3": "npm:^3.1017.0"
     "@aws-sdk/lib-storage": "npm:^3.1017.0"
+    "@orcabus/platform-cdk-constructs": "npm:^1.4.0"
     "@types/jest": "npm:^30.0.0"
     "@types/node": "npm:25.5.0"
     "@types/regenerator-runtime": "npm:^0.13.8"

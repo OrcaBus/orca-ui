@@ -1,4 +1,4 @@
-import { ApplicationStackProps } from './lib/application-stack';
+import { InfrastructureStackProps } from './lib/infrastructure-stack';
 
 export enum AppStage {
   BETA = 'beta',
@@ -24,8 +24,8 @@ export const cloudFrontBucketNameConfig: Record<AppStage, string> = {
 
 export const v2CloudFrontBucketNameConfig: Record<AppStage, string | undefined> = {
   [AppStage.BETA]: 'orcaui-v2-cloudfront-843407916570',
-  [AppStage.GAMMA]: undefined,
-  [AppStage.PROD]: undefined,
+  [AppStage.GAMMA]: 'orcaui-v2-cloudfront-455634345446',
+  [AppStage.PROD]: 'orcaui-v2-cloudfront-472057503814',
 };
 
 export const configLambdaNameConfig: Record<AppStage, string> = {
@@ -34,7 +34,7 @@ export const configLambdaNameConfig: Record<AppStage, string> = {
   [AppStage.PROD]: 'CodeBuildEnvConfigLambdaProd',
 };
 
-export const getAppStackConfig = (appStage: AppStage): ApplicationStackProps => {
+export const getInfrastructureStackConfig = (appStage: AppStage): InfrastructureStackProps => {
   switch (appStage) {
     case AppStage.BETA:
       return {
@@ -56,6 +56,7 @@ export const getAppStackConfig = (appStage: AppStage): ApplicationStackProps => 
     case AppStage.GAMMA:
       return {
         cloudFrontBucketName: cloudFrontBucketNameConfig[appStage],
+        v2CloudFrontBucketName: v2CloudFrontBucketNameConfig[appStage],
         configLambdaName: configLambdaNameConfig[appStage],
         aliasDomainName: ['orcaui.stg.umccr.org', 'portal.stg.umccr.org'],
         reactBuildEnvVariables: {
@@ -71,6 +72,7 @@ export const getAppStackConfig = (appStage: AppStage): ApplicationStackProps => 
     case AppStage.PROD:
       return {
         cloudFrontBucketName: cloudFrontBucketNameConfig[appStage],
+        v2CloudFrontBucketName: v2CloudFrontBucketNameConfig[appStage],
         configLambdaName: configLambdaNameConfig[appStage],
         aliasDomainName: [
           'orcaui.umccr.org',

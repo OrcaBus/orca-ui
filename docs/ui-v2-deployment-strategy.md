@@ -17,16 +17,17 @@ This document describes the infrastructure approach for hosting a second UI (v2)
 | SPA routing               | Viewer-request function rewrites extension-less URLs to `/index.html` | Same function rewrites `/v2` and `/v2/...` to **`/v2/index.html`**                     |
 | Runtime config (`env.js`) | Written to **`env.js`** on v1 bucket                                  | Same payload mirrored to **`v2/env.js`** on the v2 bucket when `V2_BUCKET_NAME` is set |
 
-The v2 S3 bucket is **optional** in CDK: if `v2CloudFrontBucketName` is omitted, the stack matches the previous single-bucket setup (gamma and prod today).
+The v2 S3 bucket is **optional** in CDK: if `v2CloudFrontBucketName` is omitted, the stack matches the previous single-bucket setup.
 
 ## Stage rollout
 
-In `deploy/config.ts`, **`v2CloudFrontBucketName` is set only for beta (dev) for now**:
+In `deploy/config.ts`, **`v2CloudFrontBucketName` is configured per stage**:
 
 - **Beta**: `orcaui-v2-cloudfront-843407916570`
-- **Gamma / Prod**: `undefined` — no second bucket, no `/v2/*` behavior until explicitly enabled.
+- **Gamma**: `orcaui-v2-cloudfront-455634345446`
+- **Prod**: `orcaui-v2-cloudfront-472057503814`
 
-This limits cost and operational surface while the v2 app and pipeline are still maturing.
+If a stage is changed back to `undefined`, CDK will omit the second bucket and the `/v2/*` CloudFront behavior for that stage.
 
 ## Request flow
 
