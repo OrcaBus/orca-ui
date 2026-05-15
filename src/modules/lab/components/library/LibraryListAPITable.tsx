@@ -105,6 +105,7 @@ export const processLibraryResults = (data: components['schemas']['LibraryDetail
       assay: library.assay ?? '-',
       coverage: library.coverage?.toString() ?? '-',
       overrideCycles: library.overrideCycles ?? '-',
+      requestFormId: library.requestFormId ?? '-',
 
       // Sample Model
       sampleIds: {

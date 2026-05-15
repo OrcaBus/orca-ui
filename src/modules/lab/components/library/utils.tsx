@@ -25,7 +25,7 @@ export const getLibraryTableColumn = ({
       headerClassName
     ),
     headerGroup: {
-      colSpan: 8,
+      colSpan: 9,
       label: headerGroupLabel,
       additionalClassName: classNames(
         'bg-green-50/90 dark:bg-green-900/40',
@@ -45,6 +45,7 @@ export const getLibraryTableColumn = ({
       type LibraryIdType = { libraryOrcabusId: string; libraryId: string };
       const props = p as LibraryIdType | LibraryIdType[];
 
+      // eslint-disable-next-line no-useless-assignment
       let data: LibraryIdType[] = [];
       if (!Array.isArray(props)) {
         data = [props];
@@ -224,6 +225,29 @@ export const getLibraryTableColumn = ({
         }
       : undefined,
     sortDirection: getCurrentSortDirection(currentSort, 'overrideCycles'),
+    cell: multiRowCell,
+    cellClassName: classNames(
+      'bg-green-50/80 dark:bg-green-900/30',
+      'text-gray-900 dark:text-gray-100',
+      'transition-all duration-200',
+      cellClassName
+    ),
+  },
+  {
+    header: 'Request Id',
+    headerClassName: classNames(
+      'bg-green-50/90 dark:bg-green-900/40',
+      'text-gray-900 dark:text-gray-100',
+      'transition-all duration-200',
+      headerClassName
+    ),
+    accessor: 'requestFormId',
+    onSort: setSort
+      ? () => {
+          setSort(getSortValue(currentSort, 'requestFormId'));
+        }
+      : undefined,
+    sortDirection: getCurrentSortDirection(currentSort, 'requestFormId'),
     cell: multiRowCell,
     cellClassName: classNames(
       'bg-green-50/80 dark:bg-green-900/30',
