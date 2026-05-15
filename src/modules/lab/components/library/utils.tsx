@@ -25,7 +25,7 @@ export const getLibraryTableColumn = ({
       headerClassName
     ),
     headerGroup: {
-      colSpan: 8,
+      colSpan: 9,
       label: headerGroupLabel,
       additionalClassName: classNames(
         'bg-green-50/90 dark:bg-green-900/40',
