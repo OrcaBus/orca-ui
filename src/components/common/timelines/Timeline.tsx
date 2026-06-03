@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 // https://github.com/ArnaudBarre/eslint-plugin-react-refresh/issues/25#issuecomment-1729071347
 
-import { FC, useState, useEffect, ReactNode } from 'react';
+import { FC, useState, ReactNode } from 'react';
 import { classNames } from '@/utils/commonUtils';
 import {
   ChatBubbleBottomCenterTextIcon,
@@ -54,12 +54,10 @@ const Timeline: FC<TimelineProps> = ({
   selectId = '',
   isCollapsed = false,
 }) => {
-  const [selectedEventId, setSelectedEventId] = useState<string>(timelineEvents[0]?.id || '');
-  useEffect(() => {
-    if (selectId) {
-      setSelectedEventId(selectId);
-    }
-  }, [selectId]);
+  const [localSelectedEventId, setLocalSelectedEventId] = useState<string>(
+    timelineEvents[0]?.id || ''
+  );
+  const selectedEventId = selectId || localSelectedEventId;
 
   const eventIcon = (eventType: TimelineEvent['eventType'] | undefined) => {
     if (eventType === TimelineEventTypes.COMMENT) {
@@ -77,7 +75,7 @@ const Timeline: FC<TimelineProps> = ({
   };
 
   const handleTimelineEventClick = (event: TimelineEvent) => {
-    setSelectedEventId(event.id || '');
+    setLocalSelectedEventId(event.id || '');
     if (handldEventClick) {
       handldEventClick(event);
     }
@@ -256,7 +254,7 @@ const Timeline: FC<TimelineProps> = ({
                               )}
                             >
                               {isCollapsed
-                                ? dayjs(event.datetime).format('MM/DD/YY HH:mm') // Shorter format when collapsed
+                                ? dayjs(event.datetime).format('DD/MM/YYYY HH:mm') // Shorter format when collapsed
                                 : dayjs(event.datetime).format('MMM DD, YYYY hh:mm A')}
                             </time>
                           </div>
