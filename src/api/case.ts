@@ -19,11 +19,16 @@ const caseExternalEntityPath =
 const caseLinkPath = '/api/v1/case/{orcabusId}/external-entity/' as const;
 const caseCreateStatePath = '/api/v1/state/' as const;
 const caseStateArchivePath = '/api/v1/state/{orcabusId}/archive/' as const;
+const caseSyncFromRedcapAutoHistoryPath = '/api/v1/case/sync-from-redcap/auto/history/' as const;
 
 export const useQueryCaseListObject = createSuspenseQueryHook(caseApi, casePath);
 export const useQueryCaseDetailObject = createSuspenseQueryHook(caseApi, caseDetailPath);
 export const useQueryCaseActivityObject = createSuspenseQueryHook(caseApi, caseActivityPath);
 export const useQueryCaseStatesObject = createSuspenseQueryHook(caseApi, caseStatesPath);
+export const useQueryCaseSyncFromRedcapAutoHistory = createSuspenseQueryHook(
+  caseApi,
+  caseSyncFromRedcapAutoHistoryPath
+);
 
 // Mutations that take body at call time (mutate(body)) or fixed params - use getClient + assertOk
 const getClient = () => caseApi.getClient();
@@ -225,6 +230,27 @@ export function useMutationCaseSyncFromRedcap({
       )(resolvePath(caseSyncFromRedcapPath as keyof paths), {
         body,
       });
+      return assertOk(data, error, response);
+    },
+  });
+}
+
+const caseSyncFromRedcapAutoPath = '/api/v1/case/sync-from-redcap/auto' as const;
+export function useMutationCaseSyncFromRedcapAuto({
+  reactQuery,
+}: {
+  reactQuery?: {
+    onSuccess?: () => void;
+    onError?: (error: Error) => void;
+  };
+}) {
+  return useMutation({
+    ...reactQuery,
+    mutationFn: async () => {
+      const c = getClient();
+      const { data, error, response } = await (
+        c.POST as (url: string, init?: object) => ReturnType<typeof c.POST>
+      )(resolvePath(caseSyncFromRedcapAutoPath as keyof paths), {});
       return assertOk(data, error, response);
     },
   });
