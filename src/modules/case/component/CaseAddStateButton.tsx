@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Dialog } from '@/components/common/dialogs';
-import { caseDetailPath, useMutationCaseStateCreate } from '@/api/case';
+import { caseDetailPath, caseStatesPath, useMutationCaseStateCreate } from '@/api/case';
 import toaster from '@/components/common/toaster';
 import { useQueryClient } from '@tanstack/react-query';
 import { SpinnerWithText } from '@/components/common/spinner';
@@ -37,6 +37,9 @@ function CaseAddStateButton({ caseOrcabusId }: { caseOrcabusId: string }) {
       onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: ['get', caseDetailPath, { params: { path: { orcabusId: caseOrcabusId } } }],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['get', caseStatesPath, { params: { path: { orcabusId: caseOrcabusId } } }],
         });
         toaster.success({ title: 'State added' });
         setIsDialogOpen(false);

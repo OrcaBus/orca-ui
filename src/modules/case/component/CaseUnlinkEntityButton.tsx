@@ -27,7 +27,7 @@ function CaseUnlinkEntityButton({
     reactQuery: {
       onSuccess: async () => {
         await queryClient.invalidateQueries({
-          queryKey: ['GET', caseDetailPath, { path: { orcabusId: caseOrcabusId } }],
+          queryKey: ['get', caseDetailPath, { params: { path: { orcabusId: caseOrcabusId } } }],
         });
         toaster.success({ title: `'${entityId}' unlinked` });
         setIsDialogOpen(false);

@@ -1,7 +1,12 @@
 import { Table } from '@/components/tables';
 import { dayjs, TIMESTAMP_FORMAT } from '@/utils/dayjs';
 import CaseAddStateButton from './CaseAddStateButton';
-import { useQueryCaseStatesObject, useMutationCaseStateArchive, caseStatesPath } from '@/api/case';
+import {
+  useQueryCaseStatesObject,
+  useMutationCaseStateArchive,
+  caseStatesPath,
+  caseDetailPath,
+} from '@/api/case';
 import toaster from '@/components/common/toaster';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -16,6 +21,9 @@ const CaseStateTable = ({ caseOrcabusId }: { caseOrcabusId: string }) => {
       onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: ['get', caseStatesPath, { params: { path: { orcabusId: caseOrcabusId } } }],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['get', caseDetailPath, { params: { path: { orcabusId: caseOrcabusId } } }],
         });
         toaster.success({ title: 'State archived' });
       },
