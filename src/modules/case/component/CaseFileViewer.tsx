@@ -7,7 +7,7 @@ import { DEFAULT_NON_PAGINATE_PAGE_SIZE } from '@/utils/constant';
 
 const WGS_WORKFLOW = ['sash', 'tumor-normal', 'dragen-wgts-dna'];
 const WTS_WORKFLOW = ['rnasum', 'wts', 'dragen-wgts-rna'];
-const CTTSO_WORKFLOW = ['dragen-tso500-ctDNA', 'cttsov2'];
+const CTTSO_WORKFLOW = ['dragen-tso500-ctdna', 'cttsov2'];
 
 const getFileViewerWorkflowProps = (wfrName: string) => {
   if (wfrName == 'sash') {
@@ -22,7 +22,7 @@ const getFileViewerWorkflowProps = (wfrName: string) => {
   if (['wts', 'dragen-wgts-rna'].includes(wfrName)) {
     return WORKFLOW_ANALYSIS_TABLE['wts'];
   }
-  if (['dragen-tso500-ctDNA', 'cttsov2'].includes(wfrName)) {
+  if (['dragen-tso500-ctdna', 'cttsov2'].includes(wfrName)) {
     return WORKFLOW_ANALYSIS_TABLE['cttsov2'];
   }
 
@@ -36,7 +36,7 @@ const getFileViewerWorkflowProps = (wfrName: string) => {
  */
 const groupWfrName = (wfrName: string) => {
   if (['wts', 'dragen-wgts-rna'].includes(wfrName)) return 'dragen-wgts-rna';
-  if (['dragen-tso500-ctDNA', 'cttsov2'].includes(wfrName)) return 'dragen-tso500-ctDNA';
+  if (['dragen-tso500-ctdna', 'cttsov2'].includes(wfrName)) return 'dragen-tso500-ctdna';
   if (['tumor-normal', 'dragen-wgts-dna'].includes(wfrName)) return 'dragen-wgts-dna';
   return wfrName;
 };
@@ -91,8 +91,15 @@ function CaseFileViewer({ externalEntitySet }: { externalEntitySet: Record<strin
         : [newO];
     }
   }
+  const totalLinkedWfr = Object.keys(wfrMapCase).length;
   return (
     <div>
+      {totalLinkedWfr > DEFAULT_NON_PAGINATE_PAGE_SIZE && (
+        <div className='mb-2 text-xs text-gray-500 dark:text-gray-400'>
+          This case has {totalLinkedWfr} linked workflow runs. Files are only shown from the first{' '}
+          {DEFAULT_NON_PAGINATE_PAGE_SIZE}.
+        </div>
+      )}
       {Object.keys(groupedWorkflowName).length === 0 ? (
         <div className='py-8 text-center text-gray-500 dark:text-gray-400'>
           No file highlight preview available.
