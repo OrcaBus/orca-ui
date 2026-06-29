@@ -91,8 +91,15 @@ function CaseFileViewer({ externalEntitySet }: { externalEntitySet: Record<strin
         : [newO];
     }
   }
+  const totalLinkedWfr = Object.keys(wfrMapCase).length;
   return (
     <div>
+      {totalLinkedWfr > DEFAULT_NON_PAGINATE_PAGE_SIZE && (
+        <div className='mb-2 text-xs text-gray-500 dark:text-gray-400'>
+          This case has {totalLinkedWfr} linked workflow runs. Files are only shown from the first{' '}
+          {DEFAULT_NON_PAGINATE_PAGE_SIZE}.
+        </div>
+      )}
       {Object.keys(groupedWorkflowName).length === 0 ? (
         <div className='py-8 text-center text-gray-500 dark:text-gray-400'>
           No file highlight preview available.
