@@ -50,6 +50,7 @@ export const getInfrastructureStackConfig = (appStage: AppStage): Infrastructure
           VITE_SSCHECK_URL: `https://sscheck-orcabus.dev.umccr.org`,
           VITE_HTSGET_URL: `https://htsget-file.dev.umccr.org`,
           VITE_CASE_URL: `https://case.dev.umccr.org`,
+          VITE_SYSTEM_CATALOG_URL: `https://system-catalog.dev.umccr.org`,
         },
       };
 
@@ -66,6 +67,7 @@ export const getInfrastructureStackConfig = (appStage: AppStage): Infrastructure
           VITE_FILE_URL: `https://file.stg.umccr.org`,
           VITE_SSCHECK_URL: `https://sscheck-orcabus.stg.umccr.org`,
           VITE_CASE_URL: `https://case.stg.umccr.org`,
+          VITE_SYSTEM_CATALOG_URL: `https://system-catalog.stg.umccr.org`,
         },
       };
 
@@ -87,6 +89,7 @@ export const getInfrastructureStackConfig = (appStage: AppStage): Infrastructure
           VITE_FILE_URL: `https://file.prod.umccr.org`,
           VITE_SSCHECK_URL: `https://sscheck-orcabus.prod.umccr.org`,
           VITE_CASE_URL: `https://case.prod.umccr.org`,
+          VITE_SYSTEM_CATALOG_URL: `https://system-catalog.prod.umccr.org`,
         },
       };
   }
