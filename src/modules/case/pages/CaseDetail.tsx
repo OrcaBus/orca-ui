@@ -6,6 +6,7 @@ import toaster from '@/components/common/toaster';
 import { useQueryParams } from '@/hooks/useQueryParams';
 import CaseLibraryTable from '../component/CaseLibrary';
 import WorkflowRunTable from '../component/CaseWorkflowRun';
+import CaseSequenceRunTable from '../component/CaseSequenceRun';
 import { SpinnerWithText } from '@/components/common/spinner';
 import { Button } from '@/components/common/buttons';
 import CaseLinkLibraryButton from '../component/CaseLinkLibraryButton';
@@ -81,6 +82,17 @@ export const CaseDetailAPITable = () => {
             <CaseLinkLibraryButton caseOrcabusId={caseOrcabusId} />
           </div>
           <CaseLibraryTable
+            externalEntitySet={caseData.externalEntitySet}
+            caseOrcabusId={caseOrcabusId}
+          />
+        </>
+      ),
+    },
+    {
+      label: 'SequenceRun',
+      content: (
+        <>
+          <CaseSequenceRunTable
             externalEntitySet={caseData.externalEntitySet}
             caseOrcabusId={caseOrcabusId}
           />
