@@ -33,6 +33,8 @@ def update_api_versions(event):
         'sequence_run_api_version': 'VITE_SEQUENCE_RUN_API_VERSION',
         'file_api_version': 'VITE_FILE_API_VERSION',
         'htsget_api_version': 'VITE_HTSGET_API_VERSION',
+        'case_api_version': 'VITE_CASE_API_VERSION',
+        'system_catalog_api_version': 'VITE_SYSTEM_CATALOG_API_VERSION',
     }
 
     # Check if any version keys exist in the event
@@ -75,6 +77,7 @@ def handler(event, context):
         'VITE_SSCHECK_URL': os.environ['VITE_SSCHECK_URL'],
         'VITE_HTSGET_URL': os.environ.get('VITE_HTSGET_URL', None),
         'VITE_CASE_URL': os.environ['VITE_CASE_URL'],
+        'VITE_SYSTEM_CATALOG_URL': os.environ['VITE_SYSTEM_CATALOG_URL'],
 
         # API Version
         'VITE_METADATA_API_VERSION': os.environ.get('VITE_METADATA_API_VERSION', None),
@@ -83,6 +86,7 @@ def handler(event, context):
         'VITE_FILE_API_VERSION': os.environ.get('VITE_FILE_API_VERSION', None),
         'VITE_HTSGET_API_VERSION': os.environ.get('VITE_HTSGET_API_VERSION', None),
         'VITE_CASE_API_VERSION': os.environ.get('VITE_CASE_API_VERSION', None),
+        'VITE_SYSTEM_CATALOG_API_VERSION': os.environ.get('VITE_SYSTEM_CATALOG_API_VERSION', None),
     }
     # Remove null values
     env_vars = {k: v for k, v in env_vars.items() if v is not None}
