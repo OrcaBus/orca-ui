@@ -63,15 +63,23 @@ export default function CaseEditPage() {
       </div>
       <DetailedErrorBoundary>
         <CaseForm
-          initialData={{
+          readOnlyData={{
+            orcabusId: caseData.orcabusId,
             requestFormId: caseData.requestFormId,
-            description: caseData.description,
             type: caseData.type,
+            studyName: caseData.studyName,
+            studyId: caseData.studyId,
+            urNumber: caseData.urNumber,
+            latestState: caseData.latestState,
+          }}
+          initialData={{
+            description: caseData.description,
             studyType: caseData.studyType,
             isReportRequired: caseData.isReportRequired,
             isNataAccredited: caseData.isNataAccredited,
             links: caseData.links,
             alias: caseData.alias ?? [],
+            dueDate: caseData.dueDate,
           }}
           onSubmit={handleSubmit}
           onCancel={handleCancel}

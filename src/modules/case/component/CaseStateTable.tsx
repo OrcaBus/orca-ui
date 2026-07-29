@@ -1,5 +1,5 @@
 import { Table } from '@/components/tables';
-import { dayjs, TIMESTAMP_FORMAT } from '@/utils/dayjs';
+import { DATE_FORMAT, dayjs, TIMESTAMP_FORMAT } from '@/utils/dayjs';
 import CaseAddStateButton from './CaseAddStateButton';
 import {
   useQueryCaseStatesObject,
@@ -33,7 +33,8 @@ const CaseStateTable = ({ caseOrcabusId }: { caseOrcabusId: string }) => {
   const tableData = (caseStates.data?.results ?? []).map((s) => ({
     orcabusId: s.orcabusId,
     status: s.status,
-    eventAt: dayjs(s.eventAt).format(TIMESTAMP_FORMAT),
+    eventDate: s.eventDate ? dayjs(s.eventDate).format(DATE_FORMAT) : '-',
+    eventTime: s.eventTime ?? '-',
     createdAt: dayjs(s.createdAt).format(TIMESTAMP_FORMAT),
     createdBy: s.createdBy ?? '-',
     isArchived: s.isArchived,
@@ -50,7 +51,8 @@ const CaseStateTable = ({ caseOrcabusId }: { caseOrcabusId: string }) => {
         inCard={false}
         columns={[
           { header: 'Status', accessor: 'status' },
-          { header: 'Event At', accessor: 'eventAt' },
+          { header: 'Event Date', accessor: 'eventDate' },
+          { header: 'Event Time', accessor: 'eventTime' },
           { header: 'Created At', accessor: 'createdAt' },
           { header: 'Created By', accessor: 'createdBy' },
           {

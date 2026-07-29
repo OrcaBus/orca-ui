@@ -4,14 +4,21 @@ import { components } from '@/api/types/case';
 import { inputClassName, labelClassName } from '@/components/common/input';
 import { useState } from 'react';
 
+type CaseDetailRequest = components['schemas']['PatchedCaseDetailRequest'];
+type CaseDetail = components['schemas']['CaseDetail'];
 type StudyTypeEnum = components['schemas']['StudyTypeEnum'];
 const STUDY_TYPE_OPTIONS: StudyTypeEnum[] = ['clinical', 'research'];
-type CaseTypeEnum = components['schemas']['TypeEnum'];
-const CASE_TYPE_OPTIONS: CaseTypeEnum[] = ['wgts', 'cttso'];
+
+// Fields that live on CaseDetail but not on CaseDetailRequest -- REDCap-managed, read-only.
+type ReadOnlyCaseFields = Pick<
+  CaseDetail,
+  'orcabusId' | 'requestFormId' | 'type' | 'studyName' | 'studyId' | 'urNumber' | 'latestState'
+>;
 
 type Props = {
-  initialData?: components['schemas']['CaseDetailRequest'];
-  onSubmit: (data: components['schemas']['CaseDetailRequest']) => void;
+  initialData?: CaseDetailRequest;
+  readOnlyData?: ReadOnlyCaseFields;
+  onSubmit: (data: CaseDetailRequest) => void;
   onCancel: () => void;
   isPending?: boolean;
   submitLabel?: string;
@@ -19,23 +26,21 @@ type Props = {
 
 function CaseForm({
   initialData,
+  readOnlyData,
   onSubmit,
   onCancel,
   isPending,
   submitLabel = 'Save Changes',
 }: Props) {
-  const [draftDataUpdate, setDraftDataUpdate] = useState<
-    components['schemas']['CaseDetailRequest']
-  >(
+  const [draftDataUpdate, setDraftDataUpdate] = useState<CaseDetailRequest>(
     initialData ?? {
-      requestFormId: '',
       description: '',
-      type: 'wgts',
       studyType: 'research',
       isReportRequired: false,
       isNataAccredited: false,
       links: {},
       alias: [],
+      dueDate: null,
     }
   );
 
@@ -43,50 +48,37 @@ function CaseForm({
     setDraftDataUpdate((prev) => ({ ...prev, [field]: value }));
   };
 
+  const readOnlyEntries: { label: string; value: string }[] = readOnlyData
+    ? [
+        { label: 'Case ID', value: readOnlyData.orcabusId },
+        { label: 'Request Form Id', value: readOnlyData.requestFormId },
+        { label: 'Type', value: readOnlyData.type ?? '-' },
+        { label: 'Study Name', value: readOnlyData.studyName ?? '-' },
+        { label: 'Study ID', value: readOnlyData.studyId ?? '-' },
+        { label: 'UR Number', value: readOnlyData.urNumber ?? '-' },
+        { label: 'Latest State', value: readOnlyData.latestState?.status ?? '-' },
+      ]
+    : [];
+
   return (
     <div className='rounded-xl bg-white shadow-sm ring-1 ring-gray-900/5 dark:bg-gray-900 dark:ring-white/10'>
       <div className='p-6 sm:p-8'>
+        {/* Read-only fields (REDCap-managed, not editable) */}
+        {readOnlyEntries.length > 0 && (
+          <div className='mb-8 grid grid-cols-1 gap-6 border-b border-gray-200 pb-6 text-sm sm:grid-cols-2 lg:grid-cols-3 dark:border-white/10'>
+            {readOnlyEntries.map(({ label, value }) => (
+              <div key={label}>
+                <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
+                  {label}
+                </p>
+                <p className='font-medium text-slate-800 dark:text-gray-200'>{value}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Form Fields */}
         <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'>
-          {/* Request Form Id */}
-          <div className='sm:col-span-2 lg:col-span-3'>
-            <label htmlFor='requestFormId' className={labelClassName}>
-              Request Form Id
-            </label>
-            <input
-              id='requestFormId'
-              type='text'
-              value={draftDataUpdate.requestFormId ?? ''}
-              onChange={(e) => caseDataOnChange('requestFormId', e.target.value)}
-              placeholder='Enter case requestFormId'
-              className={inputClassName}
-            />
-          </div>
-
-          {/* Type */}
-          <div>
-            <label htmlFor='type' className={labelClassName}>
-              Type
-            </label>
-            <select
-              id='type'
-              value={draftDataUpdate.type}
-              onChange={(e) =>
-                setDraftDataUpdate((prev) => ({
-                  ...prev,
-                  type: (e.target.value as components['schemas']['TypeEnum']) || null,
-                }))
-              }
-              className={inputClassName}
-            >
-              {CASE_TYPE_OPTIONS.map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </div>
-
           {/* Study Type */}
           <div>
             <label htmlFor='studyType' className={labelClassName}>
@@ -109,6 +101,22 @@ function CaseForm({
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Due Date */}
+          <div>
+            <label htmlFor='dueDate' className={labelClassName}>
+              Due Date
+            </label>
+            <input
+              id='dueDate'
+              type='date'
+              value={draftDataUpdate.dueDate ?? ''}
+              onChange={(e) =>
+                setDraftDataUpdate((prev) => ({ ...prev, dueDate: e.target.value || null }))
+              }
+              className={inputClassName}
+            />
           </div>
 
           {/* Links */}
