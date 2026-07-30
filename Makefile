@@ -4,13 +4,13 @@
 # https://github.com/umccr/orcabus#running-api-locally
 
 # Set default values if not already set (default to dev)
-VITE_METADATA_URL ?= https://metadata.stg.umccr.org
-VITE_WORKFLOW_URL ?= https://workflow.stg.umccr.org
-VITE_SEQUENCE_RUN_URL ?= https://sequence.stg.umccr.org
-VITE_FILE_URL ?= https://file.stg.umccr.org
-VITE_SSCHECK_URL ?= https://sscheck-orcabus.stg.umccr.org
-VITE_HTSGET_URL ?= https://htsget-file.stg.umccr.org
-VITE_CASE_URL ?= https://case.stg.umccr.org
+VITE_METADATA_URL ?= https://metadata.dev.umccr.org
+VITE_WORKFLOW_URL ?= https://workflow.dev.umccr.org
+VITE_SEQUENCE_RUN_URL ?= https://sequence.dev.umccr.org
+VITE_FILE_URL ?= https://file.dev.umccr.org
+VITE_SSCHECK_URL ?= https://sscheck-orcabus.dev.umccr.org
+VITE_HTSGET_URL ?= https://htsget-file.dev.umccr.org
+VITE_CASE_URL ?= https://case.dev.umccr.org
 
 # Export the variables
 export VITE_METADATA_URL
