@@ -4,9 +4,9 @@ import { useQueryCaseListObject, useQueryCaseSyncFromRedcapAutoHistory } from '@
 import { classNames } from '@/utils/commonUtils';
 import { RedirectLink } from '@/components/common/link';
 import { Search } from '@/components/common/search';
-import { Button } from '@/components/common/buttons';
-import { useNavigate } from 'react-router-dom';
-import { PlusIcon } from '@heroicons/react/24/outline';
+// import { Button } from '@/components/common/buttons';
+// import { useNavigate } from 'react-router-dom';
+// import { PlusIcon } from '@heroicons/react/24/outline';
 import CaseRedCapAutoImportButton from '../component/CaseRedCapAutoImportButton';
 import { dayjs, TIMESTAMP_FORMAT } from '@/utils/dayjs';
 
@@ -16,7 +16,7 @@ const standardClassName = classNames(
   'bg-transparent'
 );
 export const CaseListAPITable = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const { setQueryParams, getPaginationParams, getQueryParams } = useQueryParams();
   const queryParams = getQueryParams();
 
@@ -47,10 +47,11 @@ export const CaseListAPITable = () => {
           <div className='flex flex-col md:flex-row'>
             <div className='flex items-center justify-center'>{'Case Table'}</div>
             <div className='flex flex-1 flex-col items-stretch gap-3 pt-2 md:flex-row md:items-center md:justify-end'>
-              <Button type='green' onClick={() => navigate('./new')}>
+              {/* ignore new case creation */}
+              {/* <Button type='green' onClick={() => navigate('./new')}>
                 <PlusIcon className='h-5 w-5' />
                 New Case
-              </Button>
+              </Button> */}
 
               <div className='flex flex-col items-end gap-0.5'>
                 <CaseRedCapAutoImportButton />
@@ -109,16 +110,39 @@ export const CaseListAPITable = () => {
             accessor: 'type',
           },
           {
-            header: 'NATA Accredited',
+            header: 'Nata Accredited',
             headerClassName: standardClassName,
             accessor: 'isNataAccredited',
-            cell: (cellData: unknown) => ((cellData as boolean) ? 'yes' : 'no'),
+            cell: (cellData: unknown) => (cellData ? 'Yes' : 'No'),
           },
           {
-            header: 'Report Required',
+            header: 'Study Name',
             headerClassName: standardClassName,
-            accessor: 'isReportRequired',
-            cell: (cellData: unknown) => ((cellData as boolean) ? 'yes' : 'no'),
+            accessor: 'studyName',
+          },
+          {
+            header: 'Study ID',
+            headerClassName: standardClassName,
+            accessor: 'studyId',
+          },
+          {
+            header: 'UR Number',
+            headerClassName: standardClassName,
+            accessor: 'urNumber',
+          },
+          {
+            header: 'Due date',
+            headerClassName: standardClassName,
+            accessor: 'dueDate',
+          },
+          {
+            header: 'Latest State',
+            headerClassName: standardClassName,
+            accessor: 'latestState',
+            cell: (cellData: unknown) => {
+              if (cellData) return (cellData as Record<string, string>).status;
+              return '-';
+            },
           },
         ]}
         tableData={data.results.map((a) => ({
@@ -126,9 +150,15 @@ export const CaseListAPITable = () => {
           requestFormId: { text: a.requestFormId, orcabusId: a.orcabusId },
           description: a.description ?? '-',
           type: a.type ?? '-',
+          studyType: a.studyType ?? '-',
+          studyName: a.studyName ?? '-',
+          studyId: a.studyId ?? '-',
+          urNumber: a.urNumber ?? '-',
           alias: a.alias,
           isReportRequired: a.isReportRequired,
           isNataAccredited: a.isNataAccredited,
+          latestState: a.latestState,
+          dueDate: a.dueDate ?? '-',
         }))}
         paginationProps={{
           totalCount: pagination?.count ?? 0,

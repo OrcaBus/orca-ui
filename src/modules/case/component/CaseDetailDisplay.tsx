@@ -40,6 +40,24 @@ function CaseDetailDisplay({ caseData }: { caseData: components['schemas']['Case
       </div>
       <div>
         <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
+          Study Name
+        </p>
+        <p className='font-medium text-slate-800 dark:text-gray-200'>{caseData.studyName ?? '-'}</p>
+      </div>
+      <div>
+        <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
+          Study ID
+        </p>
+        <p className='font-medium text-slate-800 dark:text-gray-200'>{caseData.studyId ?? '-'}</p>
+      </div>
+      <div>
+        <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
+          UR Number
+        </p>
+        <p className='font-medium text-slate-800 dark:text-gray-200'>{caseData.urNumber ?? '-'}</p>
+      </div>
+      <div>
+        <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
           Links
         </p>
         {caseData.links && Object.keys(caseData.links).length > 0 ? (
@@ -77,6 +95,12 @@ function CaseDetailDisplay({ caseData }: { caseData: components['schemas']['Case
         <p className='font-medium text-slate-800 dark:text-gray-200'>
           {caseData.isNataAccredited === undefined ? '-' : caseData.isNataAccredited ? 'Yes' : 'No'}
         </p>
+      </div>
+      <div>
+        <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
+          Due Date
+        </p>
+        <p className='font-medium text-slate-800 dark:text-gray-200'>{caseData.dueDate ?? '-'}</p>
       </div>
       <div>
         <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
