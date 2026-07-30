@@ -56,26 +56,6 @@ export function useMutationCaseUpdate({
   });
 }
 
-export function useMutationCaseCreate({
-  reactQuery,
-}: {
-  reactQuery?: {
-    onSuccess?: (data: components['schemas']['CaseDetail']) => void;
-    onError?: (error: Error) => void;
-  };
-}) {
-  return useMutation({
-    ...reactQuery,
-    mutationFn: async (body: components['schemas']['CaseDetailRequest']) => {
-      const c = getClient();
-      const { data, error, response } = await (
-        c.POST as (url: string, init?: object) => ReturnType<typeof c.POST>
-      )(resolvePath(casePath), { body });
-      return assertOk(data, error, response) as components['schemas']['CaseDetail'];
-    },
-  });
-}
-
 export function useMutationCaseUnlinkEntity({
   caseOrcabusId,
   externalEntityOrcabusId,
