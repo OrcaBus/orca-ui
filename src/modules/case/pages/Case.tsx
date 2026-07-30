@@ -110,9 +110,10 @@ export const CaseListAPITable = () => {
             accessor: 'type',
           },
           {
-            header: 'Study Type',
+            header: 'Nata Accredited',
             headerClassName: standardClassName,
-            accessor: 'studyType',
+            accessor: 'isNataAccredited',
+            cell: (cellData: unknown) => (cellData ? 'Yes' : 'No'),
           },
           {
             header: 'Study Name',
