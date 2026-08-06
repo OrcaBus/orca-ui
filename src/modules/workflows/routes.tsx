@@ -40,7 +40,9 @@ export const Router: RouteObject = {
     },
     { path: 'workflowRuns/:orcabusId', element: <WorkflowRunsDetailsPage /> },
     { path: 'analysisRuns/:orcabusId', element: <AnalysisRunsDetailsPage /> },
-    { path: '', element: <Navigate to='workflowRuns' replace /> },
-    { path: '*', element: <Navigate to='workflowRuns' replace /> },
+    // absolute paths: a relative `to` inside the splat route below resolves against the
+    // unmatched URL, which makes an unknown path redirect onto itself indefinitely
+    { path: '', element: <Navigate to='/workflows/workflowRuns' replace /> },
+    { path: '*', element: <Navigate to='/workflows/workflowRuns' replace /> },
   ],
 };

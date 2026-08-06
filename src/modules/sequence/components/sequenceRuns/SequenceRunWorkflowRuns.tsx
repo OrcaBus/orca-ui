@@ -1,4 +1,4 @@
-import { useSequenceRunContext } from './SequenceRunContext';
+import { useSequenceRunWorkflowRunFilter } from './useSequenceRunWorkflowRunFilter';
 import { useWorkflowRunListModel } from '@/api/workflow';
 import { useMemo } from 'react';
 import { Column, TableData, Table } from '@/components/tables';
@@ -12,18 +12,7 @@ import { useQueryParams } from '@/hooks/useQueryParams';
 const SequenceRunWorkflowRuns = () => {
   const { setQueryParams, getPaginationParams, getQueryParams } = useQueryParams();
 
-  const { sequenceRunDetail } = useSequenceRunContext();
-
-  // lastest run library ids
-  const libraryIds = sequenceRunDetail?.sort((a, b) => {
-    return dayjs(b.endTime).diff(dayjs(a.endTime));
-  })[0]?.libraries;
-
-  // time range (first run end time  to 2 days after)
-  const start_time = sequenceRunDetail?.sort((a, b) => {
-    return dayjs(a.endTime).diff(dayjs(b.endTime));
-  })[0]?.endTime;
-  const end_time = dayjs(start_time).add(2, 'days').toISOString();
+  const { libraryIds, start_time, end_time } = useSequenceRunWorkflowRunFilter();
 
   const { data: workflowRuns, isLoading: isLoadingWorkflowRuns } = useWorkflowRunListModel({
     params: {
@@ -41,6 +30,9 @@ const SequenceRunWorkflowRuns = () => {
         end_time: end_time,
       },
     },
+    reactQuery: {
+      enabled: !!libraryIds?.length,
+    },
   });
   const workflowRunColumn: Column[] = useMemo(
     () => [
@@ -54,7 +46,7 @@ const SequenceRunWorkflowRuns = () => {
           } else {
             return (
               <Link
-                to={`/workflows/workflow/${id}`}
+                to={`/workflows/workflowRuns/${id}`}
                 className={classNames(
                   'flex cursor-pointer flex-row items-center text-sm font-medium text-blue-500 hover:text-blue-700'
                 )}
