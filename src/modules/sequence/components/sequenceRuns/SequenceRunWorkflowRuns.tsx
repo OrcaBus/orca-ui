@@ -31,7 +31,7 @@ const SequenceRunWorkflowRuns = () => {
       },
     },
     reactQuery: {
-      enabled: !!libraryIds?.length,
+      enabled: !!libraryIds?.length && !!start_time,
     },
   });
   const workflowRunColumn: Column[] = useMemo(

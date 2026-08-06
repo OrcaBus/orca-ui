@@ -18,9 +18,13 @@ export const useSequenceRunWorkflowRunFilter = () => {
 
   return useMemo(() => {
     // copy before sorting: `sequenceRunDetail` is query cache data and sort() mutates in place
-    const runsByEndTimeAsc = [...(sequenceRunDetail ?? [])].sort((a, b) =>
-      dayjs(a.endTime).diff(dayjs(b.endTime))
-    );
+    // missing endTime sorts last (treated as not-yet-ended, i.e. "latest") rather than
+    // producing an Invalid Date whose diff() is NaN and destabilizes the sort
+    const runsByEndTimeAsc = [...(sequenceRunDetail ?? [])].sort((a, b) => {
+      const aEnd = a.endTime ? dayjs(a.endTime).valueOf() : Number.POSITIVE_INFINITY;
+      const bEnd = b.endTime ? dayjs(b.endTime).valueOf() : Number.POSITIVE_INFINITY;
+      return aEnd - bEnd;
+    });
 
     // time range (first run end time to 2 days after)
     const start_time = runsByEndTimeAsc[0]?.endTime ?? undefined;

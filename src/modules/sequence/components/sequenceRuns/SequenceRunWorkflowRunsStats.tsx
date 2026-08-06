@@ -38,7 +38,7 @@ const SequenceRunWorkflowRunsStats = () => {
         },
       },
       reactQuery: {
-        enabled: !!libraryIds?.length,
+        enabled: !!libraryIds?.length && !!start_time,
       },
     });
 
