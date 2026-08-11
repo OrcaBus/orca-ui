@@ -78,10 +78,18 @@ export const useWorkflowRunCommentDeleteModel = createDeleteMutationHook(
   '/api/v1/workflowrun/{orcabusId}/comment/{commentOrcabusId}/'
 );
 
-// workflow run state creation model
-export const useWorkflowRunStateCreateModel = createPostMutationHook(
+// workflow run state creation models
+export const useWorkflowRunStateDeprecateModel = createPostMutationHook(
   workflowApi,
-  '/api/v1/workflowrun/{orcabusId}/state/'
+  '/api/v1/workflowrun/state/deprecate/'
+);
+export const useWorkflowRunStateResolveModel = createPostMutationHook(
+  workflowApi,
+  '/api/v1/workflowrun/state/resolve/'
+);
+export const useWorkflowRunStateCancelModel = createPostMutationHook(
+  workflowApi,
+  '/api/v1/workflowrun/state/cancel/'
 );
 export const useWorkflowRunStateUpdateModel = createPatchMutationHook(
   workflowApi,
@@ -89,7 +97,7 @@ export const useWorkflowRunStateUpdateModel = createPatchMutationHook(
 );
 export const useWorkflowRunStateCreationValidMapModel = createQueryHook(
   workflowApi,
-  '/api/v1/workflowrun/{orcabusId}/state/get_states_transition_validation_map/'
+  '/api/v1/workflowrun/state/get_states_transition_validation_map/'
 );
 
 // workflow run list model
