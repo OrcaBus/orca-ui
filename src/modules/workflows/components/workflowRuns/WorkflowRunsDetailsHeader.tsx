@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState, startTransition } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   useWorkflowRunRerunModel,
-  useWorkflowRunStateCreateModel,
+  useWorkflowRunStateCancelModel,
+  useWorkflowRunStateDeprecateModel,
+  useWorkflowRunStateResolveModel,
   useWorkflowRunCommentCreateModel,
   DatasetEnum,
 } from '@/api/workflow';
@@ -160,50 +162,68 @@ const WorkflowRunsDetailsHeader = () => {
     resetCreateWorkflowRunComment,
   ]);
 
-  const {
-    mutate: createWorkflowRunState,
-    isSuccess: isCreatedWorkflowRunState,
-    isError: isErrorCreatingWorkflowRunState,
-    reset: resetCreateWorkflowRunState,
-  } = useWorkflowRunStateCreateModel({
-    params: { path: { orcabusId: orcabusId as string } },
-    body: {
-      status: stateStatus ?? '',
-      comment: stateComment,
-    },
-  });
+  const { mutate: cancelWorkflowRun } = useWorkflowRunStateCancelModel();
+  const { mutate: deprecateWorkflowRun } = useWorkflowRunStateDeprecateModel();
+  const { mutate: resolveWorkflowRun } = useWorkflowRunStateResolveModel();
 
   const handleStateCreationEvent = () => {
     if (!stateStatus) return;
-    createWorkflowRunState();
-    setIsOpenAddStateDialog(false);
-  };
-  useEffect(() => {
-    if (isCreatedWorkflowRunState) {
-      toaster.success({ title: 'State added' });
-      refetchWorkflowState();
-      resetCreateWorkflowRunState();
-      startTransition(() => {
-        setStateStatus(null);
-        setStateComment('');
-      });
+
+    const transitionMutation = {
+      CANCELLED: cancelWorkflowRun,
+      DEPRECATED: deprecateWorkflowRun,
+      RESOLVED: resolveWorkflowRun,
+    }[stateStatus];
+
+    if (!transitionMutation) {
+      toaster.error({ title: `Unsupported state transition: ${stateStatus}` });
+      return;
     }
 
-    if (isErrorCreatingWorkflowRunState) {
-      toaster.error({ title: 'Error adding state status' });
-      resetCreateWorkflowRunState();
-    }
-  }, [
-    isCreatedWorkflowRunState,
-    refetchWorkflowState,
-    resetCreateWorkflowRunState,
-    isErrorCreatingWorkflowRunState,
-  ]);
+    transitionMutation(
+      {
+        body: {
+          workflowrunOrcabusIds: [orcabusId as string],
+          comment: stateComment,
+        },
+      },
+      {
+        onSuccess: () => {
+          toaster.success({ title: 'State added' });
+          refetchWorkflowState();
+          startTransition(() => {
+            setStateStatus(null);
+            setStateComment('');
+          });
+        },
+        onError: () => {
+          toaster.error({ title: 'Error adding state status' });
+        },
+      }
+    );
+    setIsOpenAddStateDialog(false);
+  };
 
   const handleRerunWorkflow = () => {
     rerunWorkflow();
     if (isDeprecated) {
-      handleMarkAsDeprecated();
+      deprecateWorkflowRun(
+        {
+          body: {
+            workflowrunOrcabusIds: [orcabusId as string],
+            comment: '',
+          },
+        },
+        {
+          onSuccess: () => {
+            toaster.success({ title: 'Workflow run marked as DEPRECATED' });
+            refetchWorkflowState();
+          },
+          onError: () => {
+            toaster.error({ title: 'Error marking workflow run as DEPRECATED' });
+          },
+        }
+      );
     }
     setIsOpenRerunWorkflowDialog(false);
   };
@@ -234,26 +254,6 @@ const WorkflowRunsDetailsHeader = () => {
     rerunWorkflowError,
     resetRerunWorkflow,
     setRefreshWorkflowRuns,
-  ]);
-
-  const handleMarkAsDeprecated = () => {
-    createWorkflowRunState();
-  };
-
-  useEffect(() => {
-    if (isCreatedWorkflowRunState) {
-      toaster.success({ title: `Workflow run marked as ${stateStatus}` });
-      resetCreateWorkflowRunState();
-    }
-    if (isErrorCreatingWorkflowRunState) {
-      toaster.error({ title: `Error marking workflow run as ${stateStatus}` });
-      resetCreateWorkflowRunState();
-    }
-  }, [
-    isCreatedWorkflowRunState,
-    resetCreateWorkflowRunState,
-    isErrorCreatingWorkflowRunState,
-    stateStatus,
   ]);
 
   const handleCloseRerunWorkflowDialog = () => {

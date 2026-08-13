@@ -83,7 +83,6 @@ export const WorkflowRunsProvider: FC<PropsWithChildren> = ({ children }): React
     data: workflowRunStateCreationValidMapData,
     isFetching: isFetchingWorkflowRunStateCreationValidMap,
   } = useWorkflowRunStateCreationValidMapModel({
-    params: { path: { orcabusId: orcabusId as string } },
     reactQuery: {
       enabled: !!orcabusId,
     },
