@@ -24,9 +24,15 @@ const WorkflowRunsTable = ({ libraryOrcabusId }: { libraryOrcabusId?: string }) 
         rowsPerPage: getPaginationParams().rowsPerPage || DEFAULT_PAGE_SIZE,
         search: getQueryParams().search || undefined,
         workflow__orcabus_id: getQueryParams().workflowTypeId || undefined,
-        status: ['succeeded', 'failed', 'aborted', 'resolved', 'deprecated', 'draft'].includes(
-          getQueryParams().workflowRunStatus
-        )
+        status: [
+          'succeeded',
+          'failed',
+          'aborted',
+          'resolved',
+          'cancelled',
+          'deprecated',
+          'draft',
+        ].includes(getQueryParams().workflowRunStatus)
           ? getQueryParams().workflowRunStatus
           : undefined,
         is_ongoing: getQueryParams().workflowRunStatus == 'ongoing' || undefined,
