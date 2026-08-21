@@ -58,6 +58,24 @@ function CaseDetailDisplay({ caseData }: { caseData: components['schemas']['Case
       </div>
       <div>
         <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
+          RNAsum References
+        </p>
+        {caseData.rnasumReferences &&
+        Array.isArray(caseData.rnasumReferences) &&
+        (caseData.rnasumReferences as string[]).length > 0 ? (
+          <ul className='list-disc space-y-1 pl-5'>
+            {(caseData.rnasumReferences as string[]).map((item, index) => (
+              <li key={index} className='font-medium text-slate-800 dark:text-gray-200'>
+                {item}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className='font-medium text-slate-800 dark:text-gray-200'>-</p>
+        )}
+      </div>
+      <div>
+        <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
           Links
         </p>
         {caseData.links && Object.keys(caseData.links).length > 0 ? (
