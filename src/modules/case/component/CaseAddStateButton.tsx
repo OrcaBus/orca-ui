@@ -9,22 +9,45 @@ import { components } from '@/api/types/case';
 
 type StatusEnum = components['schemas']['StatusEnum'];
 
-const STATUS_OPTIONS: SelectItems[] = [
-  { value: 'request_received', label: 'Request Received' },
-  { value: 'sample_received', label: 'Sample Received' },
-  { value: 'library_partially_failed', label: 'Library Partially Failed' },
-  { value: 'sequencing_started', label: 'Sequencing Started' },
-  { value: 'sequencing_completed', label: 'Sequencing Completed' },
-  { value: 'bioinformatics_started', label: 'Bioinformatics Started' },
-  { value: 'bioinformatics_completed', label: 'Bioinformatics Completed' },
-  { value: 'curation_started', label: 'Curation Started' },
-  { value: 'curation_completed', label: 'Curation Completed' },
-  { value: 'locked', label: 'Locked' },
-  { value: 'unlocked', label: 'Unlocked' },
-  { value: 'failed', label: 'Failed' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'archived', label: 'Archived' },
+/**
+ * Converts a snake_case status value to a human-readable label.
+ * e.g. "request_received" -> "Request Received"
+ */
+const toLabel = (value: string): string =>
+  value
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
+/**
+ * All possible StatusEnum values. TypeScript will enforce that each entry
+ * is a valid StatusEnum member, so if the backend API types change,
+ * you'll get a compile error here prompting you to update.
+ */
+const STATUS_VALUES: StatusEnum[] = [
+  // 'request_received', // Removing as not curently needed
+  'wgts_tumour_sample_received',
+  'wgts_germline_sample_received',
+  'cttso_sample_received',
+  'all_sample_received',
+  'library_partially_failed',
+  'sequencing_started',
+  'sequencing_completed',
+  'bioinformatics_started',
+  'bioinformatics_completed',
+  'curation_started',
+  'curation_completed',
+  'locked',
+  'unlocked',
+  'failed',
+  'completed',
+  'archived',
 ];
+
+const STATUS_OPTIONS: SelectItems[] = STATUS_VALUES.map((value) => ({
+  value,
+  label: toLabel(value),
+}));
 
 function CaseAddStateButton({ caseOrcabusId }: { caseOrcabusId: string }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
