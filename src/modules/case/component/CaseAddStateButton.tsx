@@ -11,13 +11,9 @@ type StatusEnum = components['schemas']['StatusEnum'];
 
 /**
  * Converts a snake_case status value to a human-readable label.
- * e.g. "request_received" -> "Request Received"
+ * e.g. "request_received" -> "request received"
  */
-const toLabel = (value: string): string =>
-  value
-    .split('_')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+const toLabel = (value: string): string => value.replaceAll('_', ' ');
 
 /**
  * All possible StatusEnum values. TypeScript will enforce that each entry
