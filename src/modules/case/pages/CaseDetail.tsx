@@ -4,11 +4,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import toaster from '@/components/common/toaster';
 import { useQueryParams } from '@/hooks/useQueryParams';
-import WorkflowRunTable from '../component/CaseWorkflowRun';
-import CaseSequenceRunTable from '../component/CaseSequenceRun';
 import { SpinnerWithText } from '@/components/common/spinner';
 import { Button } from '@/components/common/buttons';
-import CaseLinkWorkflowRunButton from '../component/CaseLinkWorkflowRunButton';
+import CaseRunsTab from '../component/CaseRunsTab';
 import CaseMetadataTab from '../component/CaseMetadataTab';
 import CaseDetailDisplay from '../component/CaseDetailDisplay';
 import CaseFileViewer from '../component/CaseFileViewer';
@@ -85,24 +83,10 @@ export const CaseDetailAPITable = () => {
       ),
     },
     {
-      label: 'SequenceRun',
+      label: 'Runs (sequences/workflows)',
       content: (
         <>
-          <CaseSequenceRunTable
-            externalEntitySet={caseData.externalEntitySet}
-            caseOrcabusId={caseOrcabusId}
-          />
-        </>
-      ),
-    },
-    {
-      label: 'WorkflowRun',
-      content: (
-        <>
-          <div className='flex justify-end'>
-            <CaseLinkWorkflowRunButton caseOrcabusId={caseOrcabusId} />
-          </div>
-          <WorkflowRunTable
+          <CaseRunsTab
             externalEntitySet={caseData.externalEntitySet}
             caseOrcabusId={caseOrcabusId}
           />
