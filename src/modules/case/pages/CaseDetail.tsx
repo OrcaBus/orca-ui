@@ -14,6 +14,8 @@ import CaseActivityTable from '../component/CaseActivity';
 import CaseCommentTable from '../component/CaseCommentTable';
 import CaseStateTable from '../component/CaseStateTable';
 import CaseUserTable from '../component/CaseUserTable';
+import CasePendingEntitiesTab from '../component/CasePendingEntitiesTab';
+import { IconDropdown } from '@/components/common/dropdowns';
 
 const selectedClassName =
   'inline-flex items-center gap-2 p-4 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 rounded-t-lg font-medium transition-colors duration-200';
@@ -56,22 +58,6 @@ export const CaseDetailAPITable = () => {
   const caseData = caseModel.data;
   const tabs = [
     {
-      label: 'States',
-      content: (
-        <>
-          <CaseStateTable caseOrcabusId={caseData.orcabusId} />
-        </>
-      ),
-    },
-    {
-      label: 'Users',
-      content: (
-        <>
-          <CaseUserTable caseOrcabusId={caseData.orcabusId} userSet={caseData.userSet} />
-        </>
-      ),
-    },
-    {
       label: 'Metadata (libraries/samples)',
       content: (
         <>
@@ -102,6 +88,40 @@ export const CaseDetailAPITable = () => {
       ),
     },
     {
+      label: 'States',
+      content: (
+        <>
+          <CaseStateTable caseOrcabusId={caseData.orcabusId} />
+        </>
+      ),
+    },
+    {
+      label: 'Pending Entities',
+      labelExtra:
+        caseData.pendingExternalEntities.length > 0 ? (
+          <span className='ml-1.5 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'>
+            {caseData.pendingExternalEntities.length}
+          </span>
+        ) : null,
+      content: (
+        <>
+          <CasePendingEntitiesTab pendingExternalEntities={caseData.pendingExternalEntities} />
+        </>
+      ),
+    },
+  ];
+
+  // Experimental tabs hidden behind overflow menu
+  const overflowTabs = [
+    {
+      label: 'Users',
+      content: (
+        <>
+          <CaseUserTable caseOrcabusId={caseData.orcabusId} userSet={caseData.userSet} />
+        </>
+      ),
+    },
+    {
       label: 'History',
       content: (
         <>
@@ -118,6 +138,13 @@ export const CaseDetailAPITable = () => {
       ),
     },
   ];
+
+  const allTabs = [...tabs, ...overflowTabs];
+
+  const overflowMenuItems = overflowTabs.map((tab) => ({
+    label: tab.label,
+    onClick: () => setQueryParams({ tab: tab.label }, true),
+  }));
 
   return (
     <>
@@ -163,7 +190,7 @@ export const CaseDetailAPITable = () => {
       </div>
       <div className='rounded-lg bg-white dark:bg-gray-900'>
         <div className='border-b border-gray-200 text-sm font-medium dark:border-gray-700'>
-          <ul className='-mb-px flex flex-wrap'>
+          <ul className='-mb-px flex flex-wrap items-center'>
             {tabs.map((tab, index) => {
               const isSelected = currentTabSelection === tab.label;
               return (
@@ -177,10 +204,16 @@ export const CaseDetailAPITable = () => {
                 </li>
               );
             })}
+            <li className='ml-auto pr-2'>
+              <IconDropdown
+                items={overflowMenuItems}
+                className='size-8 items-center justify-center'
+              />
+            </li>
           </ul>
         </div>
         <div className='mt-2 max-w-full px-2'>
-          {tabs.map((tab, index) => {
+          {allTabs.map((tab, index) => {
             if (currentTabSelection === tab.label) {
               return (
                 <Fragment key={index}>

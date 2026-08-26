@@ -130,7 +130,7 @@ function CaseDetailDisplay({ caseData }: { caseData: components['schemas']['Case
       </div>
       <div>
         <p className='mb-1 text-xs tracking-wide text-slate-500 uppercase dark:text-gray-400'>
-          Last Status
+          Latest State
         </p>
         <p className='font-medium text-slate-800 dark:text-gray-200'>
           {caseData.latestState ? caseData.latestState.status : '-'}
