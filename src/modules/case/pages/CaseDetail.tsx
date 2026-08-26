@@ -4,13 +4,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import toaster from '@/components/common/toaster';
 import { useQueryParams } from '@/hooks/useQueryParams';
-import CaseLibraryTable from '../component/CaseLibrary';
 import WorkflowRunTable from '../component/CaseWorkflowRun';
 import CaseSequenceRunTable from '../component/CaseSequenceRun';
 import { SpinnerWithText } from '@/components/common/spinner';
 import { Button } from '@/components/common/buttons';
-import CaseLinkLibraryButton from '../component/CaseLinkLibraryButton';
 import CaseLinkWorkflowRunButton from '../component/CaseLinkWorkflowRunButton';
+import CaseMetadataTab from '../component/CaseMetadataTab';
 import CaseDetailDisplay from '../component/CaseDetailDisplay';
 import CaseFileViewer from '../component/CaseFileViewer';
 import CaseActivityTable from '../component/CaseActivity';
@@ -75,13 +74,10 @@ export const CaseDetailAPITable = () => {
       ),
     },
     {
-      label: 'Libraries',
+      label: 'Metadata (libraries/samples)',
       content: (
         <>
-          <div className='flex justify-end'>
-            <CaseLinkLibraryButton caseOrcabusId={caseOrcabusId} />
-          </div>
-          <CaseLibraryTable
+          <CaseMetadataTab
             externalEntitySet={caseData.externalEntitySet}
             caseOrcabusId={caseOrcabusId}
           />
