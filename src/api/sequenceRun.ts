@@ -20,6 +20,9 @@ const sequenceRunApi = new ApiClient<paths>({
 // export component types for consumers
 export type SequenceRunModel = components['schemas']['SequenceRun'];
 export type StatusEnum = components['schemas']['StatusEnum'];
+export type StateTransitionRequest = components['schemas']['StateTransitionRequestRequest'];
+export type StateTransitionResponse = components['schemas']['StateTransitionResponse'];
+export type StateTransitionFailure = components['schemas']['StateTransitionFailure'];
 
 // sequence run list
 export const useSequenceRunListModel = createQueryHook(sequenceRunApi, '/api/v1/sequence_run/');
@@ -35,11 +38,11 @@ export const useSequenceRunDetailModel = createQueryHook(
 );
 
 // sequence run state
-export const useSequenceRunStateListModel = createQueryHook(
+export const useSequenceRunStateValidMapModel = createQueryHook(
   sequenceRunApi,
-  '/api/v1/sequence_run/{orcabusId}/state/'
+  '/api/v1/sequence_run/state/get_states_transition_validation_map/'
 );
-export const useSequenceRunStateCreateModel = createPostMutationHook(
+export const useSequenceRunStateListModel = createQueryHook(
   sequenceRunApi,
   '/api/v1/sequence_run/{orcabusId}/state/'
 );
@@ -47,6 +50,18 @@ export const useSequenceRunStateUpdateModel = createPatchMutationHook(
   sequenceRunApi,
   '/api/v1/sequence_run/{orcabusId}/state/{id}/'
 );
+
+// sequence run state transitions
+// The endpoint determines the target state; a batch of runs is transitioned in one call.
+// Responses: 201 all transitioned, 207 partial (inspect `failures`), 400/500 nothing transitioned.
+export const useSequenceRunStateDeprecateModel = createPostMutationHook(
+  sequenceRunApi,
+  '/api/v1/sequence_run/state/deprecate/'
+); // SUCCEEDED -> DEPRECATED
+export const useSequenceRunStateResolveModel = createPostMutationHook(
+  sequenceRunApi,
+  '/api/v1/sequence_run/state/resolve/'
+); // FAILED -> RESOLVED
 
 // sequence run comment
 export const useSequenceRunCommentListModel = createQueryHook(
@@ -98,8 +113,4 @@ export const useSequenceRunStatesByInstrumentRunIdModel = createQueryHook(
 export const useSequenceRunSampleSheetsByInstrumentRunIdModel = createQueryHook(
   sequenceRunApi,
   '/api/v1/sequence/{instrumentRunId}/sample_sheets/'
-);
-export const useSequenceRunStateValidMapModel = createQueryHook(
-  sequenceRunApi,
-  '/api/v1/sequence/{instrumentRunId}/get_states_transition_validation_map/'
 );
