@@ -9,7 +9,9 @@ import CommentDialog from '../common/CommentDialog';
 import StateDialog from '../common/StateDialog';
 import {
   useSequenceRunCommentCreateModel,
-  useSequenceRunStateCreateModel,
+  useSequenceRunStateDeprecateModel,
+  useSequenceRunStateResolveModel,
+  type StateTransitionResponse,
 } from '@/api/sequenceRun';
 import toaster from '@/components/common/toaster';
 import { dayjs } from '@/utils/dayjs';
@@ -107,46 +109,60 @@ const SequenceRunDetailsActions = () => {
   const [stateStatus, setStateStatus] = useState<string | null>(null);
   const [stateComment, setStateComment] = useState<string>('');
 
-  const {
-    mutate: createSequenceRunState,
-    isSuccess: isCreatedSequenceRunState,
-    isError: isErrorCreatingSequenceRunState,
-    reset: resetCreateSequenceRunState,
-  } = useSequenceRunStateCreateModel({
-    params: { path: { orcabusId: selectedSequenceRunOrcabusId as string } },
-    body: {
-      status: stateStatus ?? '',
-      comment: stateComment,
-    },
-  });
+  // Each target state has its own endpoint; the endpoint (not the body) determines
+  // the state, and both accept a batch of sequence run ids.
+  const { mutateAsync: deprecateSequenceRuns } = useSequenceRunStateDeprecateModel();
+  const { mutateAsync: resolveSequenceRuns } = useSequenceRunStateResolveModel();
 
-  const handleStateCreationEvent = () => {
+  const stateTransitionByStatus = useMemo(
+    () => ({
+      DEPRECATED: deprecateSequenceRuns,
+      RESOLVED: resolveSequenceRuns,
+    }),
+    [deprecateSequenceRuns, resolveSequenceRuns]
+  );
+
+  const handleStateCreationEvent = async () => {
     if (!stateStatus) return;
-    createSequenceRunState();
+
+    const transition = stateTransitionByStatus[stateStatus as keyof typeof stateTransitionByStatus];
+    if (!transition) {
+      toaster.error({ title: `Unsupported state: ${stateStatus}` });
+      return;
+    }
+
     setIsOpenAddStateDialog(false);
-  };
 
-  useEffect(() => {
-    if (isCreatedSequenceRunState) {
-      toaster.success({ title: 'State added successfully' });
-      refetchSequenceRunState();
-      resetCreateSequenceRunState();
-      startTransition(() => {
-        setStateStatus(null);
-        setStateComment('');
+    let result: StateTransitionResponse;
+    try {
+      result = await transition({
+        body: {
+          sequenceRunOrcabusIds: [selectedSequenceRunOrcabusId],
+          comment: stateComment,
+        },
       });
+    } catch {
+      // 400 (validation / every transition rejected) or 500 (state creation failed).
+      toaster.error({ title: 'Error adding state' });
+      return;
     }
 
-    if (isErrorCreatingSequenceRunState) {
-      toaster.error({ title: 'Error adding state' });
-      resetCreateSequenceRunState();
+    // 207: some runs transitioned and some failed.
+    if (result.failedCount) {
+      toaster.error({
+        title: 'Error adding state',
+        message: result.failures?.map((failure) => failure.detail).join(' '),
+      });
+    } else {
+      toaster.success({ title: 'State added successfully' });
     }
-  }, [
-    isCreatedSequenceRunState,
-    refetchSequenceRunState,
-    resetCreateSequenceRunState,
-    isErrorCreatingSequenceRunState,
-  ]);
+
+    refetchSequenceRunState();
+    startTransition(() => {
+      setStateStatus(null);
+      setStateComment('');
+    });
+  };
 
   const selectedSequenceRun = useMemo(() => {
     return sequenceRunDetail?.find(
