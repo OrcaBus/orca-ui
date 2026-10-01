@@ -37,13 +37,9 @@ export const SequenceRunDetailsProvider: FC<PropsWithChildren> = ({ children }):
     },
   });
 
+  // The transition validation map is global to the service, not scoped to an instrument run.
   const { data: sequenceRunStateValidMapData, isFetching: isFetchingSequenceRunStateValidMap } =
-    useSequenceRunStateValidMapModel({
-      params: { path: { instrumentRunId: instrumentRunId as string } },
-      reactQuery: {
-        enabled: !!instrumentRunId,
-      },
-    });
+    useSequenceRunStateValidMapModel();
 
   const isFetching = isFetchingSequenceRunState || isFetchingSequenceRunStateValidMap;
 
