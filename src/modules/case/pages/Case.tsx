@@ -117,12 +117,6 @@ export const CaseListAPITable = () => {
             },
           },
           {
-            header: 'Description',
-            headerClassName: standardClassName,
-            accessor: 'description',
-            ...sortProps('description'),
-          },
-          {
             header: 'Type',
             headerClassName: standardClassName,
             accessor: 'type',
@@ -168,6 +162,12 @@ export const CaseListAPITable = () => {
               if (cellData) return (cellData as Record<string, string>).status;
               return '-';
             },
+          },
+          {
+            header: 'Description',
+            headerClassName: standardClassName,
+            accessor: 'description',
+            ...sortProps('description'),
           },
         ]}
         tableData={(data?.results ?? []).map((a) => ({
