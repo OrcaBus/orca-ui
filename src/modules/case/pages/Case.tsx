@@ -1,5 +1,7 @@
 import { useQueryParams } from '@/hooks/useQueryParams';
 import { Table } from '@/components/tables';
+import { getCurrentSortDirection, getSortValue } from '@/components/tables/Table';
+import { CaseTableFilter } from '../component/CaseTableFilter';
 import { useQueryCaseListObject, useQueryCaseSyncFromRedcapAutoHistory } from '@/api/case';
 import { classNames } from '@/utils/commonUtils';
 import { RedirectLink } from '@/components/common/link';
@@ -20,8 +22,18 @@ export const CaseListAPITable = () => {
   const { setQueryParams, getPaginationParams, getQueryParams } = useQueryParams();
   const queryParams = getQueryParams();
 
+  const currentSort = queryParams.ordering;
+  const sortProps = (
+    key: string
+  ): { onSort: () => void; sortDirection: 'asc' | 'desc' | undefined } => ({
+    onSort: () => setQueryParams({ ordering: getSortValue(currentSort, key) }),
+    sortDirection: getCurrentSortDirection(currentSort, key),
+  });
+
   const caseModel = useQueryCaseListObject({
-    params: { query: { ...queryParams, ...getPaginationParams(), ordering: '-timestamp' } },
+    params: {
+      query: { ...queryParams, ...getPaginationParams(), ordering: currentSort ?? '-timestamp' },
+    },
   });
   const historyQuery = useQueryCaseSyncFromRedcapAutoHistory();
   const lastSynced = historyQuery.data?.results?.[0]?.importedAt;
@@ -62,14 +74,18 @@ export const CaseListAPITable = () => {
                   searchBoxContent={queryParams.search}
                 />
               </div>
+              <div>
+                <CaseTableFilter />
+              </div>
             </div>
           </div>
         }
         columns={[
           {
-            header: 'Request ID Form',
+            header: 'Request Form ID',
             headerClassName: standardClassName,
             accessor: 'requestFormId',
+            ...sortProps('request_form_id'),
             cell: (cellData: unknown) => {
               const { text, orcabusId } = cellData as { text: string; orcabusId: string };
               return (
@@ -83,6 +99,7 @@ export const CaseListAPITable = () => {
             header: 'Alias',
             headerClassName: standardClassName,
             accessor: 'alias',
+            ...sortProps('alias'),
             cell: (cellData: unknown) => {
               const aliasArr = cellData as string[];
               if (!aliasArr || aliasArr.length === 0) {
@@ -103,49 +120,57 @@ export const CaseListAPITable = () => {
             header: 'Description',
             headerClassName: standardClassName,
             accessor: 'description',
+            ...sortProps('description'),
           },
           {
             header: 'Type',
             headerClassName: standardClassName,
             accessor: 'type',
+            ...sortProps('type'),
           },
           {
             header: 'Nata Accredited',
             headerClassName: standardClassName,
             accessor: 'isNataAccredited',
+            ...sortProps('is_nata_accredited'),
             cell: (cellData: unknown) => (cellData ? 'Yes' : 'No'),
           },
           {
             header: 'Study Name',
             headerClassName: standardClassName,
             accessor: 'studyName',
+            ...sortProps('study_name'),
           },
           {
             header: 'Study ID',
             headerClassName: standardClassName,
             accessor: 'studyId',
+            ...sortProps('study_id'),
           },
           {
             header: 'UR Number',
             headerClassName: standardClassName,
             accessor: 'urNumber',
+            ...sortProps('ur_number'),
           },
           {
             header: 'Due date',
             headerClassName: standardClassName,
             accessor: 'dueDate',
+            ...sortProps('due_date'),
           },
           {
             header: 'Latest State',
             headerClassName: standardClassName,
             accessor: 'latestState',
+            ...sortProps('latest_state'),
             cell: (cellData: unknown) => {
               if (cellData) return (cellData as Record<string, string>).status;
               return '-';
             },
           },
         ]}
-        tableData={data.results.map((a) => ({
+        tableData={(data?.results ?? []).map((a) => ({
           orcabusId: a.orcabusId,
           requestFormId: { text: a.requestFormId, orcabusId: a.orcabusId },
           description: a.description ?? '-',

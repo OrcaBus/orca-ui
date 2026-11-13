@@ -234,7 +234,7 @@ export const getLibraryTableColumn = ({
     ),
   },
   {
-    header: 'Request Id',
+    header: 'Request Form ID',
     headerClassName: classNames(
       'bg-green-50/90 dark:bg-green-900/40',
       'text-gray-900 dark:text-gray-100',
