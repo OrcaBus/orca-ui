@@ -51,7 +51,7 @@ function CaseForm({
   const readOnlyEntries: { label: string; value: string }[] = readOnlyData
     ? [
         { label: 'Case ID', value: readOnlyData.orcabusId },
-        { label: 'Request Form Id', value: readOnlyData.requestFormId },
+        { label: 'Request Form ID', value: readOnlyData.requestFormId },
         { label: 'Type', value: readOnlyData.type ?? '-' },
         { label: 'Study Name', value: readOnlyData.studyName ?? '-' },
         { label: 'Study ID', value: readOnlyData.studyId ?? '-' },

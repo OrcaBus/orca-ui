@@ -1,7 +1,7 @@
 import config from '@/config';
 import type { components, paths } from './types/case';
 import { useMutation } from '@tanstack/react-query';
-import { ApiClient, assertOk, createSuspenseQueryHook } from './utils';
+import { ApiClient, assertOk, createQueryHook, createSuspenseQueryHook } from './utils';
 
 const caseApi = new ApiClient<paths>({
   baseUrl: config.apiEndpoint.case,
@@ -21,7 +21,7 @@ const caseCreateStatePath = '/api/v1/state/' as const;
 const caseStateArchivePath = '/api/v1/state/{orcabusId}/archive/' as const;
 const caseSyncFromRedcapAutoHistoryPath = '/api/v1/case/sync-from-redcap/auto/history/' as const;
 
-export const useQueryCaseListObject = createSuspenseQueryHook(caseApi, casePath);
+export const useQueryCaseListObject = createQueryHook(caseApi, casePath);
 export const useQueryCaseDetailObject = createSuspenseQueryHook(caseApi, caseDetailPath);
 export const useQueryCaseActivityObject = createSuspenseQueryHook(caseApi, caseActivityPath);
 export const useQueryCaseStatesObject = createSuspenseQueryHook(caseApi, caseStatesPath);
